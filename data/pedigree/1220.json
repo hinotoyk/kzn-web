@@ -1,0 +1,411 @@
+{
+ "id": 1220,
+ "jbis_id": "0001415568",
+ "馬名": "",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "レディデラウェア(USA)",
+     "sex": "牝",
+     "id": "0001346900",
+     "year": "2017",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "アメリカンファラオ(USA)",
+     "sex": "牡",
+     "id": "0001238289",
+     "year": "2012",
+     "color": "鹿毛"
+    },
+    {
+     "name": "More Hennessy(USA)",
+     "sex": "牝",
+     "id": "0001300011",
+     "year": "2007",
+     "color": "黒鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "Pioneerof the Nile(USA)",
+     "sex": "牡",
+     "id": "0001127396",
+     "year": "2006"
+    },
+    {
+     "name": "Littleprincessemma(USA)",
+     "sex": "牝",
+     "id": "0001238284",
+     "year": "2006"
+    },
+    {
+     "name": "ヘネシー(USA)",
+     "sex": "牡",
+     "id": "0000362819",
+     "year": "1993"
+    },
+    {
+     "name": "Dance Move(USA)",
+     "sex": "牝",
+     "id": "0000839041",
+     "year": "1994"
+    }
+   ],
+   [
+    {
+     "name": "エンパイアメーカー(USA)",
+     "sex": "牡",
+     "id": "0000749845",
+     "year": "2000"
+    },
+    {
+     "name": "Star of Goshen(USA)",
+     "sex": "牝",
+     "id": "0000620783",
+     "year": "1994"
+    },
+    {
+     "name": "Yankee Gentleman(USA)",
+     "sex": "牡",
+     "id": "0001015914",
+     "year": "1999"
+    },
+    {
+     "name": "Exclusive Rosette(USA)",
+     "sex": "牝",
+     "id": "0000971398",
+     "year": "1993"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Island Kitty(USA)",
+     "sex": "牝",
+     "id": "0000406937",
+     "year": "1976"
+    },
+    {
+     "name": "Capote(USA)",
+     "sex": "牡",
+     "id": "0000336568",
+     "year": "1984"
+    },
+    {
+     "name": "Dance Teacher(USA)",
+     "sex": "牝",
+     "id": "0000410093",
+     "year": "1985"
+    }
+   ],
+   [
+    {
+     "name": "Unbridled(USA)",
+     "sex": "牡",
+     "id": "0000340629",
+     "year": "1987"
+    },
+    {
+     "name": "Toussaud(USA)",
+     "sex": "牝",
+     "id": "0000405617",
+     "year": "1989"
+    },
+    {
+     "name": "Lord At War(ARG)",
+     "sex": "牡",
+     "id": "0000336772",
+     "year": "1980"
+    },
+    {
+     "name": "Castle Eight(USA)",
+     "sex": "牝",
+     "id": "0000424920",
+     "year": "1984"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Key Phrase(USA)",
+     "sex": "牝",
+     "id": "0000434286",
+     "year": "1991"
+    },
+    {
+     "name": "Ecliptical(USA)",
+     "sex": "牡",
+     "id": "0000359908",
+     "year": "1982"
+    },
+    {
+     "name": "Zetta Jet(USA)",
+     "sex": "牝",
+     "id": "0000968086",
+     "year": "1984"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Hawaii(SAF)",
+     "sex": "牡",
+     "id": "0000334708",
+     "year": "1964"
+    },
+    {
+     "name": "T.C. Kitten(USA)",
+     "sex": "牝",
+     "id": "0000406936",
+     "year": "1969"
+    },
+    {
+     "name": "Seattle Slew(USA)",
+     "sex": "牡",
+     "id": "0000335964",
+     "year": "1974"
+    },
+    {
+     "name": "Too Bald(USA)",
+     "sex": "牝",
+     "id": "0000391529",
+     "year": "1964"
+    },
+    {
+     "name": "Smarten(USA)",
+     "sex": "牡",
+     "id": "0000345645",
+     "year": "1976"
+    },
+    {
+     "name": "Intentional Move(USA)",
+     "sex": "牝",
+     "id": "0000410092",
+     "year": "1979"
+    }
+   ]
+  ]
+ },
+ "fno": "F19-b",
+ "cross": "Storm Cat(USA) ：S3×M4×M5"
+}

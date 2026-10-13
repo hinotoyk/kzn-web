@@ -1,0 +1,411 @@
+{
+ "id": 582,
+ "jbis_id": "0001332809",
+ "馬名": "クイーンズクラウン",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "ブラックエンブレム",
+     "sex": "牝",
+     "id": "0000886892",
+     "year": "2005",
+     "color": "黒鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ウォーエンブレム(USA)",
+     "sex": "牡",
+     "id": "0000731452",
+     "year": "1999",
+     "color": "青鹿毛"
+    },
+    {
+     "name": "ヴァンドノワール",
+     "sex": "牝",
+     "id": "0000309182",
+     "year": "1996",
+     "color": "青毛"
+    }
+   ],
+   [
+    {
+     "name": "Our Emblem(USA)",
+     "sex": "牡",
+     "id": "0000362883",
+     "year": "1991"
+    },
+    {
+     "name": "Sweetest Lady(USA)",
+     "sex": "牝",
+     "id": "0000731453",
+     "year": "1990"
+    },
+    {
+     "name": "ヘクタープロテクター(USA)",
+     "sex": "牡",
+     "id": "0000333887",
+     "year": "1988"
+    },
+    {
+     "name": "プリンセスデリーデ(GB)",
+     "sex": "牝",
+     "id": "0000383192",
+     "year": "1981"
+    }
+   ],
+   [
+    {
+     "name": "Mr. Prospector(USA)",
+     "sex": "牡",
+     "id": "0000335975",
+     "year": "1970"
+    },
+    {
+     "name": "Personal Ensign(USA)",
+     "sex": "牝",
+     "id": "0000411318",
+     "year": "1984"
+    },
+    {
+     "name": "Lord At War(ARG)",
+     "sex": "牡",
+     "id": "0000336772",
+     "year": "1980"
+    },
+    {
+     "name": "Sweetest Roman(USA)",
+     "sex": "牝",
+     "id": "0000414048",
+     "year": "1977"
+    },
+    {
+     "name": "Woodman(USA)",
+     "sex": "牡",
+     "id": "0000337445",
+     "year": "1983"
+    },
+    {
+     "name": "Korveya(USA)",
+     "sex": "牝",
+     "id": "0000394820",
+     "year": "1982"
+    },
+    {
+     "name": "Vaguely Noble(GB)",
+     "sex": "牡",
+     "id": "0000333923",
+     "year": "1965"
+    },
+    {
+     "name": "Flashy(GB)",
+     "sex": "牝",
+     "id": "0000393796",
+     "year": "1971"
+    }
+   ],
+   [
+    {
+     "name": "Raise a Native(USA)",
+     "sex": "牡",
+     "id": "0000334066",
+     "year": "1961"
+    },
+    {
+     "name": "Gold Digger(USA)",
+     "sex": "牝",
+     "id": "0000389632",
+     "year": "1962"
+    },
+    {
+     "name": "Private Account(USA)",
+     "sex": "牡",
+     "id": "0000336504",
+     "year": "1976"
+    },
+    {
+     "name": "Grecian Banner(USA)",
+     "sex": "牝",
+     "id": "0000411317",
+     "year": "1974"
+    },
+    {
+     "name": "General(FR)",
+     "sex": "牡",
+     "id": "0000336771",
+     "year": "1974"
+    },
+    {
+     "name": "Luna de Miel(ARG)",
+     "sex": "牝",
+     "id": "0000392849",
+     "year": "1974"
+    },
+    {
+     "name": "The Pruner(USA)",
+     "sex": "牡",
+     "id": "0000344427",
+     "year": "1967"
+    },
+    {
+     "name": "I Also(USA)",
+     "sex": "牝",
+     "id": "0000414047",
+     "year": "1969"
+    },
+    {
+     "name": "Mr. Prospector(USA)",
+     "sex": "牡",
+     "id": "0000335975",
+     "year": "1970"
+    },
+    {
+     "name": "プレイメイト(USA)",
+     "sex": "牝",
+     "id": "0000394689",
+     "year": "1975"
+    },
+    {
+     "name": "Riverman(USA)",
+     "sex": "牡",
+     "id": "0000335664",
+     "year": "1969"
+    },
+    {
+     "name": "Konafa(CAN)",
+     "sex": "牝",
+     "id": "0000394819",
+     "year": "1973"
+    },
+    {
+     "name": "ヴイエナ(GB)",
+     "sex": "牡",
+     "id": "0000333457",
+     "year": "1957"
+    },
+    {
+     "name": "Noble Lassie(GB)",
+     "sex": "牝",
+     "id": "0000385182",
+     "year": "1956"
+    },
+    {
+     "name": "Sir Ivor(USA)",
+     "sex": "牡",
+     "id": "0000333957",
+     "year": "1965"
+    },
+    {
+     "name": "Sovereign(GB)",
+     "sex": "牝",
+     "id": "0000389416",
+     "year": "1965"
+    }
+   ]
+  ]
+ },
+ "fno": "F3-c",
+ "cross": "Mr. Prospector(USA) ：M4×M5"
+}

@@ -1,0 +1,741 @@
+/* 统计总览 · 正式数据版 冒烟断言（Node stub DOM，不动浏览器；挂 run_update --ci/--check 与 CI 门禁）
+ * 三段验证：
+ *   [A] data/stats.json 产物断言：meta 一致性 / by_venue×scopes（all+自然年y+生产年g）/ 十五维分桶（含 母父=血统图 母の父、体重·牡/·牝=当日馬体重档、生产牧场/马主=basic 现值）/ 月龄桶 / 重赏明细
+ *   [B] 产物 ↔ data/basic.json + data/races 源数据 1:1 对账（独立第二实现，逐切面对账）
+ *   [C] 页面冒烟（stub DOM + stub fetch 加载真实产物）：KPI 带 / 年龄成绩曲线 / 倾向矩阵 /
+ *       场地范围组合（JRA·NAR·海外 多选，默认 JRA）/ 自然年·生产年切面切换 / 下钻 URL 生成
+ * 口径：比率分母=出走（完赛+未完赛；取消/除外不计），同 races.html 模块 34。
+ * 用法: node scripts/stats/verify_stats.cjs */
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const ROOT = path.join(__dirname, "..", "..");
+
+let fails = 0, passes = 0;
+function ok(cond, msg) {
+  if (cond) { passes++; console.log("  ok  " + msg); }
+  else { fails++; console.log("  FAIL " + msg); }
+}
+
+/* ═══════════ [A] 产物断言 ═══════════ */
+const product = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "stats.json"), "utf8"));
+const VTS = ["中央", "地方", "海外"];
+const DIMS = ["surf", "dist", "cond", "turn", "grade", "ninki", "sex", "track", "trainer", "jockey", "mps",
+              "weight_m", "weight_f", "breeder", "owner"];
+const BKEYS = ["n", "dnf", "exc", "w", "p2", "p3"];
+/* 体重档（与 build_stats.py weight_bin 同口径：400-550 每 10kg 一档，550 归 540-550；空/非数不入桶）
+ * ⚠ 必须定义在 [A] 顶层断言之前（const 无提升，[A] 循环里会用到 WEIGHT_BINS） */
+const WEIGHT_BINS = ["<400"].concat(Array.from({ length: 15 }, (_, i) => (400 + i * 10) + "-" + (410 + i * 10))).concat([">550"]);
+const weightBinOf = w => {
+  const n = (() => { if (typeof w === "number") return w; const s = String(w || "").trim(); return s && !isNaN(Number(s)) ? Math.round(Number(s)) : NaN; })();
+  if (!Number.isFinite(n)) return "";
+  if (n < 400) return "<400";
+  if (n > 550) return ">550";
+  const lo0 = Math.floor(n / 10) * 10, lo = lo0 >= 550 ? 540 : lo0;
+  return lo + "-" + (lo + 10);
+};
+const TROPHY_G = new Set(["GI", "GII", "GIII", "JGI", "JGII", "JGIII", "JpnI", "JpnII", "JpnIII"]);
+const SCOPE_RE = /^(all|y\d{4}|g\d{4})$/;
+
+console.log("[A] data/stats.json 产物断言");
+{
+  const st = (product.meta && product.meta.stats) || {};
+  const byv = product.by_venue || {};
+  ok(Object.keys(byv).sort().join(",") === VTS.join(","), "by_venue 三分：中央/地方/海外");
+  let tot = { n: 0, dnf: 0, exc: 0, w: 0, p2: 0, p3: 0 };
+  let totPr = 0;
+  for (const vt of VTS) {
+    const scopes = (byv[vt] || {}).scopes || {};
+    const b = (scopes.all || {}).base || {};
+    for (const k of BKEYS) tot[k] += b[k] || 0;
+    totPr += b.pr || 0;
+  }
+  ok(st.runs === tot.n, "meta.stats.runs = " + st.runs + " = 三分 all 切面 base.n 之和");
+  ok(st.dnf === tot.dnf && st.exc === tot.exc, "meta.stats.dnf/exc = " + st.dnf + "/" + st.exc);
+  ok(st.finished === tot.n - tot.dnf - tot.exc, "meta.stats.finished = " + st.finished + " = runs - dnf - exc");
+  ok(st.wins === tot.w, "meta.stats.wins = " + st.wins + " = 三分 all 切面 w 之和");
+  ok(st.horses > 0 && Number.isInteger(st.horses), "meta.stats.horses = " + st.horses);
+  ok(/^\d{4}-\d{2}-\d{2}$/.test(st.first_date) && /^\d{4}-\d{2}-\d{2}$/.test(st.last_date) &&
+    st.first_date <= st.last_date, "集計期間 " + st.first_date + " ~ " + st.last_date);
+
+  for (const vt of VTS) {
+    const scopes = byv[vt].scopes || {};
+    const keys = Object.keys(scopes);
+    ok(keys.includes("all") && keys.every(k => SCOPE_RE.test(k)),
+      "[" + vt + "] scopes 键合法（all" + keys.filter(k => k !== "all").map(k => "/" + k).join("") + "）");
+    let ySum = 0, gSum = 0;
+    keys.forEach(k => { if (k[0] === "y") ySum += scopes[k].base.n; if (k[0] === "g") gSum += scopes[k].base.n; });
+    ok(ySum === scopes.all.base.n, "[" + vt + "] 自然年切面合计 " + ySum + " = all.n " + scopes.all.base.n);
+    ok(gSum === scopes.all.base.n, "[" + vt + "] 生产年切面合计 " + gSum + " = all.n " + scopes.all.base.n);
+
+    for (const sk of keys) {
+      const blk = scopes[sk];
+      const base = blk.base || {};
+      const tag = "[" + vt + "/" + sk + "]";
+      let bad = [];
+      for (const k of BKEYS) if (!(Number.isInteger(base[k]) && base[k] >= 0)) bad.push(k);
+      if (!(Number.isInteger(base.pr) && base.pr >= 0)) bad.push("pr");
+      ok(bad.length === 0, tag + " base 计数非负整数（n=" + base.n + " pr=" + base.pr + "）" + (bad.length ? " 坏字段:" + bad.join("/") : ""));
+
+      let dimBad = 0, dimSum = {}, rowBad = 0;
+      for (const d of DIMS) {
+        const rows = blk.dims[d] || [];
+        if (!Array.isArray(rows)) { dimBad++; continue; }
+        let s = 0;
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          s += r.n;
+          if (!(typeof r.k === "string" && r.k)) rowBad++;
+          for (const k of BKEYS) if (!Number.isInteger(r[k]) || r[k] < 0) rowBad++;
+          if (i && rows[i - 1].n < r.n) rowBad++;          /* 按 n 降序 */
+          if (!(r.dnf + r.exc + (r.w || 0) + (r.p2 || 0) + (r.p3 || 0) <= r.n)) rowBad++;  /* 着别+未完走 ≤ n */
+          if ((d === "weight_m" || d === "weight_f") && !WEIGHT_BINS.includes(r.k)) rowBad++;  /* 体重档键合法 */
+        }
+        dimSum[d] = s;
+      }
+      ok(dimBad === 0, tag + " dims 十五维齐全");
+      ok(rowBad === 0, tag + " 分桶行契约：k 非空 / 计数非负 / n 降序 / 着别闭合");
+      ok(dimSum.grade === base.n && dimSum.surf === base.n && dimSum.sex === base.n &&
+         dimSum.trainer === base.n && dimSum.jockey === base.n && dimSum.track === base.n,
+        tag + " grade/surf/sex/trainer/jockey/track 桶合计 = base.n = " + base.n);
+      ok(dimSum.dist <= base.n && dimSum.cond <= base.n && dimSum.ninki <= base.n && dimSum.turn <= base.n && dimSum.mps <= base.n
+         && dimSum.weight_m <= base.n && dimSum.weight_f <= base.n && dimSum.breeder <= base.n && dimSum.owner <= base.n,
+        tag + " dist/cond/ninki/turn/mps/weight_m/weight_f/breeder/owner 桶合计 ≤ base.n（空值不入桶）");
+      let curveBad = 0, curveTot = 0;
+      for (let i = 0; i < blk.curve.length; i++) {
+        const c = blk.curve[i];
+        if (!(typeof c.gen === "string" && /^\d{4}$/.test(c.gen))) curveBad++;
+        if (!(Number.isInteger(c.a) && c.a >= 0)) curveBad++;
+        for (const k of BKEYS) if (!Number.isInteger(c[k]) || c[k] < 0) curveBad++;
+        curveTot += c.n;
+        if (i && (blk.curve[i - 1].gen > c.gen || (blk.curve[i - 1].gen === c.gen && blk.curve[i - 1].a >= c.a))) curveBad++;
+      }
+      ok(curveBad === 0, tag + " curve：gen 格式 / a 为月龄非负整数 / 计数非负 / (gen,a) 严格升序");
+      ok(curveTot <= base.n, tag + " curve 合计 " + curveTot + " ≤ base.n " + base.n);
+      let trBad = 0;
+      for (let i = 0; i < blk.trophies.length; i++) {
+        const t = blk.trophies[i];
+        if (!TROPHY_G.has(t.g) || !/^\d{4}-\d{2}-\d{2}$/.test(t.d)) trBad++;
+        if (!(Number.isInteger(t.id) && t.h && t.r && t.v)) trBad++;
+        if (i && blk.trophies[i - 1].d > t.d) trBad++;
+      }
+      ok(trBad === 0, tag + " trophies：g∈重赏 / 字段齐全 / 按日期升序（" + blk.trophies.length + " 场）");
+    }
+  }
+  ok(st.prize_total === totPr, "meta.stats.prize_total = 三分 all 切面 base.pr 之和 = " + totPr);
+  const allTrophy = VTS.reduce((a, vt) => a + byv[vt].scopes.all.trophies.length, 0);
+  ok(st.trophy_wins === allTrophy, "meta.stats.trophy_wins = " + st.trophy_wins + " = 三分 all 切面 trophies 合计");
+}
+
+/* ═══════════ [B] 产物 ↔ 源数据 1:1 对账（独立第二实现，逐切面） ═══════════ */
+console.log("[B] 产物 ↔ data/basic.json + data/races 源数据 1:1 对账");
+const basic = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "basic.json"), "utf8"));
+
+/* 母父字段 derive 一致性：basic.json.母父 必须 = 血统文件 pedigree.母[1][0].name
+ * （血统图「母亲的父亲」格，同 merge_basic.py damsire_of / front/public/pedigree.js 母线取格逻辑） */
+{
+  let bad = 0, total = 0;
+  for (const h of basic.horses) {
+    if (!h.pedigree_file) continue;
+    total++;
+    try {
+      const ped = JSON.parse(fs.readFileSync(path.join(ROOT, h.pedigree_file), "utf8"));
+      const m = ((ped.pedigree || {})["母"] || []);
+      const name = (m.length >= 2 && m[1] && m[1][0] && m[1][0].name) ? String(m[1][0].name).trim() : "";
+      if (String(h["母父"] || "") !== name) bad++;
+    } catch (e) { bad++; }
+  }
+  ok(bad === 0 && total > 0, "basic.json 母父 = 血统图 母の父 格（" + (total - bad) + "/" + total + " 匹一致）");
+}
+
+/* ---- 独立实现的桶规则（镜像 build_stats.py 口径，写法故意不同以互证） ---- */
+const distOf = d => {
+  d = Number(d);
+  if (!isFinite(d) || !d) return "";
+  return d <= 1400 ? "短距离" : d <= 1800 ? "英里" : d <= 2400 ? "中距离" : "长距离";
+};
+const turnOf = c => String(c || "").startsWith("右") ? "右" : String(c || "").startsWith("左") ? "左" : "";
+const ninkiOf = n => {
+  if (n === "" || n == null) return "";
+  n = Number(n);
+  if (!isFinite(n) || n < 1 || n > 18) return "";
+  return String(n);                    /* 人气逐一 1-18（同 races.html ninkiBucket） */
+};
+const gradeOf = g => {
+  g = String(g || "").trim();
+  if (g === "新馬") return "新马";
+  if (g === "未勝利") return "未胜利";
+  if (g === "1勝クラス") return "一胜级";
+  if (g === "2勝クラス") return "二胜级";
+  if (g === "3勝クラス") return "三胜级";
+  if (g === "GI") return "G1";
+  if (g === "GII") return "G2";
+  if (g === "GIII") return "G3";
+  if (g === "JGI") return "JG1";
+  if (g === "JGII") return "JG2";
+  if (g === "JGIII") return "JG3";
+  if (g === "JpnI") return "Jpn1";
+  if (g === "JpnII") return "Jpn2";
+  if (g === "JpnIII") return "Jpn3";
+  if (g === "L") return "L";
+  if (g === "OP") return "OP";
+  return "其他";
+};
+const sexOf = s => (String(s || "").trim() === "セ" ? "セン" : String(s || "").trim());
+const birthOf = b => {
+  const m = /(\d{4})年(\d{1,2})月(\d{1,2})日/.exec(String(b || "").trim());
+  return m ? { y: +m[1], m: +m[2], d: +m[3] } : null;
+};
+const ageOf = (ds, bd) => {
+  const dt = new Date(ds + "T00:00:00Z");   /* 显式 UTC：避免本地时区把日退回前一天 */
+  if (isNaN(dt)) return null;
+  let age = (dt.getUTCFullYear() - bd.y) * 12 + (dt.getUTCMonth() + 1 - bd.m);
+  if (dt.getUTCDate() < bd.d) age--;
+  return age;
+};
+const cat = r => {   /* 三态分类：0=完赛 1=未完赛(中止/失格) 2=未出走(取消/除外) 3=未知串 */
+  const p = r["結果"];
+  if (typeof p === "number") return 0;
+  const s = String(p || "").trim();
+  if (s === "中止" || s === "失格") return 1;
+  if (s === "取消" || s === "除外") return 2;
+  return 3;
+};
+const nk = r => r["人気"] === "" || r["人気"] == null ? "" : Number(r["人気"]);
+
+/* ---- 从源数据独立重算（按 场地 × 切面） ---- */
+const exp = {};
+const newBlk = () => ({ base: { n: 0, dnf: 0, exc: 0, w: 0, p2: 0, p3: 0, pr: 0 },
+                        dims: Object.fromEntries(DIMS.map(d => [d, {}])), curve: {}, trophies: [] });
+for (const vt of VTS) exp[vt] = { scopes: { all: newBlk() } };
+const srcMeta = { runs: 0, finished: 0, dnf: 0, exc: 0, horses: new Set(), wins: 0, trophy_wins: 0,
+                  prize_total: 0, dates: [], badStr: [] };
+for (const h of basic.horses) {
+  if (!h.races_file) continue;
+  let arr = [];
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(ROOT, h.races_file), "utf8"));
+    arr = Array.isArray(d) ? d : (d.races || []);
+  } catch (e) { continue; }
+  const birth = birthOf(h["生年月日"]);
+  const gen = String(h["生年"] || "").trim();
+  const gkey = /^\d{4}$/.test(gen) ? "g" + gen : null;
+  const sex = sexOf(h["性別_当前"] || h["性別"]);   // 当前性别（与 build_stats.py 同口径，官方 性別 仅登录值）
+  for (const r of arr) {
+    const ds = String(r["日付"] || "");
+    if (!ds) continue;
+    const vt = String(r["venue_type"] || "");
+    if (!exp[vt]) continue;
+    const c = cat(r);
+    if (c === 3) { srcMeta.badStr.push(String(r["結果"])); continue; }
+    const ym = /^(\d{4})/.exec(ds);
+    const ykey = ym ? "y" + ym[1] : null;
+    const pr = (() => {
+      const v = r["賞金"];
+      if (typeof v === "number") return v;
+      const s = String(v || "").replace(/,/g, "").trim();
+      return s && !isNaN(Number(s)) ? Math.round(Number(s)) : 0;
+    })();
+    srcMeta.runs++; srcMeta.horses.add(h.id); srcMeta.dates.push(ds);
+    srcMeta.prize_total += pr;
+    if (c === 1) srcMeta.dnf++;
+    else if (c === 2) srcMeta.exc++;
+    else {
+      srcMeta.finished++;
+      if (r["結果"] === 1) { srcMeta.wins++; if (TROPHY_G.has(String(r["格"] || ""))) srcMeta.trophy_wins++; }
+    }
+    const dims = { surf: String(r["芝ダ"] || ""), dist: distOf(r["距離"]), cond: String(r["馬場"] || ""),
+                   turn: turnOf(r["コース"]), grade: gradeOf(r["格"]), ninki: ninkiOf(nk(r)),
+                   sex, track: String(r["場名"] || ""), trainer: String(r["調教師"] || ""),
+                   jockey: String(r["騎手"] || ""), mps: String(h["母父"] || ""),
+                   weight_m: sex === "牡" || sex === "セン" ? weightBinOf(r["馬体重"]) : "",
+                   weight_f: sex === "牝" ? weightBinOf(r["馬体重"]) : "",
+                   breeder: String(h["生産牧場"] || "").trim(), owner: String(h["馬主"] || "").trim() };
+    let curveKey = null;
+    if (gen && birth) {
+      const am = ageOf(ds, birth);
+      if (am !== null) curveKey = gen + "/" + am;   /* 逐月一桶（同 build_stats.py） */
+    }
+    const trophy = (r["結果"] === 1 && TROPHY_G.has(String(r["格"] || ""))) ? {
+      d: ds, id: h.id, h: h["馬名"] || r["出走馬名"] || h["欧字馬名"] || "",
+      r: String(r["レース名"] || ""), g: String(r["格"] || ""), v: String(r["場名"] || ""),
+      R: r["R"] == null || r["R"] === "" ? "" : r["R"], jk: String(r["騎手"] || ""), tr: String(r["調教師"] || "")
+    } : null;
+    const targets = [exp[vt].scopes.all];
+    if (ykey) { const b = exp[vt].scopes[ykey] || (exp[vt].scopes[ykey] = newBlk()); targets.push(b); }
+    if (gkey) { const b = exp[vt].scopes[gkey] || (exp[vt].scopes[gkey] = newBlk()); targets.push(b); }
+    for (const blk of targets) {
+      const b = blk.base;
+      b.n++; b.pr += pr;
+      if (c === 1) b.dnf++;
+      else if (c === 2) b.exc++;
+      else if (r["結果"] === 1) b.w++;
+      else if (r["結果"] === 2) b.p2++;
+      else if (r["結果"] === 3) b.p3++;
+      for (const k of DIMS) {
+        if (!dims[k]) continue;
+        const row = blk.dims[k][dims[k]] || (blk.dims[k][dims[k]] = { n: 0, dnf: 0, exc: 0, w: 0, p2: 0, p3: 0 });
+        row.n++;
+        if (c === 1) row.dnf++;
+        else if (c === 2) row.exc++;
+        else if (r["結果"] === 1) row.w++;
+        else if (r["結果"] === 2) row.p2++;
+        else if (r["結果"] === 3) row.p3++;
+      }
+      if (curveKey) {
+        const row = blk.curve[curveKey] || (blk.curve[curveKey] = { n: 0, dnf: 0, exc: 0, w: 0, p2: 0, p3: 0 });
+        row.n++;
+        if (c === 1) row.dnf++;
+        else if (c === 2) row.exc++;
+        else if (r["結果"] === 1) row.w++;
+        else if (r["結果"] === 2) row.p2++;
+        else if (r["結果"] === 3) row.p3++;
+      }
+      if (trophy) blk.trophies.push(trophy);
+    }
+  }
+}
+
+ok(srcMeta.badStr.length === 0, "結果 字符串值均在白名单（中止/失格/取消/除外）内" +
+  (srcMeta.badStr.length ? "，出现未知值: " + srcMeta.badStr.join("|") : ""));
+
+/* ---- 逐切面比较 ---- */
+const st = product.meta.stats;
+ok(st.runs === srcMeta.runs && st.finished === srcMeta.finished && st.dnf === srcMeta.dnf && st.exc === srcMeta.exc,
+  "meta.runs/finished/dnf/exc 与源一致（" + st.runs + "/" + st.finished + "/" + st.dnf + "/" + st.exc + "）");
+ok(st.horses === srcMeta.horses.size && st.wins === srcMeta.wins && st.trophy_wins === srcMeta.trophy_wins,
+  "meta.horses/wins/trophy_wins 与源一致（" + st.horses + "/" + st.wins + "/" + st.trophy_wins + "）");
+ok(st.prize_total === srcMeta.prize_total, "meta.prize_total 与源一致 = " + st.prize_total.toLocaleString() + " 円");
+ok(st.first_date === srcMeta.dates.sort()[0] && st.last_date === srcMeta.dates[srcMeta.dates.length - 1],
+  "first/last_date 与源一致（" + st.first_date + " ~ " + st.last_date + "）");
+
+const eqB = (a, b, where) => {
+  for (const k of BKEYS) {
+    if (a[k] !== b[k]) {
+      ok(false, where + " 字段 " + k + " 不一致: 产物=" + a[k] + " 源=" + b[k]);
+      return false;
+    }
+  }
+  return true;
+};
+let diffCnt = 0, scopeCnt = 0;
+for (const vt of VTS) {
+  const pscopes = product.by_venue[vt].scopes, escopes = exp[vt].scopes;
+  const keys = new Set([...Object.keys(pscopes), ...Object.keys(escopes)]);
+  for (const sk of keys) {
+    scopeCnt++;
+    const pv = pscopes[sk], ev = escopes[sk];
+    const tag = "[" + vt + "/" + sk + "]";
+    if (!pv || !ev) { ok(false, tag + " 切面只存在于一边"); diffCnt++; continue; }
+    if (!eqB(pv.base, ev.base, tag + " base")) diffCnt++;
+    if (pv.base.pr !== ev.base.pr) { ok(false, tag + " base.pr 不一致: 产物=" + pv.base.pr + " 源=" + ev.base.pr); diffCnt++; }
+    for (const d of DIMS) {
+      const prow = Object.fromEntries((pv.dims[d] || []).map(x => [x.k, x]));
+      const erow = ev.dims[d];
+      const bkeys = new Set([...Object.keys(prow), ...Object.keys(erow)]);
+      for (const k of bkeys) {
+        if (!prow[k] || !erow[k]) { ok(false, tag + " dims." + d + " 桶「" + k + "」只存在于一边"); diffCnt++; continue; }
+        if (!eqB(prow[k], erow[k], tag + " dims." + d + "「" + k + "」")) diffCnt++;
+      }
+    }
+    const pcur = Object.fromEntries(pv.curve.map(c => [c.gen + "/" + c.a, c]));
+    const ckeys = new Set([...Object.keys(pcur), ...Object.keys(ev.curve)]);
+    for (const k of ckeys) {
+      if (!pcur[k] || !ev.curve[k]) { ok(false, tag + " curve 点「" + k + "」只存在于一边"); diffCnt++; continue; }
+      if (!eqB(pcur[k], ev.curve[k], tag + " curve「" + k + "」")) diffCnt++;
+    }
+    exp[vt].scopes[sk].trophies.sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : 0);   /* 产物按日期升序，期望先排序再比 */
+    const pt = JSON.stringify(pv.trophies.map(x => ({ d: x.d, id: x.id, g: x.g, h: x.h, r: x.r, v: x.v, R: String(x.R), jk: x.jk, tr: x.tr })));
+    const et = JSON.stringify(ev.trophies.map(x => ({ d: x.d, id: x.id, g: x.g, h: x.h, r: x.r, v: x.v, R: String(x.R), jk: x.jk, tr: x.tr })));
+    if (pt !== et) { ok(false, tag + " trophies 明细不一致"); diffCnt++; }
+  }
+}
+ok(diffCnt === 0, "逐切面 1:1 对账通过（" + scopeCnt + " 个切面 × base + 十维 + curve + trophies）");
+
+/* ═══════════ [C] 页面冒烟（stub DOM + 真实产物；期望值从产物独立重算） ═══════════ */
+console.log("[C] stats.html 页面冒烟");
+const html = fs.readFileSync(path.join(ROOT, "front", "pages", "stats.html"), "utf8");
+const code = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).join("\n");
+ok(code.includes('YJ.cache.fetch("stats")'), "页面经统一缓存控制器引用 stats 产物（12h）");
+
+/* els 用惰性 Proxy：断言里 els["xxx"] 取未注册元素时自动给一个空 stub（_html=""），
+ * 让该条断言正常判 FAIL —— 否则旧写法直接 TypeError 崩栈、把后面几十条断言一起吞掉 */
+const els = new Proxy({}, {
+  get(t, k) {
+    if (typeof k === "symbol") return undefined;
+    if (!(k in t)) t[k] = el(k);
+    return t[k];
+  },
+});
+/* ---- 最小 DOM stub：只补「页面真的会调」的结构 API，不参与任何断言取值 ----
+ *   classList —— W1-A ③ 首屏给矩阵表体挂 stagger 容器类（table.tBodies[0].classList.add("yj-st")）
+ *   tBodies   —— 按 innerHTML 里 <tbody> 的个数派生（真 DOM 同源规则），否则 renderTable 里取 [0] 直接抛
+ *                TypeError，渲染链断在 renderAbout 之前 → aboutNote 从未被写、KPI/着顺断言全红 */
+function mkClassList(initial) {
+  const set = new Set(String(initial || "").trim().split(/\s+/).filter(Boolean));
+  return {
+    add() { for (const c of arguments) set.add(c); },
+    remove() { for (const c of arguments) set.delete(c); },
+    toggle(c) { if (set.has(c)) set.delete(c); else set.add(c); },
+    contains(c) { return set.has(c); },
+    item(i) { return [...set][i] || null; },
+    toString() { return [...set].join(" "); },
+  };
+}
+function mkChild(tag) {                                   /* 表体这类子节点：只要结构与 class 接口 */
+  return {
+    tagName: String(tag).toUpperCase(), _html: "", attrs: {}, handlers: {}, style: {}, classList: mkClassList(),
+    offsetWidth: 0, offsetHeight: 0, isConnected: true, parentNode: null, children: [],
+    set innerHTML(v) { this._html = String(v); }, get innerHTML() { return this._html; },
+    set textContent(v) { this._text = String(v); }, get textContent() { return this._text; },
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; },
+    addEventListener(t, f) { (this.handlers[t] = this.handlers[t] || []).push(f); },
+    appendChild(c) { this.children.push(c); return c; },
+    removeChild(c) { const i = this.children.indexOf(c); if (i >= 0) this.children.splice(i, 1); return c; },
+    insertAdjacentHTML(pos, h) { if (pos === "beforeend") this.innerHTML = this._html + h; },
+    closest() { return null; },
+    querySelectorAll() { return []; },
+    getBoundingClientRect() { return { left: 0, right: 0, width: 800, height: 200 }; },
+  };
+}
+function el(id) {
+  const n = {
+    id, _html: "", text: "", attrs: {}, handlers: {}, value: "", style: {}, clientWidth: 800,
+    classList: mkClassList(), tBodies: [], tHead: null, offsetWidth: 0, offsetHeight: 0, isConnected: true,
+    set innerHTML(v) {
+      this._html = String(v);
+      this.tBodies = (String(v).match(/<tbody[\s>]/gi) || []).map(() => mkChild("tbody"));
+    },
+    get innerHTML() { return this._html; },
+    set textContent(v) { this.text = String(v); }, get textContent() { return this.text; },
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; },
+    addEventListener(t, f) { (this.handlers[t] = this.handlers[t] || []).push(f); },
+    appendChild(c) { c.parentNode = this; return c; },
+    removeChild(c) { return c; },
+    closest() { return null; },
+    querySelectorAll() { return []; },
+    getBoundingClientRect() { return { left: 0, right: 0, width: 800, height: 200 }; },
+  };
+  return n;
+}
+global.document = {
+  _handlers: {},
+  getElementById(id) { return els[id] || (els[id] = el(id)); },
+  querySelectorAll() { return []; },
+  addEventListener(t, f) { (this._handlers[t] = this._handlers[t] || []).push(f); },
+};
+global.window = global;
+global.addEventListener = function () {};
+global.location = { href: "", search: "", pathname: "/pages/stats.html", replace() {} };   /* 补全：页面「独立打开=自动回壳」分支（§82.13）要读 search/pathname 并调 replace */
+global.YJ = { i18n: { t: k => k, e: (f, v) => v } };
+global.YJ_DATA = { url(p) { return "data/" + p; } };
+global.fetch = function (url) {
+  const txt = fs.readFileSync(path.join(ROOT, String(url)), "utf8");
+  return Promise.resolve({ ok: true, json() { return Promise.resolve(JSON.parse(txt)); } });
+};
+/* §48 复用收口后页面依赖共享模块（YJ.util.esc / YJ.raceRows.PLACE_BG·G·GLABEL）：
+ * stub 按浏览器加载顺序先入 yj-util.js → race-rows.js → loading.js（window=global，挂到同一 YJ），再 eval 页面脚本。
+ * ★ #18 撤销骨架屏/分批渲染后 loading.js 只剩 YJ.ui.img（B4 图片标记），stats 页已不调 YJ.ui →
+ *   这里入它只为与本分支各页的浏览器加载顺序一致，删了也不影响下列断言。 */
+/* P3/R6（docs/REFACTOR.md §12.4）：race-rows.js 已改读 window.YJ_GRADE（fail-fast）→ stub 环境须先注入
+ * 与浏览器一致的 YJ_SITE / YJ_GRADE（node 侧 fs 读 config 两个 JSON，与 dist/site-config.js 同源）。 */
+const _sireCfg = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "sire.json"), "utf8"));
+const _gradeCfg = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "grade-table.json"), "utf8"));
+window.YJ_SITE = _sireCfg.site || {};
+window.YJ_GRADE = _gradeCfg.GRADE || {};
+(0, eval)(fs.readFileSync(path.join(ROOT, "front", "public", "yj-util.js"), "utf8"));
+(0, eval)(fs.readFileSync(path.join(ROOT, "front", "public", "race-rows.js"), "utf8"));
+(0, eval)(fs.readFileSync(path.join(ROOT, "front", "public", "loading.js"), "utf8"));
+/* 页面 init 已改走 YJ.cache.fetch('stats')（12h 统一缓存）：node 无 caches → 控制器自动降级
+ * 为直连 fetch stub，行为与旧版一致（同一份真实 yj-cache.js 顺带覆盖降级路径） */
+(0, eval)(fs.readFileSync(path.join(ROOT, "front", "public", "yj-cache.js"), "utf8"));
+eval(code);
+
+/* ---- 期望值工具（全部从产物独立重算；比率分母=出走） ---- */
+const byv = product.by_venue;
+const scopeBlk = (vt, sk) => byv[vt].scopes[sk] || null;
+const sumB = (vts, sk) => {
+  const t = { n: 0, dnf: 0, exc: 0, w: 0, p2: 0, p3: 0, pr: 0 };
+  vts.forEach(v => { const blk = scopeBlk(v, sk); if (!blk) return; const b = blk.base;
+    t.n += b.n; t.dnf += b.dnf; t.exc += b.exc; t.w += b.w; t.p2 += b.p2; t.p3 += b.p3; t.pr += b.pr || 0; });
+  return t;
+};
+const startsOf = b => b.n - b.exc;                       /* 出走 = 比率分母 */
+const pctOf = x => (x * 100).toFixed(1) + "%";
+const ratesOf = b => { const f = startsOf(b); return { f, win: f ? b.w / f : 0, ren: f ? (b.w + b.p2) / f : 0, fuku: f ? (b.w + b.p2 + b.p3) / f : 0 }; };
+const manYenOf = pr => {
+  if (!pr) return "0万";
+  if (pr >= 1e8) { const o = Math.floor(pr / 1e8), m = Math.floor((pr % 1e8) / 1e4); return o + "亿" + (m ? m.toLocaleString() + "万" : ""); }
+  return Math.round(pr / 1e4).toLocaleString() + "万";
+};
+const click = (id, attr) => {
+  const h = els[id].handlers.click;
+  if (!h || !h.length) return;
+  h[h.length - 1].call(els[id], { target: { closest: sel => /(button\[data-(v|g|tab|m|y|r)\]|th\[data-sk\])/.test(sel)
+    ? { getAttribute: () => attr, setAttribute: (k, v) => {} } : null } });
+};
+const kpiV = label => {
+  const m = String(els["kpis"]._html).match(new RegExp('class="k">' + label + '</div><div class="v(?: hi| dim)?">([\\s\\S]*?)</div>'));
+  return m ? m[1] : null;
+};
+const kpiBrk = () => String(kpiV("通算战绩") || "").replace(/<[^>]+>/g, "");
+const brk4 = b => { const s = startsOf(b); return [b.w, b.p2, b.p3, Math.max(0, s - b.w - b.p2 - b.p3)]; };
+
+setTimeout(function () {
+  console.log("[C1] 初始加载（默认 JRA + 全部切面）");
+  const b0 = sumB(["中央"], "all");
+  const r0 = ratesOf(b0);
+  ok(kpiV("总赏金") === manYenOf(b0.pr), "KPI 总赏金 " + manYenOf(b0.pr));
+  ok(kpiV("重赏胜利") === '<span class="st-trophy">🏆</span>' + byv["中央"].scopes.all.trophies.length, "KPI 重赏 🏆" + byv["中央"].scopes.all.trophies.length);
+  ok(kpiBrk() === "[" + brk4(b0).join("-") + "]",
+    "KPI 通算战绩 4 段 [" + brk4(b0).join("-") + "]（§76 去首位出走段；着外=出走−前三含未完赛 → 四段之和==出走）");
+  const brkH = String(kpiV("通算战绩") || "");
+  ok(brkH.includes("#FEED88") && brkH.includes("#CCDFFD") && brkH.includes("#ECC6A2") && brkH.includes("#ececec") && !brkH.includes("#E0F5F4")
+    && /<i[^>]*>-<\/i>/.test(brkH) && brkH.includes("linear-gradient") && !brkH.includes("#0aa7a0"),
+    "通算战绩 = 4 段 + 1/2/3 浅色做底 + 着外浅灰 + 连字符带渐变接缝（底色连成一整条，无出走青绿 #E0F5F4）");
+  const bar = String(els["distBar"]._html);
+  ok(bar.includes("st-bar") && bar.includes("#FEED88") && bar.includes("完赛 " + (b0.n - b0.dnf - b0.exc) + " 场"), "着顺分布条（着别=完赛口径；1/2/3 浅色三件套）");
+  const rb = String(els["rateBand"]._html);
+  ok(rb.includes(pctOf(r0.win)) && rb.includes(pctOf(r0.ren)) && rb.includes(pctOf(r0.fuku)),
+    "比率带（分母=出走）胜率/连对/复胜 = " + pctOf(r0.win) + " / " + pctOf(r0.ren) + " / " + pctOf(r0.fuku));
+  ok(String(els["aboutNote"]._html).includes(product.meta.stats.first_date) && String(els["aboutNote"]._html).includes(product.meta.stats.runs + " 条记录 / " + product.meta.stats.horses + " 匹"),
+    "说明区 集計期間（工具条 periodLabel 已移入 NOTES）");
+  /* 顶部切面控件 */
+  const modeHtml = String(els["ymodeSeg"]._html);
+  ok(modeHtml.includes("生产年") && modeHtml.includes("自然年"), "切面模式：生产年/自然年");
+  const yHtml = String(els["yseg"]._html);
+  ok(yHtml.includes("全部") && yHtml.includes("2023年世代") && yHtml.includes("2024年世代"), "默认生产年值：全部/2023年世代/2024年世代");
+
+  console.log("[C2] 年龄成绩曲线（颜色=产年 + 线型=指标多选 + 明细表）");
+  const segHtml = String(els["genSeg"]._html);
+  ok(segHtml.includes("全部") && segHtml.includes("2023年世代") && segHtml.includes("2024年世代"), "世代切换：全部/2023年世代/2024年世代（届·年产 已弃用）");
+  const rateHtml = String(els["rateSeg"]._html);
+  ok(rateHtml.includes("胜率") && rateHtml.includes("连对率") && rateHtml.includes("复胜率"), "指标 seg：胜率/连对率/复胜率（可组合多选）");
+  ok(rateHtml.includes('data-r="win" data-on="true"') && rateHtml.includes('data-r="ren" data-on="false"') && rateHtml.includes('data-r="fuku" data-on="false"'),
+    "默认仅 胜率 选中");
+  const curveHtml = String(els["curve"]._html);
+  /* 折线数 = 选中世代 × 选中指标（每世代需 ≥2 个月龄点才画线）——从产物独立推导，不写死世代数 */
+  const curvePts = byv["中央"].scopes.all.curve;
+  const genAges = {};
+  curvePts.forEach(p => { (genAges[p.gen] = genAges[p.gen] || new Set()).add(p.a); });
+  const pathGens = Object.keys(genAges).filter(g => genAges[g].size >= 2).length;
+  ok(curveHtml.includes("<svg") && (curveHtml.match(/<path/g) || []).length === pathGens,
+    "默认 " + pathGens + " 条折线（全部 " + pathGens + " 个世代 × 胜率，颜色=产年）");
+  const cys = [...curveHtml.matchAll(/cy="([\d.]+)"/g)].map(m => +m[1]);
+  ok(cys.length >= 4 && Math.max(...cys) - Math.min(...cys) > 40,
+    "曲线点位随比率起伏（最高-最低 cy 差 " + (Math.max(...cys) - Math.min(...cys)).toFixed(0) + "px，防贴底回归）");
+  ok((curveHtml.match(/<circle/g) || []).length >= 4, "曲线点标记（含 <title> tooltip）");
+  ok(String(els["curveLegend"]._html).includes("2023年世代胜率") && String(els["curveLegend"]._html).includes("2024年世代胜率") && String(els["curveLegend"]._html).includes("样本少"),
+    "图例（颜色=产年 · 选中指标）+ 样本少说明");
+  ok(String(els["curveTable"]._html).includes("<table") && String(els["curveTable"]._html).includes("生产年"), "月龄明细表（生产年列）");
+  click("genSeg", "2024");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === (genAges["2024"] && genAges["2024"].size >= 2 ? 1 : 0),
+    "切换 2024年世代 → " + (genAges["2024"] && genAges["2024"].size >= 2 ? 1 : 0) + " 条折线");
+  click("genSeg", "全部");
+  click("rateSeg", "ren");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === pathGens * 2 && String(els["curveLegend"]._html).includes("连对率"),
+    "组合 胜率+连对率 → " + (pathGens * 2) + " 条折线（实线+虚线）+ 图例跟随");
+  click("rateSeg", "fuku");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === pathGens * 3 && String(els["curveNote"].text).includes("复胜率") && String(els["curveNote"].text).includes("分母=出走"),
+    "三指标全开 → " + (pathGens * 3) + " 条折线 + 注解跟随（分母=出走）");
+  click("rateSeg", "win");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === pathGens * 2 && String(els["rateSeg"]._html).includes('data-r="win" data-on="false"'),
+    "再点已选指标可取消 → 剩 连对+复胜 " + (pathGens * 2) + " 条");
+  click("rateSeg", "ren");
+  click("rateSeg", "fuku");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === pathGens && String(els["rateSeg"]._html).includes('data-r="fuku" data-on="true"'),
+    "唯一项不可关（关掉连对率后 复胜率 不可再关，仍 " + pathGens + " 条）");
+  click("rateSeg", "win");
+  click("rateSeg", "fuku");
+  ok((String(els["curve"]._html).match(/<path/g) || []).length === pathGens && String(els["rateSeg"]._html).includes('data-r="win" data-on="true"') && String(els["rateSeg"]._html).includes('data-r="fuku" data-on="false"'),
+    "回默认：仅 胜率 " + pathGens + " 条折线");
+
+  console.log("[C3] 倾向矩阵（15 页签 + 库内基准 + 下钻 URL）");
+  ok((String(els["matTabs"]._html).match(/data-tab=/g) || []).length === 15, "矩阵 15 页签");
+  const tabSeq = (String(els["matTabs"]._html).match(/data-tab="[a-z_]+"/g) || []).map(s => s.slice(10, -1));
+  ok(tabSeq.join(",") === "dist,track,grade,surf,cond,ninki,sex,weight_m,weight_f,turn,mps,jockey,trainer,breeder,owner",
+    "页签序 = 用户定稿（距离/竞马场/比赛级别/跑道/马场/人气/性别/体重·牡/体重·牝/赛道方向/母父/骑手/调教师/生产牧场/马主）");
+  ok(["体重·牡", "体重·牝", "生产牧场", "马主"].every(l => String(els["matTabs"]._html).includes(">" + l + "<")),
+    "增补页签：体重·牡/体重·牝（性别后）· 生产牧场/马主（调教师后）");
+  ok(html.includes('id="matWrap"') && code.includes("applyMatScroll") && code.includes('matHtml("ninki")'),
+    "倾向矩阵滚动容器：max-height = 人气完整展示高度（更矮收缩 · 更高竖向滚动，离屏实测）");
+  const mt = String(els["matTable"]._html);
+  ok(mt.includes("总体平均") && mt.includes(pctOf(r0.win)), "基准顶行 = 总体平均胜率 " + pctOf(r0.win) + "（分母=出走）");
+  ok(mt.includes("2着") && mt.includes("3着") && mt.includes("着外"), "着别列：1/2/3着 + 着外");
+  ok(mt.includes("<td>" + (startsOf(b0) - b0.w - b0.p2 - b0.p3) + "</td>"),
+    "基准行着外 = " + (startsOf(b0) - b0.w - b0.p2 - b0.p3) + "（出走口径含未完赛 → 出走列 = 前三 + 着外）");
+  ok(html.includes("tr.base td{background:#f4f4f5") && !html.includes("#f7fdfd"),
+    "基准行（总体平均）= 中性灰底（与率列 绿=高于/红=低于 的数据语义色分离）");
+  ok(mt.includes("短距离"), "默认页签 = 距离（首屏渲染短/英/中/长距离行）");
+  click("matTabs", "surf");                      /* 跑道维度需切页签（默认已是距离，见 docs/UI优化记录.md §56） */
+  const mtSurf = String(els["matTable"]._html);
+  const daRow = byv["中央"].scopes.all.dims.surf.find(x => x.k === "ダ");
+  ok(mtSurf.includes(">ダ<") && mtSurf.includes(String(startsOf(daRow))), "跑道页签：泥地行 出走 " + startsOf(daRow));
+  ok(mtSurf.includes('data-href="races.html?f=' + encodeURIComponent("surface:ダ,venue:中央") + '"'), "泥地行下钻 = surface:ダ,venue:中央");
+  const daR = ratesOf(daRow), daDiff = (daR.win - r0.win) * 100;
+  const cellCls = (cur, base) => (Math.round(cur * 1000) > Math.round(base * 1000) ? "yj-up" : Math.round(cur * 1000) < Math.round(base * 1000) ? "yj-down" : "");
+  const rowHtml = key => (String(els["matTable"]._html).split("<tr").find(s => s.includes(">" + key + "<")) || "");
+  const dCls = cellCls(daR.win, r0.win);
+  ok(dCls === "" ? true : rowHtml("ダ").includes(dCls),
+    "泥地胜率 vs 总体平均 → " + (dCls === "" ? "显示相同不着色" : dCls === "yj-up" ? "高于=绿" : "低于=红"));
+  click("matTabs", "sex");
+  const mtSex = String(els["matTable"]._html);
+  const osuRow = byv["中央"].scopes.all.dims.sex.find(x => x.k === "牡");
+  ok(mtSex.includes(">牡<") && mtSex.includes(String(startsOf(osuRow))), "性别页签：牡 出走 " + startsOf(osuRow));
+  const oR = ratesOf(osuRow), oDiff = (oR.win - r0.win) * 100;
+  const oCls = cellCls(oR.win, r0.win);
+  ok(oCls === "yj-up" && rowHtml("牡").includes("yj-up"), "牡胜率高于总体平均 → 绿（" + pctOf(oR.win) + " vs " + pctOf(r0.win) + "）");
+  click("matTabs", "grade");
+  const mtGr = String(els["matTable"]._html);
+  /* 行内可能带「样本少」小标：用 >键(<span|</td>) 定位标签单元格 */
+  const cellIdx = (h, name) => { const m = h.match(new RegExp(">" + name + "(<span|</td>)")); return m ? m.index : -1; };
+  const gAll = byv["中央"].scopes.all.dims.grade;
+  ok(String(els["matTabs"]._html).includes(">比赛级别<"), "页签改名「比赛级别」");
+  const gradedKeys = ["G1", "G2", "G3", "JG1", "JG2", "JG3", "Jpn1", "Jpn2", "Jpn3"];
+  const gEx = gradedKeys.filter(k => gAll.some(x => x.k === k));
+  const gk = gEx.find(k => gAll.find(x => x.k === k).w > 0) || gEx[0];   /* 优先取有胜场的重赏桶 */
+  ok(gk && new RegExp(">" + gk + "(<span[^>]*>样本少</span>)?</td>(<td( class=\"dim\")?>\\d+</td>)<td( class=\"dim\")?>" + gAll.find(x => x.k === gk).w + "</td>").test(mtGr),
+    "比赛级别页签：" + (gk || "?") + " 行 1着 = " + (gk ? gAll.find(x => x.k === gk).w : "?") + "（纯数字无样式）");
+  ok(gk && mtGr.includes('data-href="races.html?f=' + encodeURIComponent("grade:" + gk + ",venue:中央") + '"'), (gk || "?") + " 行下钻 = grade:" + gk);
+  ok(mtGr.includes('data-href="races.html?f=' + encodeURIComponent("grade:1勝クラス,venue:中央") + '"'), "一胜级行下钻 = grade:1勝クラス（races.html gradeMatches 已支持）");
+  const G_SEQ = ["新马", "未胜利", "一胜级", "二胜级", "三胜级", "OP", "L", "Jpn1", "Jpn2", "Jpn3", "G1", "G2", "G3", "JG1", "JG2", "JG3", "其他"]
+    .filter(k => gAll.some(x => x.k === k));
+  ok(G_SEQ.length >= 2 && G_SEQ.every((k, i) => cellIdx(mtGr, k) >= 0 && (i === 0 || cellIdx(mtGr, k) > cellIdx(mtGr, G_SEQ[i - 1]))),
+    "比赛级别固定序：" + G_SEQ.join("→"));
+  click("matTabs", "dist");
+  const mtDist = String(els["matTable"]._html);
+  const dAll = byv["中央"].scopes.all.dims.dist;
+  /* 标签含 >2400m 一类字符，页面经 esc() 输出为 &gt; —— 断言先按同规则转义再比对 */
+  const escHtml = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const DIST_LBL = { "短距离": "短距离 ≤1400m", "英里": "英里 1401-1800m", "中距离": "中距离 1801-2400m", "长距离": "长距离 >2400m" };
+  ok(dAll.length >= 2 && dAll.every(x => mtDist.includes(escHtml(DIST_LBL[x.k]))), "距离行标签附范围（" + dAll.map(x => DIST_LBL[x.k]).join(" / ") + "）");
+  const dIdx = lbl => { const m = mtDist.match(new RegExp(">" + escHtml(lbl).replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(<span|</td>)")); return m ? m.index : -1; };
+  const D_SEQ = ["短距离", "英里", "中距离", "长距离"].filter(k => dAll.some(x => x.k === k));
+  ok(D_SEQ.length >= 2 && D_SEQ.every((k, i) => dIdx(DIST_LBL[k]) >= 0 && (i === 0 || dIdx(DIST_LBL[k]) > dIdx(DIST_LBL[D_SEQ[i - 1]]))),
+    "距离固定序：" + D_SEQ.join("→"));
+  const dk = D_SEQ[0];
+  ok(dk && mtDist.includes('data-href="races.html?f=' + encodeURIComponent("dist:" + dk + ",venue:中央") + '"'), "距离行下钻 = dist:" + dk);
+  click("matTabs", "trainer");
+  const trRows = byv["中央"].scopes.all.dims.trainer;
+  ok((String(els["matTable"]._html).match(/<tr/g) || []).length === 2 + trRows.length,
+    "调教师全部展示（" + (2 + trRows.length) + " 行 = 表头+基准+全部" + trRows.length + "）");
+  ok(String(els["matNote"]._html).includes("全部列出") && !String(els["matNote"]._html).includes("展开全部"), "无展开按钮（全展示）");
+  click("matTabs", "ninki");
+  const nkRows = byv["中央"].scopes.all.dims.ninki;
+  ok((String(els["matTable"]._html).match(/<tr/g) || []).length === 2 + nkRows.length && nkRows.every(x => /^\d+$/.test(x.k)),
+    "人气逐一展示（" + nkRows.length + " 个桶，键=1-18 数字）");
+  const mtNk = String(els["matTable"]._html);
+  const nkIdx = k => mtNk.indexOf(encodeURIComponent("ninki:" + k + ",venue:"));   /* 行定位走 data-href（整体 URI 编码，人气行必下钻） */
+  const N_SEQ = nkRows.map(x => x.k).sort((a, b) => Number(a) - Number(b));
+  ok(N_SEQ.length >= 2 && N_SEQ.every((k, i) => nkIdx(k) >= 0 && (i === 0 || nkIdx(k) > nkIdx(N_SEQ[i - 1]))),
+    "人气固定序（1人気→" + N_SEQ[N_SEQ.length - 1] + "人気 升序）：" + N_SEQ.join("→"));
+  click("matTabs", "mps");
+  const mpsRows = byv["中央"].scopes.all.dims.mps;
+  const mtMps = String(els["matTable"]._html);
+  const mpsTop = mpsRows[0];   /* 产物按 n 降序 → 首桶 = 出赛数最多的母父 */
+  const escK = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");   /* 同页面 esc() */
+  ok(mpsRows.length >= 2 && mpsTop && mtMps.includes(">" + escK(mpsTop.k) + "<") && mtMps.includes(String(mpsTop.n - mpsTop.exc)),
+    "母父页签：" + mpsTop.k + " 行出走 " + (mpsTop.n - mpsTop.exc) + "（" + mpsRows.length + " 个桶，按出赛数降序）");
+  ok(mtMps.includes('data-href="races.html?f=' + encodeURIComponent("mps:" + mpsTop.k + ",venue:中央") + '"'),
+    "母父行下钻 = mps:" + mpsTop.k);
+  click("matTabs", "weight_m");
+  const mtWm = String(els["matTable"]._html);
+  ok(/data-href="races\.html\?f=weight%3A/.test(mtWm) && mtWm.includes(encodeURIComponent("sex:牡")) && mtWm.includes(encodeURIComponent("sex:セン")),
+    "体重·牡 行下钻 = weight:<档> + sex:牡,sex:セン（口径随页签）");
+  click("matTabs", "weight_f");
+  const mtWf = String(els["matTable"]._html);
+  ok(/data-href="races\.html\?f=weight%3A/.test(mtWf) && mtWf.includes(encodeURIComponent("sex:牝")) && !mtWf.includes(encodeURIComponent("sex:セン")),
+    "体重·牝 行下钻 = weight:<档> + sex:牝");
+  click("matTabs", "breeder");
+  const brRow = byv["中央"].scopes.all.dims.breeder[0];
+  ok(brRow && String(els["matTable"]._html).includes('data-href="races.html?f=' + encodeURIComponent("breeder:" + brRow.k + ",venue:中央") + '"'),
+    "生产牧场行下钻 = breeder:" + (brRow && brRow.k));
+  click("matTabs", "owner");
+  const owRow = byv["中央"].scopes.all.dims.owner[0];
+  ok(owRow && String(els["matTable"]._html).includes('data-href="races.html?f=' + encodeURIComponent("owner:" + owRow.k + ",venue:中央") + '"'),
+    "马主行下钻 = owner:" + (owRow && owRow.k));
+  click("matTabs", "grade");
+
+  click("matTable", "win");
+  const grRows = byv["中央"].scopes.all.dims.grade;
+  const gRate = b => b.w / (b.n - b.exc);
+  const gMax = Math.max(...grRows.map(gRate)), gMin = Math.min(...grRows.map(gRate));
+  const firstRow = () => {
+    /* 首个数据行 = tbody 内基准行之后的第一行；不能用 data-href 定位（「其他」等无下钻档无该属性） */
+    const tb = String(els["matTable"]._html).split("<tbody")[1] || "";
+    const rows = tb.split("<tr");
+    return (rows[2] || "").slice(0, (rows[2] || "").indexOf("</tr>"));
+  };
+  ok((String(els["matTable"]._html).match(/data-sk=/g) || []).length === 8 && (String(els["matTable"]._html).match(/class="st-sa/g) || []).length === 8,
+    "8 个数值列表头均可点击排序（常驻 ⇅ 提示图标）");
+  ok(firstRow().includes(pctOf(gMax)), "表头排序：胜率降序 → 首行 " + pctOf(gMax));
+  click("matTable", "win");
+  ok(firstRow().includes(pctOf(gMin)), "再点表头切换升序 → 首行 " + pctOf(gMin));
+  click("matTable", "starts");
+
+  console.log("[C4] 切面切换（生产年 2023年世代 → 自然年 2026年）");
+  click("yseg", "2023");
+  const bG23 = sumB(["中央"], "g2023");
+  ok(kpiBrk() === "[" + brk4(bG23).join("-") + "]", "生产年 2023年世代 → 通算战绩 [" + brk4(bG23).join("-") + "]（g2023 切面）");
+  ok(String(els["matTable"]._html).includes('data-href="races.html?f=' + encodeURIComponent("grade:新马,venue:中央,byear:2023") + '"'),
+    "生产年切面下钻附带 byear:2023");
+  click("ymodeSeg", "year");
+  const yHtml2 = String(els["yseg"]._html);
+  ok(yHtml2.includes("2025年") && yHtml2.includes("2026年") && !yHtml2.includes("年世代"), "切自然年 → 值变 2025年/2026年");
+  click("yseg", "2026");
+  const bY26 = sumB(["中央"], "y2026");
+  ok(kpiBrk() === "[" + brk4(bY26).join("-") + "]", "自然年 2026年 → 通算战绩 [" + brk4(bY26).join("-") + "]（y2026 切面）");
+  ok(String(els["matTable"]._html).includes('data-href="races.html?f=' + encodeURIComponent("grade:新马,venue:中央,year:2026") + '"'),
+    "自然年切面下钻附带 year:2026");
+  click("yseg", "all");
+  ok(kpiBrk() === "[" + brk4(sumB(["中央"], "all")).join("-") + "]", "切面回全部 → 通算战绩 [" + brk4(sumB(["中央"], "all")).join("-") + "]");
+  click("ymodeSeg", "gen");
+
+  console.log("[C5] 场地范围组合（JRA + NAR；唯一项不可关）");
+  click("vseg", "地方");
+  const b01 = sumB(["中央", "地方"], "all");
+  const r01 = ratesOf(b01);
+  ok(kpiBrk() === "[" + brk4(b01).join("-") + "]", "加勾 NAR → 通算战绩 [" + brk4(b01).join("-") + "]");
+  ok(String(els["matTable"]._html).includes(pctOf(r01.win)), "矩阵基准联动 = " + pctOf(r01.win));
+  ok(String(els["matTable"]._html).includes('data-href="races.html?f=' + encodeURIComponent("grade:新马,venue:中央,venue:地方") + '"'),
+    "组合下钻 URL 带双 venue（grade:新马,venue:中央,venue:地方）");
+  click("vseg", "中央");                     /* 2 项时允许关中央 → 只剩地方 */
+  const bL = sumB(["地方"], "all");
+  ok(kpiBrk() === "[" + brk4(bL).join("-") + "]", "关中央 → 只剩 NAR，通算战绩 [" + brk4(bL).join("-") + "]");
+  click("vseg", "地方");                     /* 唯一项 → 不可关 */
+  ok(kpiBrk() === "[" + brk4(bL).join("-") + "]", "唯一项不可关（仍为 NAR [" + brk4(bL).join("-") + "]）");
+  click("vseg", "中央");                     /* 恢复 */
+  click("vseg", "地方");
+  ok(kpiBrk() === "[" + brk4(sumB(["中央"], "all")).join("-") + "]", "取消地方 → 回纯 JRA [" + brk4(sumB(["中央"], "all")).join("-") + "]");
+  const mtGr2 = String(els["matTable"]._html);
+  ok(mtGr2.includes('data-href="races.html?f=' + encodeURIComponent("grade:新马,venue:中央") + '"'), "回 JRA 后 新马下钻仅 venue:中央");
+
+  console.log("[C6] 重赏之路 + 补充");
+  ok(String(els["gradedProg"]._html).includes("重赏") && String(els["gradedProg"]._html).includes("新马"), "级别胜利进度条");
+  ok(!String(els["gradedProg"]._html).includes("胜场按级别"), "口径注记文案已移除（用户要求，§79）");
+  const gW = k => (gAll.find(x => x.k === k) || {}).w || 0;
+  const prog = String(els["gradedProg"]._html);
+  const wBan = gW("一胜级") + gW("二胜级") + gW("三胜级"), wTrophy = gW("G1") + gW("G2") + gW("G3") + gW("JG1") + gW("JG2") + gW("JG3") + gW("Jpn1") + gW("Jpn2") + gW("Jpn3");
+  ok(prog.includes(">" + wBan + "</b>胜"), "班赛步数 = 一胜~三胜级合计 " + wBan);
+  ok(prog.includes(">" + wTrophy + "</b>胜"), "重赏步数 = G1-3+JG1-3+Jpn1-3 合计 " + wTrophy + "（不含 L/OP）");
+  const gl = String(els["gradedList"]._html);
+  ok((gl.match(/yj-grade/g) || []).length === byv["中央"].scopes.all.trophies.length, "重赏明细行数 = " + byv["中央"].scopes.all.trophies.length);
+  ok(gl.includes(">G2</span>") && gl.includes(">G3</span>"), "徽章 = 比赛记录同款 G2/G3（GIII 不再错写为 G12）");
+  ok(gl.includes('target="_blank"'), "重赏明细马名 → 档案新标签页（§80 跳转统一）");
+  const tdesc = [...byv["中央"].scopes.all.trophies].sort((a, b) => (a.d > b.d ? -1 : a.d < b.d ? 1 : 0));
+  ok(gl.indexOf("profile.html?horse=" + tdesc[0].id) < gl.indexOf("profile.html?horse=" + tdesc[tdesc.length - 1].id),
+    "明细按日期降序（最新 " + tdesc[0].d + " 在最上）");
+  ok(gl.includes("profile.html?horse=" + byv["中央"].scopes.all.trophies[0].id), "重赏明细跳档案链接");
+  const ab = String(els["aboutNote"]._html);
+  ok(ab.includes("集計期間") && ab.includes("口径：") && ab.includes("样本少") && ab.includes("比率分母=出走"), "口径说明（工具条口径文案并入 + 分母=出走）");
+  ok(ab.includes("自然年") && ab.includes("生产年"), "口径说明含切面解释");
+  ok(!ab.includes("场地类型") && !ab.includes("build_stats.py"), "说明区已去掉 场地类型对比 与数据来源句");
+}, 0);
+
+/* 汇总 */
+setTimeout(function () {
+  console.log("\n═══ 统计总览断言汇总 ═══ 通过 " + passes + " · 失败 " + fails);
+  if (fails) process.exit(1);
+}, 300);

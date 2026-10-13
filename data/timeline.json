@@ -1,0 +1,2641 @@
+{
+ "meta": {
+  "generated_at": "2026-10-13T06:49:20",
+  "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
+  "stats": {
+   "events": 81,
+   "horses": 49,
+   "graded_wins": 71,
+   "sire_wins": 1
+  }
+ },
+ "events": [
+  {
+   "date": "2019-06-09",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 169,
+    "name": "ルーチェデラヴィタ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2017年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "阪神5R · 芝1600m · 良",
+    "time": "1:38.4",
+    "agari": "34.3",
+    "pop": "3番",
+    "team": "騎手 池添謙一 · 54kg ｜ 調教師 西村真幸"
+   }
+  },
+  {
+   "date": "2019-07-21",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 121,
+    "name": "ビアンフェ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "G3首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏首胜",
+     "crown": true
+    },
+    {
+     "cat": "gen",
+     "label": "2017年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "函館2歳S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "函館11R · 芝1200m · 良",
+    "time": "1:09.2",
+    "agari": "35.6",
+    "pop": "4番",
+    "team": "騎手 藤岡佑介 · 54kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2019-08-10",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 169,
+    "name": "ルーチェデラヴィタ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "OP首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "コスモス賞",
+    "grade": "OP",
+    "glabel": "OP",
+    "gbadge": "open",
+    "meta": "札幌10R · 芝1800m · 稍重",
+    "time": "1:50.5",
+    "agari": "35.3",
+    "pop": "1番",
+    "team": "騎手 池添謙一 · 54kg ｜ 調教師 西村真幸"
+   }
+  },
+  {
+   "date": "2019-10-31",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 34,
+    "name": "キメラヴェリテ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "Jpn3首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第2胜"
+    }
+   ],
+   "race": {
+    "name": "北海道2歳優駿",
+    "grade": "JpnIII",
+    "glabel": "Jpn3",
+    "gbadge": "g3",
+    "meta": "門別11R · ダ1800m · 良",
+    "time": "1:56.2",
+    "agari": "39.7",
+    "pop": "6番",
+    "team": "騎手 福永祐一 · 55kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2020-01-19",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 40,
+    "name": "クリスタルブラック",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第3胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第2胜"
+    }
+   ],
+   "race": {
+    "name": "京成杯",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝2000m · 稍重",
+    "time": "2:02.1",
+    "agari": "35.4",
+    "pop": "7番",
+    "team": "騎手 吉田豊 · 56kg ｜ 調教師 高橋文雅"
+   }
+  },
+  {
+   "date": "2020-03-07",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 144,
+    "name": "マルターズディオサ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "G2首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第4胜"
+    }
+   ],
+   "race": {
+    "name": "チューリップ賞",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝1600m · 良",
+    "time": "1:33.3",
+    "agari": "33.9",
+    "pop": "4番",
+    "team": "騎手 田辺裕信 · 54kg ｜ 調教師 手塚貴久"
+   }
+  },
+  {
+   "date": "2020-03-20",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 2,
+    "name": "アブレイズ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第5胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第3胜"
+    }
+   ],
+   "race": {
+    "name": "フラワーC",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝1800m · 良",
+    "time": "1:48.2",
+    "agari": "36.7",
+    "pop": "12番",
+    "team": "騎手 藤井勘一郎 · 54kg ｜ 調教師 池江泰寿"
+   }
+  },
+  {
+   "date": "2020-05-09",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 102,
+    "name": "ディープボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第6胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第2胜"
+    }
+   ],
+   "race": {
+    "name": "京都新聞杯",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "京都11R · 芝2200m · 良",
+    "time": "2:11.7",
+    "agari": "35.4",
+    "pop": "4番",
+    "team": "騎手 和田竜二 · 56kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2020-06-06",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 249,
+    "name": "ダディーズビビッド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2018年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "阪神5R · 芝1600m · 良",
+    "time": "1:36.6",
+    "agari": "34.4",
+    "pop": "6番",
+    "team": "騎手 武豊 · 54kg ｜ 調教師 千田輝彦"
+   }
+  },
+  {
+   "date": "2020-09-12",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 144,
+    "name": "マルターズディオサ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第7胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第4胜"
+    }
+   ],
+   "race": {
+    "name": "紫苑S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝2000m · 稍重",
+    "time": "2:02.1",
+    "agari": "35.8",
+    "pop": "5番",
+    "team": "騎手 田辺裕信 · 54kg ｜ 調教師 手塚貴久"
+   }
+  },
+  {
+   "date": "2021-01-11",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 276,
+    "name": "ファインルージュ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第8胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第5胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2018年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "フェアリーS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝1600m · 良",
+    "time": "1:34.4",
+    "agari": "35.0",
+    "pop": "3番",
+    "team": "騎手 Ｃ．ルメール · 54kg ｜ 調教師 木村哲也"
+   }
+  },
+  {
+   "date": "2021-01-16",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "L首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "紅梅S",
+    "grade": "L",
+    "glabel": "L",
+    "gbadge": "listed",
+    "meta": "中京10R · 芝1400m · 良",
+    "time": "1:20.6",
+    "agari": "35.3",
+    "pop": "1番",
+    "team": "騎手 Ｃ．ルメール · 54kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2021-03-21",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 102,
+    "name": "ディープボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第9胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第3胜"
+    }
+   ],
+   "race": {
+    "name": "阪神大賞典",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝3000m · 重",
+    "time": "3:07.3",
+    "agari": "36.9",
+    "pop": "3番",
+    "team": "騎手 和田竜二 · 56kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2021-04-10",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 271,
+    "name": "バスラットレオン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第10胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第4胜"
+    }
+   ],
+   "race": {
+    "name": "ニュージーランドT",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中山11R · 芝1600m · 良",
+    "time": "1:33.1",
+    "agari": "34.6",
+    "pop": "2番",
+    "team": "騎手 藤岡佑介 · 56kg ｜ 調教師 矢作芳人"
+   }
+  },
+  {
+   "date": "2021-06-13",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 121,
+    "name": "ビアンフェ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第11胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第6胜"
+    }
+   ],
+   "race": {
+    "name": "函館スプリントS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "札幌11R · 芝1200m · 良",
+    "time": "1:07.6",
+    "agari": "34.8",
+    "pop": "5番",
+    "team": "騎手 藤岡佑介 · 56kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2021-06-20",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 61,
+    "name": "シャムロックヒル",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第12胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第7胜"
+    }
+   ],
+   "race": {
+    "name": "マーメイドS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "阪神11R · 芝2000m · 良",
+    "time": "2:00.4",
+    "agari": "35.3",
+    "pop": "10番",
+    "team": "騎手 藤懸貴志 · 50kg ｜ 調教師 佐々木晶三"
+   }
+  },
+  {
+   "date": "2021-07-10",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 361,
+    "name": "サイード",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2019年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "小倉5R · 芝1200m · 良",
+    "time": "1:08.8",
+    "agari": "34.6",
+    "pop": "1番",
+    "team": "騎手 福永祐一 · 54kg ｜ 調教師 角田晃一"
+   }
+  },
+  {
+   "date": "2021-09-11",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 276,
+    "name": "ファインルージュ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第13胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第8胜"
+    }
+   ],
+   "race": {
+    "name": "紫苑S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝2000m · 良",
+    "time": "1:58.2",
+    "agari": "34.2",
+    "pop": "2番",
+    "team": "騎手 福永祐一 · 54kg ｜ 調教師 岩戸孝樹"
+   }
+  },
+  {
+   "date": "2021-09-12",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 102,
+    "name": "ディープボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第14胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第5胜"
+    },
+    {
+     "cat": "graded",
+     "label": "海外重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "フォワ賞",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "パリロンシャン · 芝2400m · 良",
+    "time": "2:31.82",
+    "agari": "—",
+    "pop": "5番",
+    "team": "騎手 Ｃ．デムーロ · 58kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2021-10-23",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第15胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第6胜"
+    }
+   ],
+   "race": {
+    "name": "富士S",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:33.2",
+    "agari": "33.9",
+    "pop": "1番",
+    "team": "騎手 池添謙一 · 52kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2021-11-14",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 1,
+    "name": "アカイイト",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "G1首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第16胜"
+    }
+   ],
+   "race": {
+    "name": "エリザベス女王杯",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "阪神11R · 芝2200m · 良",
+    "time": "2:12.1",
+    "agari": "35.7",
+    "pop": "10番",
+    "team": "騎手 幸英明 · 56kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2022-02-26",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第17胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第9胜"
+    },
+    {
+     "cat": "graded",
+     "label": "海外重赏第2胜"
+    }
+   ],
+   "race": {
+    "name": "1351ターフスプリント",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "キングアブドゥル · 芝1351m · 良",
+    "time": "1:18.00",
+    "agari": "—",
+    "pop": "2番",
+    "team": "騎手 Ｃ．ルメール · 55kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2022-03-20",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 102,
+    "name": "ディープボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第18胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第7胜"
+    }
+   ],
+   "race": {
+    "name": "阪神大賞典",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝3000m · 良",
+    "time": "3:05.0",
+    "agari": "34.6",
+    "pop": "1番",
+    "team": "騎手 和田竜二 · 57kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2022-03-26",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 271,
+    "name": "バスラットレオン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第19胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第8胜"
+    },
+    {
+     "cat": "graded",
+     "label": "海外重赏第3胜"
+    }
+   ],
+   "race": {
+    "name": "ゴドルフィンマイル",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "メイダン · ダ1600m · 良",
+    "time": "1:36.03",
+    "agari": "—",
+    "pop": "15番",
+    "team": "騎手 坂井瑠星 · 57kg ｜ 調教師 矢作芳人"
+   }
+  },
+  {
+   "date": "2022-05-07",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 325,
+    "name": "アスクワイルドモア",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第20胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第9胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2019年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "京都新聞杯",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中京11R · 芝2200m · 良",
+    "time": "2:09.5",
+    "agari": "35.2",
+    "pop": "8番",
+    "team": "騎手 岩田望来 · 56kg ｜ 調教師 藤原英昭"
+   }
+  },
+  {
+   "date": "2022-06-05",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第21胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第2胜"
+    }
+   ],
+   "race": {
+    "name": "安田記念",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:32.3",
+    "agari": "32.9",
+    "pop": "4番",
+    "team": "騎手 池添謙一 · 56kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2022-07-03",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 437,
+    "name": "アリスヴェリテ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2020年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "小倉5R · 芝1800m · 良",
+    "time": "1:50.6",
+    "agari": "35.2",
+    "pop": "3番",
+    "team": "騎手 川田将雅 · 54kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2022-11-30",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 103,
+    "name": "テリオスベル",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第22胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn3第2胜"
+    }
+   ],
+   "race": {
+    "name": "クイーン賞",
+    "grade": "JpnIII",
+    "glabel": "Jpn3",
+    "gbadge": "g3",
+    "meta": "船橋11R · ダ1800m · 稍重",
+    "time": "1:54.4",
+    "agari": "40.8",
+    "pop": "3番",
+    "team": "騎手 江田照男 · 55kg ｜ 調教師 田島俊明"
+   }
+  },
+  {
+   "date": "2023-02-25",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 271,
+    "name": "バスラットレオン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第23胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第10胜"
+    },
+    {
+     "cat": "graded",
+     "label": "海外重赏第4胜"
+    }
+   ],
+   "race": {
+    "name": "1351ターフスプリ",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "キングアブドゥル · 芝1351m · 良",
+    "time": "1:17.49",
+    "agari": "—",
+    "pop": "4番",
+    "team": "騎手 坂井瑠星 · 57kg ｜ 調教師 矢作芳人"
+   }
+  },
+  {
+   "date": "2023-03-16",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 116,
+    "name": "ハギノアレグリアス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第24胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn3第3胜"
+    }
+   ],
+   "race": {
+    "name": "名古屋大賞典",
+    "grade": "JpnIII",
+    "glabel": "Jpn3",
+    "gbadge": "g3",
+    "meta": "名古屋11R · ダ2000m · 良",
+    "time": "2:08.2",
+    "agari": "36.1",
+    "pop": "1番",
+    "team": "騎手 川田将雅 · 54kg ｜ 調教師 四位洋文"
+   }
+  },
+  {
+   "date": "2023-04-22",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 235,
+    "name": "ステラリア",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第25胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第11胜"
+    }
+   ],
+   "race": {
+    "name": "福島牝馬S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "福島11R · 芝1800m · 良",
+    "time": "1:47.9",
+    "agari": "34.5",
+    "pop": "8番",
+    "team": "騎手 団野大成 · 55kg ｜ 調教師 斉藤崇史"
+   }
+  },
+  {
+   "date": "2023-05-14",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第26胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第3胜"
+    }
+   ],
+   "race": {
+    "name": "ヴィクトリアマイル",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:32.2",
+    "agari": "33.2",
+    "pop": "4番",
+    "team": "騎手 戸崎圭太 · 56kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2023-06-04",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 245,
+    "name": "ソングライン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第27胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第4胜"
+    }
+   ],
+   "race": {
+    "name": "安田記念",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:31.4",
+    "agari": "33.1",
+    "pop": "4番",
+    "team": "騎手 戸崎圭太 · 56kg ｜ 調教師 林徹"
+   }
+  },
+  {
+   "date": "2023-06-25",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 578,
+    "name": "ギャンブルルーム",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2021年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "阪神5R · 芝1800m · 良",
+    "time": "1:48.8",
+    "agari": "33.7",
+    "pop": "4番",
+    "team": "騎手 松山弘平 · 55kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2023-08-17",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 103,
+    "name": "テリオスベル",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第28胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn3第4胜"
+    }
+   ],
+   "race": {
+    "name": "ブリーダーズゴールド",
+    "grade": "JpnIII",
+    "glabel": "Jpn3",
+    "gbadge": "g3",
+    "meta": "門別11R · ダ2000m · 稍重",
+    "time": "2:08.5",
+    "agari": "41.1",
+    "pop": "2番",
+    "team": "騎手 江田照男 · 56kg ｜ 調教師 田島俊明"
+   }
+  },
+  {
+   "date": "2023-09-30",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 116,
+    "name": "ハギノアレグリアス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第29胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第12胜"
+    }
+   ],
+   "race": {
+    "name": "シリウスS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "阪神11R · ダ2000m · 良",
+    "time": "2:04.4",
+    "agari": "36.9",
+    "pop": "1番",
+    "team": "騎手 岩田望来 · 58.5kg ｜ 調教師 四位洋文"
+   }
+  },
+  {
+   "date": "2024-02-10",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 581,
+    "name": "クイーンズウォーク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第30胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第13胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2021年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "デイリー杯クイーンC",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:33.1",
+    "agari": "33.4",
+    "pop": "1番",
+    "team": "騎手 川田将雅 · 55kg ｜ 調教師 中内田充正"
+   }
+  },
+  {
+   "date": "2024-02-11",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 599,
+    "name": "ジャスティンミラノ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第31胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第14胜"
+    }
+   ],
+   "race": {
+    "name": "共同通信杯",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "東京11R · 芝1800m · 良",
+    "time": "1:48.0",
+    "agari": "32.6",
+    "pop": "4番",
+    "team": "騎手 戸崎圭太 · 57kg ｜ 調教師 友道康夫"
+   }
+  },
+  {
+   "date": "2024-03-09",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 459,
+    "name": "コンクシェル",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第32胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第15胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2020年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "中山牝馬S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝1800m · 稍重",
+    "time": "1:49.0",
+    "agari": "36.2",
+    "pop": "5番",
+    "team": "騎手 岩田望来 · 53kg ｜ 調教師 清水久詞"
+   }
+  },
+  {
+   "date": "2024-03-17",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 597,
+    "name": "シックスペンス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第33胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第10胜"
+    }
+   ],
+   "race": {
+    "name": "フジTVスプリングS",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中山11R · 芝1800m · 良",
+    "time": "1:49.4",
+    "agari": "33.3",
+    "pop": "1番",
+    "team": "騎手 Ｃ．ルメール · 57kg ｜ 調教師 国枝栄"
+   }
+  },
+  {
+   "date": "2024-03-30",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 388,
+    "name": "パラレルヴィジョン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第34胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第16胜"
+    }
+   ],
+   "race": {
+    "name": "ダービー卿チャレンジ",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝1600m · 稍重",
+    "time": "1:32.9",
+    "agari": "34.0",
+    "pop": "2番",
+    "team": "騎手 戸崎圭太 · 57kg ｜ 調教師 国枝栄"
+   }
+  },
+  {
+   "date": "2024-04-14",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 599,
+    "name": "ジャスティンミラノ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第35胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第5胜"
+    }
+   ],
+   "race": {
+    "name": "皐月賞",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "中山11R · 芝2000m · 良",
+    "time": "1:57.1",
+    "agari": "34.7",
+    "pop": "2番",
+    "team": "騎手 戸崎圭太 · 57kg ｜ 調教師 友道康夫"
+   }
+  },
+  {
+   "date": "2024-05-04",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 605,
+    "name": "ジューンテイク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第36胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第11胜"
+    }
+   ],
+   "race": {
+    "name": "京都新聞杯",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "京都11R · 芝2200m · 良",
+    "time": "2:11.2",
+    "agari": "33.6",
+    "pop": "8番",
+    "team": "騎手 藤岡佑介 · 57kg ｜ 調教師 武英智"
+   }
+  },
+  {
+   "date": "2024-06-01",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 771,
+    "name": "ダノンフェアレディ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2022年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "京都5R · 芝1600m · 良",
+    "time": "1:33.8",
+    "agari": "33.8",
+    "pop": "1番",
+    "team": "騎手 川田将雅 · 55kg ｜ 調教師 橋口慎介"
+   }
+  },
+  {
+   "date": "2024-06-16",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 437,
+    "name": "アリスヴェリテ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第37胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第17胜"
+    }
+   ],
+   "race": {
+    "name": "マーメイドS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "京都11R · 芝2000m · 良",
+    "time": "1:57.2",
+    "agari": "36.1",
+    "pop": "4番",
+    "team": "騎手 永島まなみ · 50kg ｜ 調教師 中竹和也"
+   }
+  },
+  {
+   "date": "2024-08-31",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 807,
+    "name": "マジックサンズ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第38胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第18胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2022年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "札幌2歳S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "札幌11R · 芝1800m · 重",
+    "time": "1:50.3",
+    "agari": "36.6",
+    "pop": "3番",
+    "team": "騎手 佐々木大輔 · 55kg ｜ 調教師 須貝尚介"
+   }
+  },
+  {
+   "date": "2024-09-03",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 595,
+    "name": "サンライズジパング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "Jpn2首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第39胜"
+    }
+   ],
+   "race": {
+    "name": "不来方賞",
+    "grade": "JpnII",
+    "glabel": "Jpn2",
+    "gbadge": "g2",
+    "meta": "盛岡10R · ダ2000m · 稍重",
+    "time": "2:03.2",
+    "agari": "36.1",
+    "pop": "2番",
+    "team": "騎手 武豊 · 56kg ｜ 調教師 音無秀孝"
+   }
+  },
+  {
+   "date": "2024-09-15",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 581,
+    "name": "クイーンズウォーク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第40胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第12胜"
+    }
+   ],
+   "race": {
+    "name": "関西TVローズS",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中京11R · 芝2000m · 稍重",
+    "time": "1:59.9",
+    "agari": "33.5",
+    "pop": "2番",
+    "team": "騎手 川田将雅 · 55kg ｜ 調教師 中内田充正"
+   }
+  },
+  {
+   "date": "2024-09-28",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 116,
+    "name": "ハギノアレグリアス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第41胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第19胜"
+    }
+   ],
+   "race": {
+    "name": "シリウスS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中京11R · ダ1900m · 良",
+    "time": "1:57.1",
+    "agari": "36.4",
+    "pop": "5番",
+    "team": "騎手 岩田望来 · 59.5kg ｜ 調教師 四位洋文"
+   }
+  },
+  {
+   "date": "2024-10-06",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 597,
+    "name": "シックスペンス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第42胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第13胜"
+    }
+   ],
+   "race": {
+    "name": "毎日王冠",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "東京11R · 芝1800m · 良",
+    "time": "1:45.1",
+    "agari": "33.3",
+    "pop": "1番",
+    "team": "騎手 Ｃ．ルメール · 56kg ｜ 調教師 国枝栄"
+   }
+  },
+  {
+   "date": "2024-10-26",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 794,
+    "name": "ブラウンラチェット",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第43胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第20胜"
+    }
+   ],
+   "race": {
+    "name": "アルテミスS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:33.8",
+    "agari": "33.3",
+    "pop": "3番",
+    "team": "騎手 Ｃ．ルメール · 55kg ｜ 調教師 手塚貴久"
+   }
+  },
+  {
+   "date": "2024-11-03",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 595,
+    "name": "サンライズジパング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第44胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第21胜"
+    }
+   ],
+   "race": {
+    "name": "みやこS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "京都11R · ダ1800m · 重",
+    "time": "1:49.7",
+    "agari": "37.1",
+    "pop": "3番",
+    "team": "騎手 鮫島克駿 · 56kg ｜ 調教師 音無秀孝"
+   }
+  },
+  {
+   "date": "2024-11-23",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 727,
+    "name": "エリキング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第45胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第22胜"
+    }
+   ],
+   "race": {
+    "name": "ラジオN杯京都2歳S",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "京都11R · 芝2000m · 良",
+    "time": "2:00.9",
+    "agari": "34.2",
+    "pop": "1番",
+    "team": "騎手 川田将雅 · 56kg ｜ 調教師 中内田充正"
+   }
+  },
+  {
+   "date": "2025-01-13",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 825,
+    "name": "リラエンブレム",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第46胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第23胜"
+    }
+   ],
+   "race": {
+    "name": "日刊スポシンザン記念",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中京11R · 芝1600m · 良",
+    "time": "1:34.6",
+    "agari": "35.1",
+    "pop": "3番",
+    "team": "騎手 浜中俊 · 57kg ｜ 調教師 武幸四郎"
+   }
+  },
+  {
+   "date": "2025-02-09",
+   "type": "race",
+   "node": "sire",
+   "horse": {
+    "id": 747,
+    "name": "サトノシャイニング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第47胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第24胜"
+    },
+    {
+     "cat": "sire",
+     "label": "父子制覇",
+     "tip": "高情厚意同胜：如月赏"
+    }
+   ],
+   "race": {
+    "name": "きさらぎ賞",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "京都11R · 芝1800m · 稍重",
+    "time": "1:47.0",
+    "agari": "35.1",
+    "pop": "1番",
+    "team": "騎手 西村淳也 · 57kg ｜ 調教師 杉山晴紀"
+   }
+  },
+  {
+   "date": "2025-03-02",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 597,
+    "name": "シックスペンス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第48胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第14胜"
+    }
+   ],
+   "race": {
+    "name": "中山記念",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中山11R · 芝1800m · 良",
+    "time": "1:44.8",
+    "agari": "33.9",
+    "pop": "2番",
+    "team": "騎手 Ｃ．ルメール · 58kg ｜ 調教師 国枝栄"
+   }
+  },
+  {
+   "date": "2025-03-08",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 757,
+    "name": "ショウナンザナドゥ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第49胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第15胜"
+    }
+   ],
+   "race": {
+    "name": "フィリーズレビュー",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝1400m · 良",
+    "time": "1:20.7",
+    "agari": "34.8",
+    "pop": "3番",
+    "team": "騎手 池添謙一 · 55kg ｜ 調教師 松下武士"
+   }
+  },
+  {
+   "date": "2025-03-16",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 581,
+    "name": "クイーンズウォーク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第50胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第16胜"
+    }
+   ],
+   "race": {
+    "name": "東海テレビ杯金鯱賞",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中京11R · 芝2000m · 重",
+    "time": "2:01.3",
+    "agari": "36.3",
+    "pop": "4番",
+    "team": "騎手 川田将雅 · 55kg ｜ 調教師 中内田充正"
+   }
+  },
+  {
+   "date": "2025-03-22",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 832,
+    "name": "レーゼドラマ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第51胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第25胜"
+    }
+   ],
+   "race": {
+    "name": "フラワーC",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中山11R · 芝1800m · 良",
+    "time": "1:47.8",
+    "agari": "35.4",
+    "pop": "5番",
+    "team": "騎手 戸崎圭太 · 55kg ｜ 調教師 辻野泰之"
+   }
+  },
+  {
+   "date": "2025-03-26",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 777,
+    "name": "ナチュラルライズ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第52胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn2第2胜"
+    }
+   ],
+   "race": {
+    "name": "京浜盃競走",
+    "grade": "JpnII",
+    "glabel": "Jpn2",
+    "gbadge": "g2",
+    "meta": "大井11R · ダ1700m · 良",
+    "time": "1:45.5",
+    "agari": "37.3",
+    "pop": "1番",
+    "team": "騎手 横山武史 · 56kg ｜ 調教師 伊藤圭三"
+   }
+  },
+  {
+   "date": "2025-04-29",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 777,
+    "name": "ナチュラルライズ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "Jpn1首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第53胜"
+    }
+   ],
+   "race": {
+    "name": "羽田盃競走",
+    "grade": "JpnI",
+    "glabel": "Jpn1",
+    "gbadge": "g1",
+    "meta": "大井11R · ダ1800m · 重",
+    "time": "1:52.1",
+    "agari": "36.8",
+    "pop": "1番",
+    "team": "騎手 横山武史 · 57kg ｜ 調教師 伊藤圭三"
+   }
+  },
+  {
+   "date": "2025-05-06",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 595,
+    "name": "サンライズジパング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第54胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn2第3胜"
+    }
+   ],
+   "race": {
+    "name": "名古屋グランプリ",
+    "grade": "JpnII",
+    "glabel": "Jpn2",
+    "gbadge": "g2",
+    "meta": "名古屋11R · ダ2100m · 不良",
+    "time": "2:13.2",
+    "agari": "39.3",
+    "pop": "1番",
+    "team": "騎手 坂井瑠星 · 58kg ｜ 調教師 新谷功一"
+   }
+  },
+  {
+   "date": "2025-06-11",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 777,
+    "name": "ナチュラルライズ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第55胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn1第2胜"
+    }
+   ],
+   "race": {
+    "name": "東京ダービー競走",
+    "grade": "JpnI",
+    "glabel": "Jpn1",
+    "gbadge": "g1",
+    "meta": "大井11R · ダ2000m · 不良",
+    "time": "2:03.8",
+    "agari": "37.1",
+    "pop": "1番",
+    "team": "騎手 横山武史 · 57kg ｜ 調教師 伊藤圭三"
+   }
+  },
+  {
+   "date": "2025-06-14",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 930,
+    "name": "マイオウンウェイ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2023年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "阪神5R · 芝1200m · 稍重",
+    "time": "1:10.5",
+    "agari": "35.3",
+    "pop": "3番",
+    "team": "騎手 松山弘平 · 55kg ｜ 調教師 高野友和"
+   }
+  },
+  {
+   "date": "2025-08-16",
+   "type": "race",
+   "node": "first",
+   "horse": {
+    "id": 336,
+    "name": "インプレス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "first",
+     "label": "JG3首胜",
+     "crown": true
+    },
+    {
+     "cat": "graded",
+     "label": "重赏第56胜"
+    }
+   ],
+   "race": {
+    "name": "新潟ジャンプS",
+    "grade": "JGIII",
+    "glabel": "JG3",
+    "gbadge": "g3",
+    "meta": "新潟9R · 障3250m · 良",
+    "time": "3:30.5",
+    "agari": "13.0",
+    "pop": "1番",
+    "team": "騎手 小牧加矢太 · 60kg ｜ 調教師 佐々木晶三"
+   }
+  },
+  {
+   "date": "2025-09-20",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 263,
+    "name": "ネビーイーム",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第57胜"
+    },
+    {
+     "cat": "graded",
+     "label": "JG3第2胜"
+    }
+   ],
+   "race": {
+    "name": "阪神ジャンプS",
+    "grade": "JGIII",
+    "glabel": "JG3",
+    "gbadge": "g3",
+    "meta": "阪神4R · 障3140m · 良",
+    "time": "3:29.6",
+    "agari": "13.4",
+    "pop": "2番",
+    "team": "騎手 小牧加矢太 · 60kg ｜ 調教師 佐々木晶三"
+   }
+  },
+  {
+   "date": "2025-09-21",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 727,
+    "name": "エリキング",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第58胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第17胜"
+    }
+   ],
+   "race": {
+    "name": "神戸新聞杯",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝2400m · 良",
+    "time": "2:26.4",
+    "agari": "32.3",
+    "pop": "2番",
+    "team": "騎手 川田将雅 · 57kg ｜ 調教師 中内田充正"
+   }
+  },
+  {
+   "date": "2025-11-09",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 634,
+    "name": "ダブルハートボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第59胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第26胜"
+    }
+   ],
+   "race": {
+    "name": "みやこS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "京都11R · ダ1800m · 不良",
+    "time": "1:47.5",
+    "agari": "36.2",
+    "pop": "2番",
+    "team": "騎手 坂井瑠星 · 55kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2025-11-24",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 911,
+    "name": "パントルナイーフ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第60胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第18胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2023年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "東京スポーツ杯2歳S",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "東京11R · 芝1800m · 良",
+    "time": "1:46.0",
+    "agari": "32.9",
+    "pop": "3番",
+    "team": "騎手 Ｃ．ルメール · 56kg ｜ 調教師 木村哲也"
+   }
+  },
+  {
+   "date": "2025-12-07",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 634,
+    "name": "ダブルハートボンド",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第61胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第6胜"
+    }
+   ],
+   "race": {
+    "name": "チャンピオンズC",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "中京11R · ダ1800m · 良",
+    "time": "1:50.2",
+    "agari": "37.1",
+    "pop": "3番",
+    "team": "騎手 坂井瑠星 · 56kg ｜ 調教師 大久保龍志"
+   }
+  },
+  {
+   "date": "2026-02-12",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 569,
+    "name": "カゼノランナー",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第62胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn3第5胜"
+    }
+   ],
+   "race": {
+    "name": "佐賀記念",
+    "grade": "JpnIII",
+    "glabel": "Jpn3",
+    "gbadge": "g3",
+    "meta": "佐賀10R · ダ2000m · 稍重",
+    "time": "2:07.4",
+    "agari": "38.0",
+    "pop": "2番",
+    "team": "騎手 西村淳也 · 56kg ｜ 調教師 松永幹夫"
+   }
+  },
+  {
+   "date": "2026-02-14",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 905,
+    "name": "ドリームコア",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第63胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第27胜"
+    }
+   ],
+   "race": {
+    "name": "デイリー杯クイーンC",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:32.6",
+    "agari": "33.8",
+    "pop": "2番",
+    "team": "騎手 Ｃ．ルメール · 55kg ｜ 調教師 萩原清"
+   }
+  },
+  {
+   "date": "2026-02-15",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 605,
+    "name": "ジューンテイク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第64胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第19胜"
+    }
+   ],
+   "race": {
+    "name": "京都記念",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "京都11R · 芝2200m · 良",
+    "time": "2:12.7",
+    "agari": "33.9",
+    "pop": "6番",
+    "team": "騎手 藤岡佑介 · 57kg ｜ 調教師 武英智"
+   }
+  },
+  {
+   "date": "2026-02-21",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 614,
+    "name": "スティンガーグラス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第65胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第28胜"
+    }
+   ],
+   "race": {
+    "name": "ダイヤモンドS",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "東京11R · 芝3400m · 良",
+    "time": "3:32.0",
+    "agari": "34.8",
+    "pop": "1番",
+    "team": "騎手 Ｃ．ルメール · 57.5kg ｜ 調教師 友道康夫"
+   }
+  },
+  {
+   "date": "2026-03-15",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 847,
+    "name": "アウダーシア",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第66胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第20胜"
+    }
+   ],
+   "race": {
+    "name": "フジTVスプリングS",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中山11R · 芝1800m · 良",
+    "time": "1:46.0",
+    "agari": "34.0",
+    "pop": "8番",
+    "team": "騎手 津村明秀 · 57kg ｜ 調教師 手塚貴久"
+   }
+  },
+  {
+   "date": "2026-03-22",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 709,
+    "name": "アイサンサン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第67胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G3第29胜"
+    }
+   ],
+   "race": {
+    "name": "愛知杯",
+    "grade": "GIII",
+    "glabel": "G3",
+    "gbadge": "g3",
+    "meta": "中京11R · 芝1400m · 良",
+    "time": "1:19.6",
+    "agari": "34.2",
+    "pop": "12番",
+    "team": "騎手 幸英明 · 55kg ｜ 調教師 橋田宜長"
+   }
+  },
+  {
+   "date": "2026-04-08",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 569,
+    "name": "カゼノランナー",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第68胜"
+    },
+    {
+     "cat": "graded",
+     "label": "Jpn1第3胜"
+    }
+   ],
+   "race": {
+    "name": "川崎記念",
+    "grade": "JpnI",
+    "glabel": "Jpn1",
+    "gbadge": "g1",
+    "meta": "川崎11R · ダ2100m · 稍重",
+    "time": "2:14.6",
+    "agari": "38.4",
+    "pop": "3番",
+    "team": "騎手 西村淳也 · 57kg ｜ 調教師 松永幹夫"
+   }
+  },
+  {
+   "date": "2026-06-07",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 597,
+    "name": "シックスペンス",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第69胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第7胜"
+    }
+   ],
+   "race": {
+    "name": "安田記念",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "東京11R · 芝1600m · 良",
+    "time": "1:32.1",
+    "agari": "33.9",
+    "pop": "8番",
+    "team": "騎手 武豊 · 58kg ｜ 調教師 田中博康"
+   }
+  },
+  {
+   "date": "2026-07-25",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 1024,
+    "name": "ブレイクアウェイ",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "gen",
+     "label": "2024年世代新马首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "2歳新馬",
+    "grade": "新馬",
+    "glabel": "",
+    "gbadge": "",
+    "meta": "中京2R · 芝1400m · 良",
+    "time": "1:22.5",
+    "agari": "34.0",
+    "pop": "1番",
+    "team": "騎手 岩田望来 · 55kg ｜ 調教師 上村洋行"
+   }
+  },
+  {
+   "date": "2026-09-13",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 937,
+    "name": "モンローウォーク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第70胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第21胜"
+    }
+   ],
+   "race": {
+    "name": "関西TVローズS",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "阪神11R · 芝1800m · 良",
+    "time": "1:44.5",
+    "agari": "34.1",
+    "pop": "1番",
+    "team": "騎手 戸崎圭太 · 55kg ｜ 調教師 上村洋行"
+   }
+  },
+  {
+   "date": "2026-09-20",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 412,
+    "name": "メイショウゲキリン",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第71胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第22胜"
+    }
+   ],
+   "race": {
+    "name": "産経賞オールカマー",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "中山11R · 芝2200m · 重",
+    "time": "2:16.9",
+    "agari": "37.1",
+    "pop": "9番",
+    "team": "騎手 田辺裕信 · 57kg ｜ 調教師 笹田和秀"
+   }
+  }
+ ]
+}

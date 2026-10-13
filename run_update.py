@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""统一更新入口：9 种更新策略（供日常运行与 GitHub Actions 定时调用）。
+
+策略（互斥，--since 可修饰 --races）：
+  --init        初始化：删空 data/ 从 0 全量（复用 run_full_test.py 的完整测试流程）
+  --basic       基本数据增量：新马对账建档(--year) + 补缺(血统/nk_id/意味/详情) + merge
+  --races       比赛数据增量：详情更新+判变 → 成绩增量(SP页含格/条件/調教師/本賞金) → 台账海外 → 合并
+  --horse id    定向更新：只处理指定 id 的马（详情更新 + 成绩增量 + 台账海外 + 合并；
+                台账环防「海外台账马 races 文件丢失后被成绩页 0 场误判为空」——见 docs/TESTING.md §4 边界）
+  --races-force 比赛全量刷新：全部马重抓成绩页（覆盖式重建，历史数据修正用；已有记录缺失字段一并回填）
+  --check       数据校验：引用完整性 + 通算战数 vs 文件出赛数（--fix 自动补跑）+ 日期图断言(node)
+  --since N     轻量时段增量：只抓最近 N 天内出赛的马的成绩（不跑详情/判变，需配合 --races；
+                含台账环防海外台账马误伤）
+  --ledger      仅台账：只拉台账海外场并入（不跑 netkeiba）
+  --ci          CI 全自动：基本增量 + 比赛增量 + 校验 + 日期图断言(node) + git 提交（全部通过才提交）
+
+输出约定：详细输出进 test-logs/update-<时间戳>.log，stdout 每步一行状态（便于远程监督）。
+
+用法:
+    python run_update.py --init
+    python run_update.py --basic --year 2025,2026
+    python run_update.py --races                # 比赛增量（判变∪缺失∪无文件）
+    python run_update.py --races --since 7      # 轻量：只抓最近 7 天出赛的马
+    python run_update.py --horse 1,2,3
+    python run_update.py --races-force
+    python run_update.py --check --fix
+    python run_update.py --ledger
+    python run_update.py --ci [--year 2025,2026]
+"""
+import argparse
+import datetime
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))   # 引导 scripts/core/（纯 stdlib）
+from core import runtime, sire_config  # noqa: E402
+
+runtime.install_utf8_stdout()
+
+ROOT = Path(__file__).resolve().parent
+DATA = ROOT / "data"
+BASIC = ROOT / "scripts" / "basic"
+RACES = ROOT / "scripts" / "races"
+CHECK = ROOT / "scripts" / "check_data.py"
+TIMELINE = ROOT / "scripts" / "timeline" / "build_timeline.py"   # 时间线事件预计算 → data/timeline.json
+DATECHART = ROOT / "scripts" / "datechart" / "build_datechart.py"  # 日期图数据预计算 → data/datechart.json
+VERIFY_DATECHART = ROOT / "scripts" / "datechart" / "verify_datechart.cjs"  # 日期图断言校验（node：产物契约/源对账/页面冒烟）
+STATS = ROOT / "scripts" / "stats" / "build_stats.py"               # 统计总览数据预计算 → data/stats.json
+VERIFY_STATS = ROOT / "scripts" / "stats" / "verify_stats.cjs"      # 统计总览断言校验（node：产物契约/源对账/页面冒烟）
+VERIFY_RACES_DRILL = ROOT / "scripts" / "races" / "verify_drill.cjs"      # 比赛记录页下钻冒烟（统计矩阵行 → races.html?f= 全链路）
+VERIFY_RACES_RESULT = ROOT / "scripts" / "races" / "verify_result.cjs"    # 比赛记录页着顺三态口径对账（读 data/races 全量）
+FULL_TEST = ROOT / "run_full_test.py"
+LOG_DIR = ROOT / "test-logs"
+PY = sys.executable
+
+TS = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+LOG_FILE = LOG_DIR / f"update-{TS}.log"
+results = []
+
+
+def log(msg="", echo=True):
+    line = f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}"
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
+    if echo:
+        print(line, flush=True)
+
+
+def run_step(name, script, *args, exe=None):
+    """跑一步子进程（默认 python，exe="node" 跑断言脚本），失败不中断后续步骤（返回码交给调用方决策）。"""
+    log(f"\n───── [{name}] {Path(script).name} {' '.join(args)} ─────", echo=False)
+    t0 = time.time()
+    try:
+        r = subprocess.run([exe or PY, str(script), *args], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=10800)
+    except subprocess.TimeoutExpired:
+        log(f"✗ [{name}] 超时(10800s)")
+        results.append((name, -1, time.time() - t0))
+        return -1, time.time() - t0
+    except OSError as e:
+        log(f"✗ [{name}] 启动失败: {e}")
+        results.append((name, -1, time.time() - t0))
+        return -1, time.time() - t0
+    dt = time.time() - t0
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write("\n".join("  | " + ln for ln in (r.stdout or "").splitlines()) + "\n")
+        if (r.stderr or "").strip():
+            f.write("  [stderr]\n" + "\n".join("  ! " + ln for ln in r.stderr.splitlines()) + "\n")
+    results.append((name, r.returncode, dt))
+    status = "完成" if r.returncode == 0 else f"失败(exit={r.returncode})"
+    log(f"✔ [{name}] {status} · 耗时 {dt/60:.1f} 分钟")
+    return r.returncode, dt
+
+
+def git_commit_if_changed():
+    """data/ 有变化才 git 提交；无 git 仓库时跳过并提示。"""
+    log("── git 提交（仅 data/ 有变化时） ──")
+    try:
+        r = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "data/"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace")
+        if r.returncode != 0:
+            log("⚠ 非 git 仓库（尚未 git init / 未配置 remote）→ 跳过提交，数据已保存在 data/")
+            return
+        if not (r.stdout or "").strip():
+            log("✔ data/ 无变化，跳过提交")
+            return
+        changed = [ln.split()[1] for ln in r.stdout.splitlines() if ln.strip()]
+        log(f"  变更 {len(changed)} 项，提交中…")
+        for cmd in (["git", "-C", str(ROOT), "add", "data/"],
+                    ["git", "-C", str(ROOT), "commit", "-m", f"data: auto update {TS}"]):
+            c = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if c.returncode != 0:
+                log(f"⚠ git {cmd[2]} 失败: {(c.stderr or c.stdout or '').strip()[:200]}")
+                return
+        push = subprocess.run(["git", "-C", str(ROOT), "push"],
+                              capture_output=True, text=True, encoding="utf-8", errors="replace")
+        if push.returncode == 0:
+            log("✔ 已提交并推送")
+        else:
+            log(f"⚠ 已提交但推送失败: {(push.stderr or '').strip()[:200]}（可手动 git push）")
+    except Exception as e:  # noqa: BLE001
+        log(f"⚠ git 操作异常: {e}")
+
+
+def run_ledger():
+    """台账环（--ledger / --horse / --races --since 三处同款收口）：
+    台账启用则拉取海外场；未启用则跳过并清理残留缓存（防 merge 误消费存量）。"""
+    if not sire_config.ledger_url():
+        # D5：台账关闭态只跳 fetch_ledger 一步，merge/派生照跑（空缓存下均为 no-op）
+        log("台账未启用（config/sire.json 的 ledger.url 为空）→ 跳过台账拉取，merge/派生照跑")
+        # D6 编排层清理：fetch_ledger 未启用时不会被调用，残留缓存由这里显式清（防 merge 误消费存量）
+        # 缓存真实路径 = data/_tmp/races/ledger.json（races/common.py TMP_DIR = constants.tmp_dir("races")）
+        _stale = DATA / "_tmp" / "races" / "ledger.json"
+        if _stale.exists():
+            _stale.unlink()
+            log(f"✔ 已清理残留台账缓存: {_stale}")
+    else:
+        run_step("台账·海外拉取", RACES / "fetch_ledger.py")
+
+
+def main():
+    ap = argparse.ArgumentParser(description="统一更新入口（9 种策略）")
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--init", action="store_true", help="初始化：删空 data/ 从 0 全量")
+    g.add_argument("--basic", action="store_true", help="基本数据增量")
+    g.add_argument("--races", action="store_true", help="比赛数据增量")
+    g.add_argument("--horse", help="定向：逗号分隔的指定 id")
+    g.add_argument("--races-force", action="store_true", help="比赛全量刷新")
+    g.add_argument("--check", action="store_true", help="数据校验")
+    g.add_argument("--ledger", action="store_true", help="仅台账海外并入")
+    g.add_argument("--ci", action="store_true", help="CI 全自动：基本+比赛+校验+日期图/统计/下钻断言+git 提交")
+    ap.add_argument("--year", default="", help="建档年份（--basic/--ci 用，如 2025,2026；默认现有年份）")
+    ap.add_argument("--since", type=int, default=0, help="时段增量天数（配 --races，轻量模式）")
+    ap.add_argument("--fix", action="store_true", help="配 --check：校验后自动补跑修复")
+    ap.add_argument("--limit", type=int, default=0, help="调试：每环只处理前 n")
+    args = ap.parse_args()
+
+    log(f"══ 更新开始 {TS} · 策略: {next(k for k in ('init','basic','races','horse','races-force','check','ledger','ci') if getattr(args, k.replace('-', '_')))} ══ 日志: {LOG_FILE}")
+
+    def lim():
+        return ["--limit", str(args.limit)] if args.limit else []
+
+    if args.init:
+        run_step("初始化·从0全量", FULL_TEST)
+    elif args.basic:
+        y = ["--year", args.year] if args.year else []
+        run_step("建档·新马对账", BASIC / "build_registry.py", *y)
+        run_step("基础·补缺+合并", BASIC / "run_all.py")
+        run_step("时间线·事件预计算", TIMELINE)
+        run_step("日期图·数据预计算", DATECHART)
+        run_step("统计·数据预计算", STATS)
+    elif args.races:
+        if args.since:
+            run_step("比赛·轻量时段增量", RACES / "fetch_races.py", "--since", str(args.since), *lim())
+            run_ledger()
+            run_step("比赛·合并", RACES / "merge_races.py")
+        else:
+            run_step("比赛·增量流水线", RACES / "run_all.py", *lim())
+        run_step("时间线·事件预计算", TIMELINE)
+        run_step("日期图·数据预计算", DATECHART)
+        run_step("统计·数据预计算", STATS)
+    elif args.horse:
+        ids = [x.strip() for x in args.horse.split(",") if x.strip()]
+        if not ids:
+            sys.exit("--horse 需要至少一个 id")
+        run_step("比赛·详情更新(定向)", RACES / "fetch_detail.py", "--id", ",".join(ids))
+        run_step("比赛·成绩增量(定向)", RACES / "fetch_races.py", "--id", ",".join(ids))
+        run_ledger()
+        run_step("比赛·合并", RACES / "merge_races.py")
+        run_step("时间线·事件预计算", TIMELINE)
+        run_step("日期图·数据预计算", DATECHART)
+        run_step("统计·数据预计算", STATS)
+    elif args.races_force:
+        run_step("比赛·全量刷新", RACES / "run_all.py", "--force")
+        run_step("时间线·事件预计算", TIMELINE)
+        run_step("日期图·数据预计算", DATECHART)
+        run_step("统计·数据预计算", STATS)
+    elif args.check:
+        run_step("数据校验", CHECK, *(["--fix"] if args.fix else []))
+        run_step("日期图·断言校验", VERIFY_DATECHART, exe="node")
+        run_step("统计·断言校验", VERIFY_STATS, exe="node")
+        run_step("比赛记录·下钻冒烟", VERIFY_RACES_DRILL, exe="node")
+        run_step("比赛记录·结果对账", VERIFY_RACES_RESULT, exe="node")
+    elif args.ledger:
+        run_ledger()
+        run_step("比赛·合并", RACES / "merge_races.py")
+        run_step("时间线·事件预计算", TIMELINE)
+        run_step("日期图·数据预计算", DATECHART)
+        run_step("统计·数据预计算", STATS)
+    elif args.ci:
+        y = ["--year", args.year] if args.year else []
+        run_step("CI·建档新马对账", BASIC / "build_registry.py", *y)
+        run_step("CI·基础补缺+合并", BASIC / "run_all.py")
+        run_step("CI·比赛增量流水线", RACES / "run_all.py", *lim())
+        run_step("CI·时间线事件预计算", TIMELINE)
+        run_step("CI·日期图数据预计算", DATECHART)
+        run_step("CI·统计数据预计算", STATS)
+        run_step("CI·数据校验", CHECK)
+        rc_verify = run_step("CI·日期图断言校验", VERIFY_DATECHART, exe="node")[0]
+        rc_stats = run_step("CI·统计断言校验", VERIFY_STATS, exe="node")[0]
+        rc_drill = run_step("CI·比赛记录下钻冒烟", VERIFY_RACES_DRILL, exe="node")[0]
+        rc_result = run_step("CI·比赛记录结果对账", VERIFY_RACES_RESULT, exe="node")[0]
+        if rc_verify != 0 or rc_stats != 0 or rc_drill != 0 or rc_result != 0:
+            log("✗ 断言校验失败 → 跳过数据提交（先修复，再重跑 --ci）")
+        else:
+            git_commit_if_changed()
+
+    log("\n══ 更新结束 ══")
+    total = sum(dt for _, _, dt in results)
+    log(f"总耗时 {total/60:.1f} 分钟 · 步骤: " + " · ".join(
+        f"{n}{'OK' if rc == 0 else f'FAIL({rc})'}" for n, rc, _ in results))
+
+
+if __name__ == "__main__":
+    main()

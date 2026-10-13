@@ -1,0 +1,411 @@
+{
+ "id": 600,
+ "jbis_id": "0001340226",
+ "馬名": "ジャスティンライズ",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "ジアナズドリーム(USA)",
+     "sex": "牝",
+     "id": "0001314014",
+     "year": "2013",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "Twirling Candy(USA)",
+     "sex": "牡",
+     "id": "0001164410",
+     "year": "2007",
+     "color": "黒鹿毛"
+    },
+    {
+     "name": "Untamed Beauty(USA)",
+     "sex": "牝",
+     "id": "0001016291",
+     "year": "1999",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "Candy Ride(ARG)",
+     "sex": "牡",
+     "id": "0000965271",
+     "year": "1999"
+    },
+    {
+     "name": "House of Danzing(USA)",
+     "sex": "牝",
+     "id": "0001163979",
+     "year": "2002"
+    },
+    {
+     "name": "Rahy(USA)",
+     "sex": "牡",
+     "id": "0000337553",
+     "year": "1985"
+    },
+    {
+     "name": "Forty Weight(USA)",
+     "sex": "牝",
+     "id": "0000419914",
+     "year": "1986"
+    }
+   ],
+   [
+    {
+     "name": "Ride the Rails(USA)",
+     "sex": "牡",
+     "id": "0000348538",
+     "year": "1991"
+    },
+    {
+     "name": "Candy Girl(ARG)",
+     "sex": "牝",
+     "id": "0000964152",
+     "year": "1990"
+    },
+    {
+     "name": "Chester House(USA)",
+     "sex": "牡",
+     "id": "0000369520",
+     "year": "1995"
+    },
+    {
+     "name": "Danzing Crown(USA)",
+     "sex": "牝",
+     "id": "0000450149",
+     "year": "1997"
+    },
+    {
+     "name": "Blushing Groom(FR)",
+     "sex": "牡",
+     "id": "0000335274",
+     "year": "1974"
+    },
+    {
+     "name": "Glorious Song(CAN)",
+     "sex": "牝",
+     "id": "0000391586",
+     "year": "1976"
+    },
+    {
+     "name": "Quadratic(USA)",
+     "sex": "牡",
+     "id": "0000336134",
+     "year": "1975"
+    },
+    {
+     "name": "Opec(USA)",
+     "sex": "牝",
+     "id": "0000393154",
+     "year": "1971"
+    }
+   ],
+   [
+    {
+     "name": "Cryptoclearance(USA)",
+     "sex": "牡",
+     "id": "0000342433",
+     "year": "1984"
+    },
+    {
+     "name": "Herbalesian(USA)",
+     "sex": "牝",
+     "id": "0000392384",
+     "year": "1969"
+    },
+    {
+     "name": "Candy Stripes(USA)",
+     "sex": "牡",
+     "id": "0000345372",
+     "year": "1982"
+    },
+    {
+     "name": "City Girl(ARG)",
+     "sex": "牝",
+     "id": "0000719620",
+     "year": "1982"
+    },
+    {
+     "name": "Mr. Prospector(USA)",
+     "sex": "牡",
+     "id": "0000335975",
+     "year": "1970"
+    },
+    {
+     "name": "Toussaud(USA)",
+     "sex": "牝",
+     "id": "0000405617",
+     "year": "1989"
+    },
+    {
+     "name": "Danzig(USA)",
+     "sex": "牡",
+     "id": "0000336082",
+     "year": "1977"
+    },
+    {
+     "name": "Crownette(USA)",
+     "sex": "牝",
+     "id": "0000427762",
+     "year": "1989"
+    },
+    {
+     "name": "Red God(USA)",
+     "sex": "牡",
+     "id": "0000334068",
+     "year": "1954"
+    },
+    {
+     "name": "Runaway Bride(GB)",
+     "sex": "牝",
+     "id": "0000388608",
+     "year": "1962"
+    },
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Ballade(USA)",
+     "sex": "牝",
+     "id": "0000391585",
+     "year": "1972"
+    },
+    {
+     "name": "Quadrangle(USA)",
+     "sex": "牡",
+     "id": "0000334444",
+     "year": "1961"
+    },
+    {
+     "name": "Smartaire(USA)",
+     "sex": "牝",
+     "id": "0000390274",
+     "year": "1962"
+    },
+    {
+     "name": "Bagdad(USA)",
+     "sex": "牡",
+     "id": "0000334109",
+     "year": "1956"
+    },
+    {
+     "name": "Laurel Mae(USA)",
+     "sex": "牝",
+     "id": "0000393153",
+     "year": "1959"
+    }
+   ]
+  ]
+ },
+ "fno": "F1-n",
+ "cross": "Halo(USA) ：S4×M5"
+}

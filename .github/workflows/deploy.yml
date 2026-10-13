@@ -1,0 +1,89 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  # contents: write —— 重算产物落库 commit（方案A：线上站点独立构建直读仓库 data/*.json）
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 落库步骤要 git pull --rebase，浅克隆 rebase 不可靠
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # node 20 已在 runner 上弃用（checkout/setup-node 被强制跑 node 24，见运行注解警告）；
+          # 升到 LTS 22，本地已用 node 22.12 验证 npm ci + build 通过。
+          node-version: 22
+          # 去掉 cache: npm —— 排除 GitHub actions 缓存导致的偶发 npm ci 失败；构建仅 ~30s，缓存收益低
+
+      # 线上编辑台提交（编辑台草稿箱 → GitHub API commit）后由此自动生效：
+      # ① merge_basic 把 manual_overrides.json 套进 basic.json（展示页读的是合并产物，只提交人工表值不会变）；
+      # ② 重算时间线产物（时间线人工节点提交后不再需要本地手动 build_timeline）。
+      # 两步均纯 stdlib、秒级、幂等（缓存缺失 read_cache 返回 {}；重排/套表与既有产物等值）。
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Apply manual overrides + rebuild timeline
+        run: |
+          python scripts/basic/merge_basic.py --keep
+          python scripts/timeline/build_timeline.py
+
+      # 前端构建：产物输出到仓库根 dist/（与 data/ 同级），随后随仓库根整体发布
+      - name: Build frontend
+        run: |
+          cd front
+          npm ci
+          npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # 站点根 = 仓库根：dist/pages/*.html 里的 ../../data 指向站点根 data/（与本地 :8090 结构一致）
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # 方案A（2026-10-02 定稿）：重算产物落库。线上站点（Pages 独立构建）直读仓库 commit
+      # 的 data/*.json、不走本工作流的重算 → 编辑台提交人工表后把 merge_basic/build_timeline 产物
+      # commit 回 main，CF 随之自动重建。无变化不 commit（幂等终止，无循环）；落库 push 会再触发
+      # 本工作流一次（重算后无变化 → 空转部署，预期内）。放最后一步：先保证本 run 部署完成，
+      # 再落库，避免 concurrency cancel-in-progress 把未完成的部署砍掉。
+      - name: Commit recomputed data products
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/basic.json data/timeline.json
+          if git diff --cached --quiet; then
+            echo "产物无变化，跳过落库"
+          else
+            git commit -m "ci: 重算数据产物落库（basic/timeline ← manual_overrides + races_manual）"
+            git pull --rebase origin main || true
+            git push origin HEAD:main
+          fi

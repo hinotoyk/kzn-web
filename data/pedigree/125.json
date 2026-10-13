@@ -1,0 +1,411 @@
+{
+ "id": 125,
+ "jbis_id": "0001234533",
+ "馬名": "フィアレススマイル",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "イッツスパーブ",
+     "sex": "牝",
+     "id": "0001093483",
+     "year": "2008",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ファルブラヴ(IRE)",
+     "sex": "牡",
+     "id": "0000626942",
+     "year": "1998",
+     "color": "鹿毛"
+    },
+    {
+     "name": "シュペリユール",
+     "sex": "牝",
+     "id": "0000701556",
+     "year": "2000",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "Fairy King(USA)",
+     "sex": "牡",
+     "id": "0000337427",
+     "year": "1982"
+    },
+    {
+     "name": "Gift of the Night(USA)",
+     "sex": "牝",
+     "id": "0000627744",
+     "year": "1990"
+    },
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ファビラスラフイン(FR)",
+     "sex": "牝",
+     "id": "0000275639",
+     "year": "1993"
+    }
+   ],
+   [
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "Fairy Bridge(USA)",
+     "sex": "牝",
+     "id": "0000392264",
+     "year": "1975"
+    },
+    {
+     "name": "Slewpy(USA)",
+     "sex": "牡",
+     "id": "0000336745",
+     "year": "1980"
+    },
+    {
+     "name": "Little Nana(FR)",
+     "sex": "牝",
+     "id": "0000627745",
+     "year": "1975"
+    },
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Fabulous Dancer(USA)",
+     "sex": "牡",
+     "id": "0000336184",
+     "year": "1976"
+    },
+    {
+     "name": "Mercalle(FR)",
+     "sex": "牝",
+     "id": "0000409703",
+     "year": "1986"
+    }
+   ],
+   [
+    {
+     "name": "Nearctic(CAN)",
+     "sex": "牡",
+     "id": "0000334378",
+     "year": "1954"
+    },
+    {
+     "name": "Natalma(USA)",
+     "sex": "牝",
+     "id": "0000386225",
+     "year": "1957"
+    },
+    {
+     "name": "Bold Reason(USA)",
+     "sex": "牡",
+     "id": "0000334859",
+     "year": "1968"
+    },
+    {
+     "name": "Special(USA)",
+     "sex": "牝",
+     "id": "0000390581",
+     "year": "1969"
+    },
+    {
+     "name": "Seattle Slew(USA)",
+     "sex": "牡",
+     "id": "0000335964",
+     "year": "1974"
+    },
+    {
+     "name": "Rare Bouquet(USA)",
+     "sex": "牝",
+     "id": "0000392779",
+     "year": "1963"
+    },
+    {
+     "name": "Lithiot(USA)",
+     "sex": "牡",
+     "id": "0000343568",
+     "year": "1965"
+    },
+    {
+     "name": "Nenana Road(FR)",
+     "sex": "牝",
+     "id": "0000420879",
+     "year": "1970"
+    },
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "Last of the Line(USA)",
+     "sex": "牝",
+     "id": "0000390969",
+     "year": "1967"
+    },
+    {
+     "name": "Kaldoun(FR)",
+     "sex": "牡",
+     "id": "0000336817",
+     "year": "1975"
+    },
+    {
+     "name": "Eole des Mers(FR)",
+     "sex": "牝",
+     "id": "0000409702",
+     "year": "1975"
+    }
+   ]
+  ]
+ },
+ "fno": "F3-e",
+ "cross": "サンデーサイレンス(USA) ：S3×M3 Northern Dancer(CAN) ：M4×S5×M5"
+}

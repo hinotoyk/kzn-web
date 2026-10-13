@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="../rehome.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>航迹线 · {{YJ_SITE_NAME}}</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg?v=1">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png?v=1">
+<link rel="stylesheet" href="theme.css">
+<style>
+/* ===== 等级徽章 / 1着徽章 / 马名跳转：样式单一出处 = theme.css（.yj-grade/.yj-g*/.yj-no*/.yj-no1/.hjump）
+ * 本页只保留两个故意变体（页内 <style> 未分层，级联优先于 theme.css 的 @layer）：
+ * ① 卡片内等级徽章不左缩进；② 1着徽章 22px 小号（底座/颜色仍走 theme.css） ===== */
+.yj-grade{margin-left:0}
+.yj-no{flex:none;width:22px;height:22px;font-size:12px}
+
+/* ===== 中央时间轴：轴线居中，卡片 16:9 左右交替，日期在卡片对侧 ===== */
+.tl{position:relative}
+.tl::before{content:"";position:absolute;left:50%;top:8px;bottom:8px;width:2px;transform:translateX(-50%);background:#ececec}
+.tl-item{position:relative;display:grid;grid-template-columns:1fr 56px 1fr;grid-template-rows:auto;align-items:center;padding-bottom:26px}
+.tl-item.right{grid-template-areas:"date node card"}
+.tl-item.left{grid-template-areas:"card node date"}
+.tl-date{grid-area:date;font-size:13px;font-weight:600;color:#8a9096;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl-item.right .tl-date{text-align:right;padding-right:20px}
+.tl-item.left .tl-date{text-align:left;padding-left:20px}
+.tl-node{grid-area:node;justify-self:center;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 3px #fff;position:relative;z-index:1}
+.tl-cardwrap{grid-area:card;min-width:0;width:min(480px,100%)}
+.tl-item.right .tl-cardwrap{justify-self:start}
+.tl-item.left .tl-cardwrap{justify-self:end}
+.tl-card{display:flex;overflow:hidden;min-width:0;transition:box-shadow .15s}
+.tl-card:hover{box-shadow:0 2px 10px rgba(16,24,40,.07)}
+/* 图位：横放 A4 比例（宽:高=297:210≈√2:1），贴时间轴一侧、垂直居中，四周留 10px 白边（不顶死卡缘）；无图=浅灰占位 */
+.tl-photo{flex:none;align-self:center;width:50%;margin:10px;aspect-ratio:297/210;background:#f5f5f5;overflow:hidden;border-radius:4px}
+.tl-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.tl-photo.empty{display:flex;align-items:center;justify-content:center}
+.tl-photo.empty span{font-size:34px;opacity:.3;line-height:1}
+.tl-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:12px 16px}
+/* 比赛名行（等级徽章 + 赛事名）：**恒单行**，PC / mb 同一套 —— 名字超宽由 fitRaceNames() 缩字号，
+   缩到下限仍放不下才用省略号兜底（此刻给 title，悬停可看全）。徽章 flex:none 不参与压缩。 */
+.tl-racename-row{display:flex;align-items:center;gap:8px;min-width:0}
+.tl-racename-row .yj-grade{flex:none}
+.tl-racename{flex:1 1 auto;min-width:0;font-size:15px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-item.left .tl-photo{order:2}
+.tl-item.left .tl-body{order:1}
+/* 年份：骑在轴线上的居中胶囊 */
+.tl-yearrow{position:relative;display:flex;justify-content:center;padding:4px 0 20px;z-index:1}
+.tl-year{background:#fff;border:1px solid #ececec;border-radius:100px;padding:3px 18px;font-size:13px;font-weight:700;color:#171717}
+@media (max-width:768px){
+  .tl::before{left:7px;transform:none}
+  .tl-item.right,.tl-item.left{grid-template-columns:16px minmax(0,1fr);grid-template-areas:"node date" "node card";align-items:start;padding-bottom:14px}
+  .tl-date{align-self:end;text-align:left !important;padding:0 0 4px !important}
+  .tl-node{margin-top:20px;align-self:start}
+  .tl-cardwrap{width:100%}
+  .tl-card{aspect-ratio:auto}
+  .tl-photo{width:44%}
+  .tl-body{padding:10px 12px}
+  .tl-yearrow{justify-content:flex-start;padding:2px 0 14px 28px}
+}
+/* 节点颜色 = 该事件最高优先级标签的类别色 */
+.tl-node.first{background-color:#0aa7a0}
+.tl-node.graded{background-color:#0a3b7e}
+.tl-node.gen{background-color:#e8742a}
+.tl-node.sire{background-color:#d5302a}
+.tl-node.award{background-color:#dca026}
+.tl-node.manual{background-color:#8a9096}   /* 人工节点：中性灰 */
+
+/* ===== 事件标签（一场比赛可叠加多枚，类别色区分） ===== */
+.tl-tag{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.5;white-space:nowrap;position:relative}
+/* 首胜标签（后端 crown:true）右上角：斜置小皇冠（金 #dca026 同站内金） */
+.tl-tag .crown{position:absolute;top:-8px;right:-7px;width:12px;height:12px;transform:rotate(18deg);pointer-events:none;fill:#dca026}
+.tl-tag.first{background-color:rgba(10,167,160,.12);color:#0b6b64}
+.tl-tag.graded{background-color:rgba(10,59,126,.09);color:#0a3b7e}
+.tl-tag.gen{background-color:rgba(232,116,42,.13);color:#b4530c}
+.tl-tag.sire{background-color:rgba(213,48,42,.1);color:#b02a25}
+.tl-tag.award{background-color:rgba(220,160,38,.16);color:#8f6408}
+.tl-tag.manual{background-color:rgba(138,144,150,.14);color:#5c636a}   /* 人工节点标签：中性灰 */
+
+/* ===== 迷你数据条：label 上 / 值 下，细竖线分隔 ===== */
+.tl-kpis{display:flex;flex-wrap:wrap}
+.tl-kpi{padding:0 16px;border-left:1px solid #ececec}
+.tl-kpi:first-child{padding-left:2px;border-left:0}
+.tl-kpi .k{font-size:10.5px;font-weight:600;letter-spacing:.5px;color:#9aa0a6}
+.tl-kpi .v{margin-top:1px;font-size:13.5px;font-variant-numeric:tabular-nums;color:#171717}
+.tl-kpi .v.hi{color:#0aa7a0;font-weight:700}
+@media (max-width:768px){.tl-kpi{padding:0 12px}}
+</style>
+</head>
+<body class="bg-background text-foreground antialiased">
+<div class="mx-auto w-full px-6 pt-[22px] pb-[60px] max-md:px-3.5 max-md:pt-2 max-md:pb-12 md:w-[90%]" id="page">
+  <div class="page-title mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 max-md:mt-2.5">航迹线 · TIMELINE<a id="editEntry" class="hidden text-[11.5px] font-semibold normal-case tracking-normal text-muted-foreground transition hover:text-primary max-md:hidden" href="edit-timeline.html" title="人工节点编辑（编辑台）">编辑 ↗</a></div>
+  <div id="stats" class="mb-3 text-[12.5px] text-muted-foreground"></div>
+  <div id="body"><div class="hint-empty">正在加载时间线数据…</div></div>
+</div>
+
+<script src="../site-config.js"></script>
+<script src="../data-config.js"></script>
+<script src="../yj-util.js?v=4"></script>
+<script src="../yj-cache.js?v=1"></script>
+<script src="../loading.js?v=2"></script>
+<script>
+/* 编辑入口默认不进视野（2026-10-02 用户定稿）：本页「编辑 ↗」仅 URL 带 ?edit=1 时显示
+   —— 与外壳 index.html「编辑」导航组同一开关（外壳加载子页时把 edit=1 透传进 iframe）。
+   保持内联（不引 YJ.util.qs，F1.3）：头部极早执行的一行原生 URLSearchParams 开关，先于任何工具依赖。 */
+if(new URLSearchParams(location.search).get("edit")==="1"){ var ee=document.getElementById("editEntry"); if(ee) ee.classList.remove("hidden"); }
+/* ================= 时间线 · 里程碑事件页 =================
+ * 数据：data/timeline.json —— 后端预计算（scripts/timeline/build_timeline.py 生成，
+ *       run_update.py 各策略在数据更新后自动重算），前端只做渲染，不再实时计算。
+ * 一场比赛 = 一条事件（绝不按标签拆行），该场触发的所有里程碑以标签徽章并列展示；纯展示无筛选。
+ * 事件规则（详见 build_timeline.py）：
+ *   1. 全局级别首胜（每级别全站仅一次）  1b. 世代新马首胜  2. 全局重赏序数（重赏首胜/重赏第N胜/G2第N胜，跨马累计；级别第1胜=首胜不重复挂）  3. 世代重赏首胜（中央）
+ *   4. 父子制覇（高情厚意同胜）  5. 受赏 —— 同一场比赛可同时触发多枚徽章。
+ * 渲染：时间自下而上（最新在顶；同日按発走晚者在顶——后端已按 日期→同日発走（缺失视为最大） 升序
+ *       输出，同 races.html 模块 33），年份分组降序；中央轴卡片左右交替，图位（横A4比例）恒贴时间轴一侧。
+ * 赛事名（race.name）：后端已剥掉徽章代劳的等级尾缀（见 build_timeline.py strip_grade_suffix），
+ *       前端恒单行显示，超宽由 fitRaceNames() 缩字号（PC / mb 同一套）。 */
+var esc = YJ.util.esc;  /* HTML 转义：单一出处 public/yj-util.js（原页内副本 > 分支已漂移为无操作，此处一并修正） */
+function tagHTML(t){
+  return '<span class="tl-tag '+t.cat+'"'+(t.tip?' title="'+esc(t.tip)+'"':'')+'>'+
+         (t.crown ? '<svg class="crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8L8.3 12L12 5.5L15.7 12L20.5 8L19 18L5 18Z"/><circle cx="3.5" cy="6.2" r="1.9"/><circle cx="12" cy="3.6" r="1.9"/><circle cx="20.5" cy="6.2" r="1.9"/></svg>' : '')+
+         esc(t.label)+'</span>';
+}
+/* 迷你数据条单元：label 上 / 值 下（hi=青绿加粗，胜果核心数据） */
+function kpi(label, value, hi){
+  return '<div class="tl-kpi"><div class="k">'+esc(label)+'</div>'+
+         '<div class="v'+(hi?' hi':'')+'">'+esc(value)+'</div></div>';
+}
+/* 騎手/調教師行：后端 team 为「 ｜ 」拼接的单串（缺失整段不出现），前端按分隔符拆成一行一人 */
+function teamHTML(team){
+  return '<div class="text-[12px] text-muted-foreground space-y-0.5">'+
+           team.split('｜').map(function(s){ return '<div>'+esc(s.trim())+'</div>'; }).join('')+
+         '</div>';
+}
+/* 图源：timeline.json 已解析（race photo 优先→马照片），空=浅灰占位。
+ * 图片标记统一走 YJ.ui.img（§5.3.2）：loading=lazy + decoding=async + 写死占位尺寸
+ * 297×210 —— 与 .tl-photo 的 aspect-ratio:297/210 同源，解码前比例即已确定，不会顶动卡片位置。 */
+function photoHTML(ev){
+  var src = ev.photo || "";
+  return src
+    ? '<div class="tl-photo">'+YJ.ui.img({ src: src, alt: "", cls: "", w: 297, h: 210 })+'</div>'
+    : '<div class="tl-photo empty"><span>🐎</span></div>';
+}
+function eventHTML(ev, side){   /* side: "right"=卡片在轴右侧（日期在左），"left"=卡片在轴左侧；图位恒贴时间轴一侧 */
+  var card = '<div class="tl-card card">'+photoHTML(ev)+'<div class="tl-body">';
+  if (ev.type === "manual"){   /* 人工节点：来自 timeline_manual.json（manual:true），无 horse；标题/副题/说明/可选跳转 */
+    var ttl = ev.link
+      ? '<a class="hjump text-[15px] font-semibold" href="'+esc(ev.link)+'">📌 '+esc(ev.title||"")+'</a>'
+      : '<span class="text-[15px] font-semibold">📌 '+esc(ev.title||"")+'</span>';
+    card += '<div class="flex flex-wrap items-baseline gap-x-2">'+ttl+
+              (ev.cn ? '<span class="text-[12px] text-muted-foreground">〈'+esc(ev.cn)+'〉</span>' : '')+
+            '</div>'+
+            (ev.note ? '<div class="text-[12px] text-muted-foreground">'+esc(ev.note)+'</div>' : '')+
+            (ev.tags && ev.tags.length ? '<div class="flex flex-wrap gap-1.5">'+ev.tags.map(tagHTML).join("")+'</div>' : '');
+  } else {
+  var hero = '<a class="hjump text-[16px] font-semibold" href="profile.html?horse='+encodeURIComponent(ev.horse.id)+'">'+esc(ev.horse.name)+'</a>'+
+             (ev.horse.cn ? '<span class="text-[12.5px] text-muted-foreground">〈'+esc(ev.horse.cn)+'〉</span>' : "");
+  if (ev.type === "award"){
+    var a = ev.award || {};
+    card += '<div class="flex flex-wrap items-baseline gap-x-2">'+
+              '<span class="text-[15px] font-semibold">✦ '+esc(a.賞名||"")+'</span>'+
+              (a.cn ? '<span class="text-[12px] text-muted-foreground">〈'+esc(a.cn)+'〉</span>' : '')+
+            '</div>'+
+            '<div class="flex flex-wrap items-center gap-x-2">'+hero+'</div>'+
+            (a.備考 ? '<div class="text-[12px] text-muted-foreground">'+esc(a.備考)+'</div>' : '')+
+            '<div class="flex flex-wrap gap-1.5">'+ev.tags.map(tagHTML).join("")+'</div>';
+  } else {
+    var r = ev.race || {};
+    card +=
+      '<div class="tl-racename-row">'+
+        (r.gbadge ? '<span class="yj-grade yj-'+r.gbadge+'">'+esc(r.glabel||"")+'</span>' : '')+
+        '<span class="tl-racename">'+esc(r.name||"")+'</span>'+
+      '</div>'+
+      (r.meta ? '<div class="text-[12px] text-muted-foreground">'+esc(r.meta)+'</div>' : '')+
+      '<div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">'+
+        '<span class="yj-no yj-no1">1</span>'+ hero +
+      '</div>'+
+      '<div class="tl-kpis">'+
+        kpi("タイム", r.time||"—", true) + kpi("上り", r.agari||"—") + kpi("人気", r.pop||"—")+
+      '</div>'+
+      (r.team ? teamHTML(r.team) : '')+
+      '<div class="flex flex-wrap gap-1.5">'+ev.tags.map(tagHTML).join("")+'</div>';
+  }
+  }
+  card += '</div></div>';
+  return '<div class="tl-item '+side+'">'+
+           '<div class="tl-date">'+esc(ev.date||"—")+'</div>'+
+           '<div class="tl-node '+esc(ev.node||"award")+'"></div>'+
+           '<div class="tl-cardwrap">'+card+'</div>'+
+         '</div>';
+}
+/* ===== 赛事名恒单行：超宽缩字号（PC / mb 同一套）=====
+ * 规则（用户定稿）：卡片里的比赛名无论 PC 还是 mb 都只占一行——名字过长就**缩小字号**，不换行、不撑破卡片；
+ *   名字后「(GII)/(JpnI)/(L)/(OP)」这类等级尾缀已由左侧徽章表达，后端产物 name 里已剥掉
+ *   （scripts/timeline/build_timeline.py 的 strip_grade_suffix），此处只管一行内自适应字号。
+ * 机制：先复位到 CSS 基准字号（单一出处 = 页内 .tl-racename）→ 量 scrollWidth/clientWidth →
+ *   超宽按 0.5px 步进降字号；降到下限 NAME_FLOOR 仍放不下才交给 CSS 省略号，并挂 title 悬停看全名。
+ * 幂等：每轮先复位字号，故 resize / 字体加载完成后可放心重跑。 */
+var NAME_FLOOR = 10.5;   /* 字号下限（px）：再小就伤可读性，改为省略号兜底 */
+function fitRaceNames(){
+  var els = document.querySelectorAll(".tl-racename");
+  for (var i = 0; i < els.length; i++){
+    var el = els[i];
+    el.style.fontSize = "";                                     /* 复位：可重复调用 */
+    el.removeAttribute("title");
+    var size = parseFloat(getComputedStyle(el).fontSize) || 15; /* 基准字号取自 CSS，页内不写死 */
+    while (el.scrollWidth > el.clientWidth && size > NAME_FLOOR){
+      size = Math.max(NAME_FLOOR, Math.round((size - 0.5) * 10) / 10);
+      el.style.fontSize = size + "px";
+    }
+    if (el.scrollWidth > el.clientWidth) el.setAttribute("title", el.textContent);  /* 缩到下限仍超宽：兜底提示 */
+  }
+}
+function render(events){
+  /* 时间自下而上：最新在顶部（渲染前倒序），年份分组同步降序；卡片按序左右交替骑在中央轴上 */
+  var year = "";
+  var items = events.slice().reverse().map(function(ev, i){
+    var s = "";
+    var y = ev.date ? ev.date.slice(0,4) : "";
+    if (y && y !== year){ year = y; s += '<div class="tl-yearrow"><span class="tl-year">'+y+'</span></div>'; }
+    return s + eventHTML(ev, i%2===0 ? "right" : "left");
+  }).join("");
+  document.getElementById("body").innerHTML = items.length
+    ? '<div class="tl">'+items+'</div>'
+    : '<div class="hint-empty">暂无里程碑事件</div>';
+  fitRaceNames();   /* 渲染完立即量一次：赛事名超宽缩字号，保证恒单行 */
+}
+function renderStats(st){
+  st = st || {};
+  document.getElementById("stats").innerHTML =
+    '共 <b class="text-foreground">'+(st.events||0)+'</b> 条里程碑 · 覆盖 <b class="text-foreground">'+(st.horses||0)+'</b> 匹产驹'+
+    ' · 重赏胜利 <b class="text-foreground">'+(st.graded_wins||0)+'</b> 场 · 父子制覇 <b class="text-foreground">'+(st.sire_wins||0)+'</b> 次';
+}
+function init(){
+  YJ.cache.fetch("timeline").then(function(data){
+    renderStats(data.meta && data.meta.stats);
+    render(data.events || []);
+  }).catch(function(e){
+    document.getElementById("body").innerHTML =
+      '<div class="hint-empty">数据加载失败（'+esc(e.message)+'），请通过 http 服务器访问</div>';
+  });
+}
+init();
+/* 卡片宽度随视口变 → 重新量；Web 字体（Noto Sans SC）到位后文字宽度会变 → 也重量一次 */
+var fitTimer = null;
+window.addEventListener("resize", function(){ clearTimeout(fitTimer); fitTimer = setTimeout(fitRaceNames, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fitRaceNames(); });
+</script>
+</body>
+</html>

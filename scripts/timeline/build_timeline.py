@@ -1,0 +1,372 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""时间线事件预计算：读 data/basic.json + data/races/*.json + data/races_manual.json → data/timeline.json
+
+事件生成规则与产物字段契约见 docs/SCHEMA.md（本节原为 1-76 行文件头，6a 搬过去）。
+"""
+import datetime
+import json
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # scripts/ 入 sys.path（直跑脚本）
+from core import artifacts, constants, grade, runtime, sire_config    # noqa: E402
+from races import racelib                              # noqa: E402
+
+runtime.install_utf8_stdout()
+
+ROOT = constants.ROOT
+DATA = constants.DATA_DIR
+
+# ---- 常量（口径与前端/races.html 一致） ----
+# 格 → (显示文案, 徽章类)：单一出处 = config/grade-table.json（docs/REFACTOR.md §12/R6）；
+# 徽章类复用同级别 g1/g2/g3（Jpn/障害 与中央 G1-G3 视觉同级，靠文案区分）；L/OP 用 listed/open。
+# ★ 与前端 front/public/race-rows.js 的 window.YJ_GRADE（构建注入）同源。
+_GT = grade.load_grade()
+GRADE = _GT["GRADE"]
+GLBL = _GT["GLBL"]                       # 派生别名（显示文案）：既有调用点不变
+GBADGE = _GT["GBADGE"]                   # 派生别名（徽章类）：既有调用点不变
+GRADED = _GT["GRADED"]                   # 重赏判定（含障害重赏）——由徽章类 ∈ {g1,g2,g3} 派生
+NODE_PRIO = {"sire": 0, "gen": 1, "first": 2, "graded": 3, "award": 4}  # 节点取色优先级（小者优先）
+# 人工节点 tags[].cat 白名单（D9 六色，允许自选）：与自动节点同源 = NODE_PRIO 五类 + manual。
+# 取值即前端 timeline.html 的 .tl-node / .tl-tag 类名（那页只读参考，改色需同步），
+# 同 front/public/editor.js::TL_CATS 下拉（原 edit_server.py 已删，§82.4）。
+MANUAL_CATS = frozenset(NODE_PRIO) | {"manual"}
+
+# ---- 父子制覇：种马生涯重赏一着（单一出处 = config/sire.json 的 sire.wins，可空数组 = 关闭该徽章） ----
+# 历史来源：https://db.netkeiba.com/horse/result/2010105827/（成绩页，EUC-JP）；tests/_trash/fetch_kizuna_wins.py
+SIRE_WINS = sire_config.sire_wins()
+
+
+def norm_race(s):
+    """レース名去格级括号尾缀（如 東京優駿(GI) → 東京優駿）并去空格，用于父子制覇匹配。"""
+    s = "" if s is None else str(s)
+    m = re.search(r"[（(]([^()（）]*)[)）]\s*$", s)
+    if m:
+        s = s[: m.start()]
+    return s.replace(" ", "").replace("　", "").strip()
+
+
+def strip_grade_suffix(name, grade):
+    """赛事名去「徽章已代劳」的格级括号尾缀（京都新聞杯(GII) → 京都新聞杯）。
+
+    只在尾缀与 格 相等、且该格确实会渲染徽章（GBADGE 命中）时剥；否则
+    (1勝クラス)/(3歳)/(C4) 等无徽章尾缀必须原样保留，剥了会丢信息。
+    口径同前端 race-rows.js 的 raceNameText（那里按原始记录形状判 r.格）。"""
+    s = "" if name is None else str(name)
+    m = re.search(r"[（(]([^()（）]*)[)）]\s*$", s)
+    if m and grade in GBADGE and m.group(1) == grade:
+        return s[: m.start()].rstrip()
+    return s
+
+
+def first_photo(p):
+    """photo 兼容 数组/字符串（同 profile 头像约定），取首图路径/URL；无则空串。
+    路径归一为「pages 页相对」：马照片在 basic.json 里是仓库相对 data/…（§82.17 本地化），
+    人工节点/比赛配图存 ../data/…（编辑台约定，timeline.html 直读 src 不经 YJ_DATA）——
+    仓库相对形式统一补 ../ 前缀，否则浏览器按 /pages/data/… 解析 404（2026-10-01 线上实测）。
+    外链 URL 原样。"""
+    if isinstance(p, list):
+        s = p[0] if p and p[0] else ""
+    elif isinstance(p, str):
+        s = p
+    else:
+        return ""
+    s = str(s).strip()
+    if s.startswith("data/"):
+        s = "../" + s
+    return s
+
+
+def posttime_key(r):
+    """発走升序分量：缺失（空/None，海外场）视为最大（升序排最后 → 倒序后同日显示在最上）；
+    "HH:MM" 为零填充字符串可直接比较。同 races.html 模块 33 口径。"""
+    hk = str((r or {}).get("発走") or "")
+    return (1, "") if not hk else (0, hk)
+
+
+def place_desc_key(rk):
+    """着順降序分量（用于升序键的末位）：数字着順取负（着順越大越靠前 → 倒序后同场 1着
+    显示在最上）；未完走（中止/取消/除外/失格等非数字）取 -inf（升序最前 → 倒序后殿后）。"""
+    try:
+        return -float(str(rk))
+    except (TypeError, ValueError):
+        return float("-inf")
+
+
+def event_sort_key(date, r):
+    """事件升序排序键（前端倒序后 = 最新在顶）：① 日期升序；② 同日按発走升序（缺失视为最大）；
+    ③ 同日同発走按着順降序。受赏/人工节点无比赛记录（r=None）→ 発走/着順均按缺失（同日置顶）。"""
+    return (str(date or "") or "9999-99-99",
+            posttime_key(r),
+            place_desc_key((r or {}).get("結果")) if r else float("-inf"))
+
+
+def build_events(horses, races_by_id):
+    # 先扫一遍：每个年世代（=生年）的两条「首胜」，一代各只有一条、之后不再标记：
+    #   genBest   —— 该年世代产驹在 JRA 中央的首场重赏胜利
+    #   genShinba —— 该年世代产驹最早的新马战胜利
+    gen_best, gen_shinba = {}, {}
+    for h in horses:
+        if not h.get("生年"):
+            continue
+        g_best = g_shin = None
+        for r in races_by_id.get(h["id"], []):
+            if str(r.get("結果")) != "1":
+                continue
+            cand = {"date": str(r.get("日付") or ""), "key": racelib.race_key(r), "pt": posttime_key(r)}
+            if g_shin is None and r.get("格") == "新馬":
+                g_shin = cand
+            if g_best is None and r.get("格") in GRADED and r.get("venue_type") == "中央":
+                g_best = cand
+        # 「最早」比较 = (日付, 発走) 元组：同日两场新馬/重赏一着时按発走分先后
+        # （如 2026-08-09 中京2R 10:20 先于 中京3R 10:50；発走缺失视为最大），同 races.html 模块 33
+        if g_best is not None:
+            cur = gen_best.get(h["生年"])
+            if cur is None or (g_best["date"], g_best["pt"]) < (cur["date"], cur["pt"]):
+                gen_best[h["生年"]] = g_best
+        if g_shin is not None:
+            cur_s = gen_shinba.get(h["生年"])
+            if cur_s is None or (g_shin["date"], g_shin["pt"]) < (cur_s["date"], cur_s["pt"]):
+                gen_shinba[h["生年"]] = g_shin
+
+    # 全局预扫（单一遍历，跨马按日期累计；同日按発走升序（缺失视为最大）+ race_key + horse id 稳定排序，
+    # 与最终展示顺序同口径）：
+    #   grade_first  —— 每个级别的产驹史首胜（全局只挂一次；2026-09 确认级别首胜为全局口径）
+    #   global_index —— 重赏全局序 / 该级别全局序 / 海外重赏全局序（2026-09 确认：全局替代马内序数）
+    all_wins = []
+    for h in horses:
+        for r in races_by_id.get(h["id"], []):
+            if str(r.get("結果")) == "1" and r.get("格") in GLBL:
+                all_wins.append((str(r.get("日付") or ""), racelib.race_key(r), str(h.get("id")), h, r))
+    all_wins.sort(key=lambda x: (x[0], posttime_key(x[4]), x[1], x[2]))
+    grade_first, global_index, g_seq, grade_cnt, ovs_cnt = {}, {}, 0, {}, 0
+    for _d, _key, hid, h, r in all_wins:
+        g = r["格"]
+        if g not in grade_first:
+            grade_first[g] = (hid, _key)
+        if g not in GRADED:
+            continue
+        g_seq += 1
+        grade_cnt[g] = grade_cnt.get(g, 0) + 1
+        ovs = None
+        if r.get("venue_type") == "海外":
+            ovs_cnt += 1
+            ovs = ovs_cnt
+        global_index[(hid, _key)] = (g_seq, grade_cnt[g], ovs)
+
+    sire_set = {norm_race(w["name"]): w for w in SIRE_WINS if isinstance(w, dict) and w.get("name")}   # 缺 name 键的条目跳过（防 KeyError）
+    out = []
+    for h in horses:
+        for r in races_by_id.get(h["id"], []):
+            if str(r.get("結果")) != "1":
+                continue                # 只有一着构成事件
+            g = r.get("格")
+            tags = []
+            if g in GLBL and grade_first.get(g) == (str(h["id"]), racelib.race_key(r)):
+                tags.append({"cat": "first", "label": GLBL[g] + "首胜"})   # 1. 级别首胜：全局口径，每级别全站仅一次
+            if g in GRADED:                                  # 2. 全局重赏序数（产驹史上第 N 个，跨马累计）
+                seq, grade_seq, ovs_seq = global_index[(str(h["id"]), racelib.race_key(r))]
+                tags.append({"cat": "graded", "label": "重赏首胜" if seq == 1 else "重赏第" + str(seq) + "胜"})
+                if grade_seq > 1:   # 该级别第1胜 =「级别首胜」，不重复挂（§45.5 用户反馈）
+                    tags.append({"cat": "graded", "label": GLBL[g] + "第" + str(grade_seq) + "胜"})
+                if ovs_seq:
+                    tags.append({"cat": "graded", "label": "海外重赏首胜" if ovs_seq == 1 else "海外重赏第" + str(ovs_seq) + "胜"})
+                if r.get("venue_type") == "中央" and h.get("生年") \
+                        and h["生年"] in gen_best and gen_best[h["生年"]]["key"] == racelib.race_key(r):
+                    tags.append({"cat": "gen", "label": str(h["生年"]) + "年世代重赏首胜"})   # 3. 世代重赏首胜（中央）
+            if g == "新馬" and h.get("生年") \
+                    and h["生年"] in gen_shinba and gen_shinba[h["生年"]]["key"] == racelib.race_key(r):
+                tags.append({"cat": "gen", "label": str(h["生年"]) + "年世代新马首胜"})     # 1b. 世代新马首胜
+            sw = sire_set.get(norm_race(r.get("レース名")))
+            if sw:
+                tags.append({"cat": "sire", "label": "父子制覇",
+                             "tip": sire_config.sire_name_cn() + "同胜：" + (sw.get("cn") or sw["name"])})        # 4. 父子制覇
+            for t in tags:
+                if t["label"].endswith("首胜"):
+                    t["crown"] = True   # 首胜标签右上角小皇冠（§45.6；to_render_event 会省略假值键）
+            if tags:
+                out.append({"date": str(r.get("日付") or ""), "h": h, "r": r, "tags": tags})
+        # 5. 受赏（非比赛事件；受賞歴 为后端预留字段，兼容对象/字符串）
+        awards = h.get("受賞歴") or []
+        if isinstance(awards, str):
+            awards = [awards]
+        for a in awards:
+            if isinstance(a, str):
+                a = {"賞名": a}
+            out.append({"date": str(a.get("日付") or a.get("date") or ""), "h": h, "a": a,
+                        "tags": [{"cat": "award", "label": "受赏"}]})
+
+    out.sort(key=lambda e: e["date"] or "9999-99-99")
+    return out
+
+
+def to_render_event(e, race_manual=None):
+    """内部事件 → 渲染就绪事件（前端拿到即画，不再做任何计算）。"""
+    h, tags = e["h"], e["tags"]
+    ev = {
+        "date": e["date"],
+        "type": "award" if "a" in e else "race",
+        "node": min(tags, key=lambda t: NODE_PRIO[t["cat"]])["cat"],
+        "horse": {
+            "id": h.get("id"),
+            "name": h.get("馬名") or "",
+            "cn": h.get("香港馬名") or h.get("自译馬名") or "",
+        },
+        "photo": "",
+        "tags": [{k: v for k, v in t.items() if v} for t in tags],   # 无 tip 时省略键
+    }
+    if "a" in e:
+        a = e["a"]
+        award = {"賞名": a.get("賞名") or a.get("名") or ""}
+        if a.get("cn"):
+            award["cn"] = a["cn"]
+        if a.get("備考"):
+            award["備考"] = a["備考"]
+        ev["award"] = award
+        return ev
+    r = e["r"]
+    place = str(r.get("場名") or "") + (str(r["R"]) + "R" if r.get("R") not in (None, "") else "")
+    surf = str(r.get("芝ダ") or "") + (str(r["距離"]) + "m" if r.get("距離") not in (None, "") else "")
+    meta = " · ".join(x for x in (place, surf, r.get("馬場")) if x not in (None, ""))
+    jockey = " · ".join(x for x in (r.get("騎手") or "",
+                                    str(r["斤量"]) + "kg" if r.get("斤量") not in (None, "") else "")
+                        if x not in (None, ""))
+    team = " ｜ ".join(x for x in (("騎手 " + jockey) if jockey else "",
+                                   ("調教師 " + str(r["調教師"])) if r.get("調教師") else "") if x)
+    race = {
+        "name": strip_grade_suffix(r.get("レース名"), r.get("格")),
+        "grade": r.get("格") or "",
+        "glabel": GLBL.get(r.get("格"), ""),
+        "gbadge": GBADGE.get(r.get("格"), ""),
+        "meta": meta,
+        "time": r.get("タイム") or "—",
+        "agari": r.get("上り") or "—",
+        "pop": (str(r["人気"]) + "番") if r.get("人気") not in (None, "") else "—",
+        "team": team,
+    }
+    # 取图优先级（§82.9 用户定稿）：比赛人工配图（data/races_manual.json，race_id → photo，抓取永不写）
+    # > race.photo（历史抓取值兼容，现管线已不产生）> 回退马照片。
+    # 键 = race_id；无 race_id 的台账场（§82.22 兼容，与人工荣誉节点同类）= 虚拟键 "@马id@日付"
+    # （一马一天只跑一场，SCHEMA 去重键同口径；编辑台 STEP2 用 rmKeyOf 生成同一键）
+    rid = str(r.get("race_id") or "").strip()
+    if not rid:
+        rid = "@{}@{}".format(h.get("id"), str(r.get("日付") or "").strip())
+    m = race_manual.get(rid) if race_manual else None
+    mp = (m.get("photo") if isinstance(m, dict) else m) if m else ""
+    ev["photo"] = first_photo(mp) or first_photo(r.get("photo")) or first_photo(h.get("photo"))
+    ev["race"] = race
+    return ev
+
+
+def to_manual_event(e):
+    """人工节点（data/timeline_manual.json）→ 渲染事件。
+    用户字段（date/title/cn/note/link/photo/tags.label/tags.tip）原样保留，仅补 type/node/manual 标记；
+    tags[].cat 命中白名单 MANUAL_CATS（D9 六色，人工可自选）则透传，缺失/非法回退 manual；
+    重算永不覆盖 timeline_manual.json 本身，本产物只负责把人工节点合并进合适的时间位置。"""
+    def cat_of(t):
+        c = t.get("cat")
+        return c if isinstance(c, str) and c in MANUAL_CATS else "manual"
+    def tag_out(t):
+        o = {"cat": cat_of(t), "label": str(t["label"])}
+        if t.get("tip"):
+            o["tip"] = str(t["tip"])
+        return o
+    tags = [tag_out(t) for t in (e.get("tags") or [])
+            if isinstance(t, dict) and t.get("label")]
+    ev = {
+        "date": str(e.get("date") or ""),
+        "type": "manual",
+        "node": "manual",
+        "photo": first_photo(e.get("photo")),
+        "tags": tags,
+        "title": str(e.get("title") or ""),
+        "manual": True,
+    }
+    if e.get("cn"):
+        ev["cn"] = str(e["cn"])
+    if e.get("note"):
+        ev["note"] = str(e["note"])
+    if e.get("link"):
+        ev["link"] = str(e["link"])
+    return ev
+
+
+def main():
+    horses = artifacts.load_basic_horses()
+
+    # 比赛人工配图（data/races_manual.json，§82.9）：race_id → {"photo": 路径}；用户自维护，重算永不覆盖
+    race_manual = {}
+    rm_path = DATA / "races_manual.json"
+    if rm_path.exists():
+        try:
+            raw = json.loads(rm_path.read_text(encoding="utf-8-sig"))
+            if isinstance(raw, dict):
+                race_manual = raw
+        except (json.JSONDecodeError, OSError) as ex:
+            print(f"  ⚠ races_manual.json 读取失败，本次不含比赛人工配图: {ex}")
+
+    races_by_id = {}
+    for h in horses:
+        if not h.get("races_file"):          # 与前端旧逻辑一致：无成绩文件（未出道等）跳过
+            races_by_id[h["id"]] = []
+            continue
+        f = DATA.parent / h["races_file"]
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            data = []
+        arr = sorted(artifacts.records_of(data), key=lambda x: str(x.get("日付") or ""))   # 与前端旧逻辑一致：先按日付升序再算「首个」
+        races_by_id[h["id"]] = arr
+
+    # 自动事件：转渲染事件的同时生成排序键（build_events 内部 out.sort 只保证「首个」判定的
+    # 稳定输入顺序；最终顺序以这里为准）
+    items = [(event_sort_key(e["date"], e.get("r")), to_render_event(e, race_manual))
+             for e in build_events(horses, races_by_id)]
+
+    # 人工节点：data/timeline_manual.json（用户自维护）。重算永不覆盖该文件，
+    # 仅把其中节点合并进产物并按日期排到合适位置；缺 date/title 的条目跳过并告警。
+    manual_path = DATA / "timeline_manual.json"
+    manual = []
+    if manual_path.exists():
+        try:
+            raw = json.loads(manual_path.read_text(encoding="utf-8-sig"))   # utf-8-sig: 兼容带 BOM（Windows 记事本等）
+            for e in ((raw.get("events") if isinstance(raw, dict) else raw) or []):
+                if not isinstance(e, dict):
+                    continue
+                if not e.get("date") or not e.get("title"):
+                    print(f"  ⚠ 人工节点缺 date/title，已跳过: {str(e)[:100]}")
+                    continue
+                manual.append(to_manual_event(e))
+        except (json.JSONDecodeError, OSError) as ex:
+            print(f"  ⚠ timeline_manual.json 读取失败，本次不含人工节点: {ex}")
+    items += [(event_sort_key(e.get("date"), None), e) for e in manual]   # 人工节点：発走/着順按缺失
+    items.sort(key=lambda kv: kv[0])   # 升序（同日按発走，见 event_sort_key）；前端倒序 = 最新在顶
+    events = [ev for _, ev in items]
+
+    stats = {
+        "events": len(events),
+        "horses": len({e["horse"]["id"] for e in events if e.get("horse")}),   # 人工节点不挂马，不计入
+        "graded_wins": sum(1 for e in events if e["type"] == "race" and e["race"]["grade"] in GRADED),
+        "sire_wins": sum(1 for e in events if e["type"] == "race" and any(t["cat"] == "sire" for t in e["tags"])),   # 人工节点不计（同 graded_wins 口径）
+    }
+    payload = {
+        "meta": {
+            "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+            "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
+            "stats": stats,
+        },
+        "events": events,
+    }
+    out = DATA / "timeline.json"
+
+    # 内容无变化时跳过写入：generated_at 每次运行都不同，若照写会使 --ci 每轮都产生空 diff 提交
+    if not artifacts.write_if_changed(out, payload, ("meta", "events"), "时间线事件预计算"):
+        return
+    print(f"时间线事件预计算完成: {stats['events']} 条事件 / 覆盖 {stats['horses']} 匹产驹 / "
+          f"重赏胜利 {stats['graded_wins']} 场 / 父子制覇 {stats['sire_wins']} 次 → {out.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

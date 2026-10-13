@@ -1,0 +1,411 @@
+{
+ "id": 729,
+ "jbis_id": "0001355453",
+ "馬名": "エンデューロ",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "パーシステントリー(USA)",
+     "sex": "牝",
+     "id": "0001128225",
+     "year": "2006",
+     "color": "栗毛"
+    }
+   ],
+   [
+    {
+     "name": "Smoke Glacken(USA)",
+     "sex": "牡",
+     "id": "0000368103",
+     "year": "1994",
+     "color": "芦毛"
+    },
+    {
+     "name": "Just Reward(USA)",
+     "sex": "牝",
+     "id": "0000846592",
+     "year": "1999",
+     "color": "栗毛"
+    }
+   ],
+   [
+    {
+     "name": "Two Punch(USA)",
+     "sex": "牡",
+     "id": "0000347573",
+     "year": "1983"
+    },
+    {
+     "name": "Majesty's Crown(USA)",
+     "sex": "牝",
+     "id": "0000442534",
+     "year": "1984"
+    },
+    {
+     "name": "Deputy Minister(CAN)",
+     "sex": "牡",
+     "id": "0000338072",
+     "year": "1979"
+    },
+    {
+     "name": "Heavenly Prize(USA)",
+     "sex": "牝",
+     "id": "0000432359",
+     "year": "1991"
+    }
+   ],
+   [
+    {
+     "name": "Mr. Prospector(USA)",
+     "sex": "牡",
+     "id": "0000335975",
+     "year": "1970"
+    },
+    {
+     "name": "Heavenly Cause(USA)",
+     "sex": "牝",
+     "id": "0000393119",
+     "year": "1978"
+    },
+    {
+     "name": "Magesterial(USA)",
+     "sex": "牡",
+     "id": "0000339644",
+     "year": "1977"
+    },
+    {
+     "name": "Queen's Crown(USA)",
+     "sex": "牝",
+     "id": "0000442535",
+     "year": "1979"
+    },
+    {
+     "name": "Vice Regent(CAN)",
+     "sex": "牡",
+     "id": "0000336132",
+     "year": "1967"
+    },
+    {
+     "name": "Mint Copy(CAN)",
+     "sex": "牝",
+     "id": "0000392196",
+     "year": "1970"
+    },
+    {
+     "name": "Seeking the Gold(USA)",
+     "sex": "牡",
+     "id": "0000337444",
+     "year": "1985"
+    },
+    {
+     "name": "Oh What a Dance(USA)",
+     "sex": "牝",
+     "id": "0000433098",
+     "year": "1987"
+    }
+   ],
+   [
+    {
+     "name": "Raise a Native(USA)",
+     "sex": "牡",
+     "id": "0000334066",
+     "year": "1961"
+    },
+    {
+     "name": "Gold Digger(USA)",
+     "sex": "牝",
+     "id": "0000389632",
+     "year": "1962"
+    },
+    {
+     "name": "Grey Dawn(FR)",
+     "sex": "牡",
+     "id": "0000334282",
+     "year": "1962"
+    },
+    {
+     "name": "Lady Dulcinea(USA)",
+     "sex": "牝",
+     "id": "0000393118",
+     "year": "1963"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "Courting Days(USA)",
+     "sex": "牝",
+     "id": "0000390811",
+     "year": "1970"
+    },
+    {
+     "name": "King Emperor(USA)",
+     "sex": "牡",
+     "id": "0000333942",
+     "year": "1966"
+    },
+    {
+     "name": "Turn Capp(USA)",
+     "sex": "牝",
+     "id": "0000412784",
+     "year": "1972"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "Victoria Regina(CAN)",
+     "sex": "牝",
+     "id": "0000389443",
+     "year": "1958"
+    },
+    {
+     "name": "Bunty's Flight(CAN)",
+     "sex": "牡",
+     "id": "0000336550",
+     "year": "1953"
+    },
+    {
+     "name": "Shakney(USA)",
+     "sex": "牝",
+     "id": "0000392195",
+     "year": "1964"
+    },
+    {
+     "name": "Mr. Prospector(USA)",
+     "sex": "牡",
+     "id": "0000335975",
+     "year": "1970"
+    },
+    {
+     "name": "Con Game(USA)",
+     "sex": "牝",
+     "id": "0000392025",
+     "year": "1974"
+    },
+    {
+     "name": "Nijinsky(CAN)",
+     "sex": "牡",
+     "id": "0000333996",
+     "year": "1967"
+    },
+    {
+     "name": "Blitey(USA)",
+     "sex": "牝",
+     "id": "0000395275",
+     "year": "1976"
+    }
+   ]
+  ]
+ },
+ "fno": "F20-b",
+ "cross": "Mr. Prospector(USA) ：M4×M5 Northern Dancer(CAN) ：S5×M5×M5"
+}

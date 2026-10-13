@@ -1,0 +1,411 @@
+{
+ "id": 838,
+ "jbis_id": "0001358256",
+ "馬名": "",
+ "pedigree": {
+  "父": [
+   [
+    {
+     "name": "キズナ",
+     "sex": "牡",
+     "id": "0001120570",
+     "year": "2010",
+     "color": "青鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ディープインパクト",
+     "sex": "牡",
+     "id": "0000742976",
+     "year": "2002",
+     "color": "鹿毛"
+    },
+    {
+     "name": "キャットクイル(CAN)",
+     "sex": "牝",
+     "id": "0000383744",
+     "year": "1990",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "ウインドインハーヘア(IRE)",
+     "sex": "牝",
+     "id": "0000430846",
+     "year": "1991"
+    },
+    {
+     "name": "Storm Cat(USA)",
+     "sex": "牡",
+     "id": "0000337102",
+     "year": "1983"
+    },
+    {
+     "name": "Pacific Princess(USA)",
+     "sex": "牝",
+     "id": "0000393762",
+     "year": "1973"
+    }
+   ],
+   [
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Alzao(USA)",
+     "sex": "牡",
+     "id": "0000339659",
+     "year": "1980"
+    },
+    {
+     "name": "Burghclere(GB)",
+     "sex": "牝",
+     "id": "0000394655",
+     "year": "1977"
+    },
+    {
+     "name": "Storm Bird(CAN)",
+     "sex": "牡",
+     "id": "0000336177",
+     "year": "1978"
+    },
+    {
+     "name": "Terlingua(USA)",
+     "sex": "牝",
+     "id": "0000393602",
+     "year": "1976"
+    },
+    {
+     "name": "Damascus(USA)",
+     "sex": "牡",
+     "id": "0000334660",
+     "year": "1964"
+    },
+    {
+     "name": "Fiji(GB)",
+     "sex": "牝",
+     "id": "0000393761",
+     "year": "1960"
+    }
+   ],
+   [
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Lady Rebecca(GB)",
+     "sex": "牝",
+     "id": "0000394467",
+     "year": "1971"
+    },
+    {
+     "name": "Busted(GB)",
+     "sex": "牡",
+     "id": "0000334011",
+     "year": "1963"
+    },
+    {
+     "name": "Highclere(GB)",
+     "sex": "牝",
+     "id": "0000390924",
+     "year": "1971"
+    },
+    {
+     "name": "Northern Dancer(CAN)",
+     "sex": "牡",
+     "id": "0000334002",
+     "year": "1961"
+    },
+    {
+     "name": "South Ocean(CAN)",
+     "sex": "牝",
+     "id": "0000390935",
+     "year": "1967"
+    },
+    {
+     "name": "Secretariat(USA)",
+     "sex": "牡",
+     "id": "0000333978",
+     "year": "1970"
+    },
+    {
+     "name": "Crimson Saint(USA)",
+     "sex": "牝",
+     "id": "0000393601",
+     "year": "1969"
+    },
+    {
+     "name": "Sword Dancer(USA)",
+     "sex": "牡",
+     "id": "0000334518",
+     "year": "1956"
+    },
+    {
+     "name": "Kerala(USA)",
+     "sex": "牝",
+     "id": "0000387890",
+     "year": "1958"
+    },
+    {
+     "name": "Acropolis(GB)",
+     "sex": "牡",
+     "id": "0000334077",
+     "year": "1952"
+    },
+    {
+     "name": "Rififi(GB)",
+     "sex": "牝",
+     "id": "0000393760",
+     "year": "1954"
+    }
+   ]
+  ],
+  "母": [
+   [
+    {
+     "name": "ヴゼットジョリー",
+     "sex": "牝",
+     "id": "0001186882",
+     "year": "2014",
+     "color": "黒鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "ローエングリン",
+     "sex": "牡",
+     "id": "0000619817",
+     "year": "1999",
+     "color": "栗毛"
+    },
+    {
+     "name": "フレンチビキニ",
+     "sex": "牝",
+     "id": "0000750375",
+     "year": "2002",
+     "color": "鹿毛"
+    }
+   ],
+   [
+    {
+     "name": "Singspiel(IRE)",
+     "sex": "牡",
+     "id": "0000263172",
+     "year": "1992"
+    },
+    {
+     "name": "カーリング(FR)",
+     "sex": "牝",
+     "id": "0000432603",
+     "year": "1992"
+    },
+    {
+     "name": "サンデーサイレンス(USA)",
+     "sex": "牡",
+     "id": "0000333862",
+     "year": "1986"
+    },
+    {
+     "name": "フェンジー(FR)",
+     "sex": "牝",
+     "id": "0000384155",
+     "year": "1994"
+    }
+   ],
+   [
+    {
+     "name": "In The Wings(GB)",
+     "sex": "牡",
+     "id": "0000341850",
+     "year": "1986"
+    },
+    {
+     "name": "Glorious Song(CAN)",
+     "sex": "牝",
+     "id": "0000391586",
+     "year": "1976"
+    },
+    {
+     "name": "Garde Royale(IRE)",
+     "sex": "牡",
+     "id": "0000341356",
+     "year": "1980"
+    },
+    {
+     "name": "Corraleja(FR)",
+     "sex": "牝",
+     "id": "0000431561",
+     "year": "1982"
+    },
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Wishing Well(USA)",
+     "sex": "牝",
+     "id": "0000393162",
+     "year": "1975"
+    },
+    {
+     "name": "Saumarez(GB)",
+     "sex": "牡",
+     "id": "0000342252",
+     "year": "1987"
+    },
+    {
+     "name": "Belle et Chere(USA)",
+     "sex": "牝",
+     "id": "0000397643",
+     "year": "1985"
+    }
+   ],
+   [
+    {
+     "name": "Sadler's Wells(USA)",
+     "sex": "牡",
+     "id": "0000336572",
+     "year": "1981"
+    },
+    {
+     "name": "High Hawk(IRE)",
+     "sex": "牝",
+     "id": "0000130578",
+     "year": "1980"
+    },
+    {
+     "name": "Halo(USA)",
+     "sex": "牡",
+     "id": "0000335154",
+     "year": "1969"
+    },
+    {
+     "name": "Ballade(USA)",
+     "sex": "牝",
+     "id": "0000391585",
+     "year": "1972"
+    },
+    {
+     "name": "Mill Reef(USA)",
+     "sex": "牡",
+     "id": "0000334047",
+     "year": "1968"
+    },
+    {
+     "name": "Royal Way(FR)",
+     "sex": "牝",
+     "id": "0000409203",
+     "year": "1969"
+    },
+    {
+     "name": "Carvin(FR)",
+     "sex": "牡",
+     "id": "0000336742",
+     "year": "1962"
+    },
+    {
+     "name": "Darling Dale(IRE)",
+     "sex": "牝",
+     "id": "0000431558",
+     "year": "1976"
+    },
+    {
+     "name": "Hail to Reason(USA)",
+     "sex": "牡",
+     "id": "0000334286",
+     "year": "1958"
+    },
+    {
+     "name": "Cosmah(USA)",
+     "sex": "牝",
+     "id": "0000387273",
+     "year": "1953"
+    },
+    {
+     "name": "Understanding(USA)",
+     "sex": "牡",
+     "id": "0000336892",
+     "year": "1963"
+    },
+    {
+     "name": "Mountain Flower(USA)",
+     "sex": "牝",
+     "id": "0000393161",
+     "year": "1964"
+    },
+    {
+     "name": "Rainbow Quest(USA)",
+     "sex": "牡",
+     "id": "0000337286",
+     "year": "1981"
+    },
+    {
+     "name": "Fiesta Fun(GB)",
+     "sex": "牝",
+     "id": "0000394252",
+     "year": "1978"
+    },
+    {
+     "name": "Lyphard(USA)",
+     "sex": "牡",
+     "id": "0000334968",
+     "year": "1969"
+    },
+    {
+     "name": "Madge(FR)",
+     "sex": "牝",
+     "id": "0000416734",
+     "year": "1975"
+    }
+   ]
+  ]
+ },
+ "fno": "F1-u",
+ "cross": "サンデーサイレンス(USA) ：S3×M3 Halo(USA) ：S4×M4×M5 Lyphard(USA) ：S5×M5"
+}

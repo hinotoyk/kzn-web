@@ -1,0 +1,18 @@
+/.idea/
+__pycache__/
+*.pyc
+test-logs/
+
+# Vite 构建产物（可随时重新生成）
+/dist/
+# 前端依赖（npm install 安装）
+front/node_modules/
+
+# 探索/候选版与废案归档（AGENTS.md §1 约定，不入库）
+/tests/
+
+# 视觉测试临时产物（无头浏览器截图/OCR 路由缓存）
+/.dsh-vision-router/
+
+# 数据管线缓存与编辑台备份（.bak 含编辑备注，绝不能被 CI `git add data/` 带上；copy-data/step_sync 也都跳过本目录）
+data/_tmp/

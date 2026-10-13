@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 絆 favicon：青绿圆角方标 + 白「絆」（粗体居中；源字不落仓库，走系统/站内 Noto Sans SC 回退；候选过程归档 tests/_trash/favicon-candidates） -->
+  <rect width="100" height="100" rx="24" fill="#0aa7a0"/>
+  <text x="50" y="52" text-anchor="middle" dominant-baseline="central"
+        font-family="'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif"
+        font-size="62" font-weight="700" fill="#ffffff">絆</text>
+</svg>

@@ -1,0 +1,23 @@
+{
+  "sire": {
+    "name_ja": "キズナ",
+    "name_cn": "高情厚意",
+    "name_en": "Kizuna",
+    "jbis_id": "0001120570",
+    "netkeiba_id": "2010105827",
+    "studbook": { "name": "キズナ", "father": "ディープインパクト" },
+    "wins": [
+      { "date": "2013-02-03", "name": "きさらぎ賞", "grade": "G3", "cn": "如月赏" },
+      { "date": "2013-05-26", "name": "東京優駿", "grade": "G1", "cn": "东京优骏" },
+      { "date": "2014-04-06", "name": "産経大阪杯", "grade": "G2", "cn": "大阪杯" }
+    ]
+  },
+  "site": {
+    "name": "絆",
+    "subtitle": "高情厚意档案",
+    "tagline": "沿着キズナ的羁绊，记录每一匹绊崽。",
+    "logo": "絆",
+    "domains": []
+  },
+  "ledger": { "url": "" }
+}
