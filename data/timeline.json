@@ -1,11 +1,11 @@
 {
  "meta": {
-  "generated_at": "2026-10-13T06:49:20",
+  "generated_at": "2026-10-20T03:31:08",
   "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
   "stats": {
-   "events": 81,
+   "events": 82,
    "horses": 49,
-   "graded_wins": 71,
+   "graded_wins": 72,
    "sire_wins": 1
   }
  },
@@ -2635,6 +2635,38 @@
     "agari": "37.1",
     "pop": "9番",
     "team": "騎手 田辺裕信 · 57kg ｜ 調教師 笹田和秀"
+   }
+  },
+  {
+   "date": "2026-10-18",
+   "type": "race",
+   "node": "graded",
+   "horse": {
+    "id": 937,
+    "name": "モンローウォーク",
+    "cn": ""
+   },
+   "photo": "",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第72胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G1第8胜"
+    }
+   ],
+   "race": {
+    "name": "秋華賞",
+    "grade": "GI",
+    "glabel": "G1",
+    "gbadge": "g1",
+    "meta": "京都11R · 芝2000m · 良",
+    "time": "1:56.1",
+    "agari": "34.5",
+    "pop": "1番",
+    "team": "騎手 戸崎圭太 · 55kg ｜ 調教師 上村洋行"
    }
   }
  ]
