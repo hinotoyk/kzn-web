@@ -118,8 +118,8 @@ def fetch_list_all(years, sleep=0.6):
                     allr[r["nk_id"]] = r
                     got += 1
         pg = soup.select_one("div.pager")
-        m = re.search(r"([\d,]+)件中", pg.get_text(" ", strip=True)) if pg else None
-        total = int(m.group(1).replace(",", "")) if m else 0
+        m = re.search(r"(\d+)件中", pg.get_text(" ", strip=True)) if pg else None
+        total = int(m.group(1)) if m else 0
         print(f"  page {page}: 收集到 {got}（累计 {len(allr)}）")
         if got == 0 or len(allr) >= total:
             break

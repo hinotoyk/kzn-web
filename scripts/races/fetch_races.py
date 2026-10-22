@@ -146,9 +146,7 @@ def parse_races(html):
         try:
             result = int(r_raw)
         except ValueError:
-            # 空白着順 = 地方（NAR）取消马：netkeiba 马匹成绩页对 取消/未出走 行
-            # 显示空单元格（不写「取消」文本），SP 比赛页也不列出该马 → 归一为「取消」。
-            result = r_raw if r_raw else "取消"  # 中止/取消/除外/失格
+            result = r_raw  # 中止/取消/除外/失格
         bw_m = re.search(r"(\d+)(\(([+-]?\d+)\))?", c("馬体重"))
         bw_v, bw_d = "", ""
         if bw_m:
@@ -443,6 +441,7 @@ def main():
     args = ap.parse_args()
 
     horses = common.load_basic()["horses"]
+    done_racing = sum(1 for h in horses if common.is_done_racing(h))
 
     want_ids = {str(x) for x in args.id.split(",") if x.strip()} if args.id else None
 
@@ -455,6 +454,8 @@ def main():
                 continue
             if want_ids is not None and str(h["id"]) not in want_ids:
                 continue
+            if want_ids is None and common.is_done_racing(h):
+                continue          # 更新停止环：已确认退役去向 → 不再出赛，跳过（--id 定向可强制）
             recs = load_existing(h["id"])
             if recs is None:
                 no_file.append(h)
@@ -473,6 +474,8 @@ def main():
             id_s = str(h["id"])
             if want_ids is not None and id_s not in want_ids:
                 continue
+            if want_ids is None and common.is_done_racing(h):
+                continue          # 更新停止环：已确认退役去向 → 不再出赛，跳过（--id 定向可强制）
             recs = load_existing(id_s)
             missing = recs is None or actual_starts(recs) < expected_starts(h)
             if recs is None:
@@ -486,6 +489,8 @@ def main():
     if args.limit:
         targets = dict(list(targets.items())[:args.limit])
     print(f"✔ 成绩页目标 {len(targets)} 匹（{note}）")
+    if done_racing:
+        print(f"✔ 更新停止环：已确认退役去向跳过 {done_racing} 匹（乗馬/繁殖/種馬/死亡）")
     return _fetch(targets, args.force)
 
 

@@ -24,6 +24,7 @@ scripts/
     grade.py      load_grade() 读 config/grade-table.json（格→显示文案/徽章类单源，GRADED 由徽章类派生，R6）
   basic/          基础管线：build_registry → fetch_pedigree / fetch_nk_id / fetch_studbook → fetch_detail → merge_basic
   races/          竞赛管线：fetch_detail / fetch_races / fetch_ledger → merge_races（racelib = 解析与规则库）
+  status/         登録状態任务（2026-10，独立日频）：run_status.py —— NAR + keibabook 抹消馬簿 → 直写 basic.json 抹消组
   timeline/       build_timeline.py  → data/timeline.json
   datechart/      build_datechart.py → data/datechart.json
   stats/          build_stats.py     → data/stats.json
@@ -33,7 +34,8 @@ scripts/
 ### 1.2 怎么跑
 
 - 直跑即可，不需要 `python -m`：`python scripts/basic/merge_basic.py`、`python scripts/races/merge_races.py`、
-  `python scripts/timeline/build_timeline.py`、`python scripts/check_data.py`。
+  `python scripts/status/run_status.py`（可加 `--dry-run` 只出报告不落库）、`python scripts/timeline/build_timeline.py`、
+  `python scripts/check_data.py`。
   各 `common.py` 头部有一行 `sys.path` 注入（把 `scripts/` 放进去），所以 `python scripts/<管线>/xxx.py`
   这种直跑方式零改动就能 `from core import …`——**不要**改成 `python -m`（会动 `run_update.py` 的调用语义）。
 - 日常/定时更新统一走项目根 `python run_update.py <策略>`（9 种策略表见根 `README.md`，验证与排查见
@@ -50,7 +52,7 @@ scripts/
 ### 1.3 设计原则（线性流）
 
 - 每个脚本只负责一条独立业务链路，无跨源来回兜底。
-- 请求统一走 `fetch()`：重试 + 风控日志（`data/fetch_log.csv`）+ 按域名限速（`DOMAIN_SLEEP`，带 0.8~1.2 抖动）。
+- 请求统一走 `fetch()`：重试 + 风控日志（`data/fetch_log.jsonl`）+ 按域名限速（`DOMAIN_SLEEP`，带 0.8~1.2 抖动）。
 - `basic.json` 是唯一「前合并」数据源，各并发脚本**不直接碰它**，只写自己的独立缓存
   `data/_tmp/<管线>/<name>.json`（键均为 `str(id)`），因此可真正并行、互不覆盖；
   最后由该管线的 `merge_*.py` 统一合并进 `basic.json` 并删除缓存（`--keep` 保留缓存调试）。
@@ -77,7 +79,9 @@ scripts/
 ### 1.5 人工值（脚本永不写）
 
 人工钉住的字段只活在 `data/manual_overrides.json`（时间线节点在 `data/timeline_manual.json`）；
-直接改 `data/basic.json` 会被第二天 CI 抹掉。两条管线的合并收尾**都**要套一次
+直接改 `data/basic.json` 会被第二天 CI 抹掉。**唯一例外 = `scripts/status` 任务**（§4）：它是
+`basic.json` 抹消组的授权自动写入层，合并语义配套改为抹消组逐键合并（人工键覆盖/清空，其余保留任务值）。
+两条管线的合并收尾**都**要套一次
 `manual.apply_overrides`（`merge_basic.py` 写回前、`merge_races.py` 全部派生之后），否则只跑 `--basic`
 就会把人工的 `馬主` / `調教師` / `登録状態` 抓取值整片覆盖。契约与 `_` 前缀键（`_orig` / `_note`）口径见
 [`docs/SCHEMA.md`](SCHEMA.md) §3。
@@ -114,7 +118,7 @@ data/                      # 统一数据根（根目录，两部分的共同产
 ├── basic.json           # 唯一「前合并」数据源（建档 + 基本信息）
 ├── pedigree/{id}.json   # 每匹马 5 代血统文件（id 引用）
 ├── _tmp/basic/          # 基础并发脚本的独立缓存（merge 后自动删除）
-└── fetch_log.csv        # 风控请求日志（基础+竞赛统一记录，script 列区分）
+└── fetch_log.jsonl      # 风控请求日志（基础+竞赛统一记录，script 字段区分；逐行 JSON）
 ```
 
 ### 2.2 业务流程（线性）
@@ -130,6 +134,8 @@ data/                      # 统一数据根（根目录，两部分的共同产
 | `_tmp/basic/pedigree.json` | `{id: "data/pedigree/{id}.json"}` |
 | `_tmp/basic/nk_id.json` | `{id: nk_id}` |
 | `_tmp/basic/studbook.json` | `{id: 馬名意味}` |
+| `_tmp/basic/studbook_eu.json` | `{id: 欧字馬名}`（2026-10 起：studbook Honba 兜底，merge 只在 netkeiba 缺失时写入） |
+| `_tmp/basic/studbook_name.json` | `{id: 馬名}`（2026-10 起：studbook 空名回填，merge 只补「空→有」、不覆盖已有真名） |
 | `_tmp/basic/detail.json` | `{id: {登録状態, 性別, ..., 欧字馬名, ...}}` |
 
 #### 1. 建档 `build_registry.py`
@@ -153,11 +159,16 @@ python build_registry.py --year 2026 --dry-run   # 后续加年份（预览）
 |------|------|------|------|
 | 1 | `fetch_pedigree.py` | JBIS `/horse/{jbis_id}/pedigree/` | `data/pedigree/{id}.json` + `_tmp/basic/pedigree.json` 引用 |
 | 2 | `fetch_nk_id.py` | netkeiba `list.html?sire_id=...&sort=age-asc` | `_tmp/basic/nk_id.json`（按生年数组过滤 + 罗马数字归一化匹配）；另写 `_tmp/basic/总赏金.json`（列表页 `総賞金(万円)` 列） |
-| 3 | `fetch_studbook.py` | studbook.jp `Honba?sid=` | `_tmp/basic/studbook.json`（按归一化馬名匹配） |
+| 3 | `fetch_studbook.py` | studbook.jp `SearchChichiKettouList2`（血統登録産駒一覧，翻页）+ `SearchChichiShushiList2`（父馬別繁殖登録馬 kubun=1/2）→ `Honba?sid\|hid=` | `_tmp/basic/studbook.json`（意味・由来）+ `_tmp/basic/studbook_eu.json`（欧字馬名兜底）+ `_tmp/basic/studbook_name.json`（空名回填） |
 
 > 并发2：netkeiba 列表不能指定生年，需翻遍全部分页，只取生年在数组的马；
 > 匹配键 `(母名归一化, 生年)` —— 建档时母名已统一拉丁，两端天然一致。
-> 并发3：studbook 无母名，只能按馬名关联；未登録/未命名仔无法匹配则留空并记报告。
+> 并发3（2026-10 定稿，覆盖両列表）：studbook 数据模型 = 马要么在「血統登録」列表（赛马/未命名）、
+> 要么在「繁殖登録」列表（已入繁殖），**不在两个列表都出现**——只扫血統登録会漏掉已繁殖仔
+> （如 ゲンパチミスティ），故繁殖登録列表必扫。匹配键 = 馬名归一 或 `(母名,生年)`，性別交叉校验
+> （两侧都已知且冲突 → 跳过进报告，不猜）。空名回填只在「空→有」；已有真名 ≠ studbook 马名
+> （出口马 英文名 vs 日文名）只进命名环冲突报告，不覆盖。库外産駒 / 库内但 studbook 未见 → 只进报告提示。
+> 单结果繁殖登録页直接内联档案（意味/欧字免二次请求）；多结果按行抓 Honba。报告 `data/studbook_report.md`。
 
 #### 3. 阶段四 `fetch_detail.py`
 - **依赖 nk_id**：读取 `_tmp/basic/nk_id.json` 缓存（或 basic.json 的 nk_id）。
@@ -183,7 +194,7 @@ python run_all.py --skip-detail       # 只做阶段1 + merge（不抓详情）
 
 - 建档填：`id, jbis_id, 馬名, 母名, 生年`
 - 并发2 填：`nk_id`；并发3 填：`馬名意味`；并发1 填：`pedigree_file`
-- 阶段四 填：`登録状態…セリ取引価格` 及 `欧字馬名`（netkeiba 英文名）
+- 阶段四 填：`登録状態…セリ取引価格` 及 `欧字馬名`（netkeiba 英文名；缺失时由并发3 studbook Honba 兜底，见 §2.2 表）
 - `香港馬名` / `自译馬名`：手工补充字段（建档为空，待人工填写）
 - `races_file` / `収得賞金` 由竞赛部分（§3）回填；`photo` 可人工钉住。
 
@@ -201,7 +212,7 @@ DEFAULT_SLEEP = 2.0              # 未匹配域名的兜底
 ```
 
 - 脚本里 `time.sleep(common.sleep_for(url))` 自动按 URL 的 host 查表取间隔。
-- **风控观测**：每次请求写 `data/fetch_log.csv`（含 `host` 列），运行后可统计各域名的 403/失败率，据此调整上面的值。
+- **风控观测**：每次请求写 `data/fetch_log.jsonl`（含 `host` 字段），运行后可统计各域名的 403/失败率，据此调整上面的值。
 
 ### 2.5 常用命令
 
@@ -252,7 +263,7 @@ data/                      # 统一数据根（根目录，两部分的共同产
 ├── races/{id}.json      # 每匹逐场成绩（持久，增量只增不覆盖）
 ├── _tmp/races/          # 各环独立缓存（merge 后自动删除）
 ├── races_report.md      # 每次合并的更新报告（脚本生成产物，留 data/）
-└── fetch_log.csv        # 风控请求日志（基础+竞赛统一记录，script 列区分）
+└── fetch_log.jsonl      # 风控请求日志（基础+竞赛统一记录，script 字段区分；逐行 JSON）
 ```
 
 ### 3.2 线性主链（单链，不来回退）
@@ -262,6 +273,7 @@ data/basic.json (id, nk_id)
    │  ① fetch_detail：db.netkeiba.com/horse/{nk_id}/（EUC-JP）
    │     会变化字段无条件覆盖：登録状態/性別/馬齢/馬主/調教師/通算成績/獲得賞金 (中央)/獲得賞金 (地方)
    │     稳定字段非空才覆盖：毛色/生年月日/産地/生産牧場/欧字馬名/セリ取引価格
+   │     （欧字馬名 另可由 studbook Honba 兜底，merge_basic 只在 netkeiba 缺失时写入，不覆盖）
    │     通算成績 判变（两侧去空白后精确比较）→ _tmp/races/changed.json
    ▼
    ② fetch_races：db.netkeiba.com/horse/result/{nk_id}/（EUC-JP）
@@ -321,6 +333,9 @@ python merge_races.py --keep       # 单独合并（保留缓存调试）
   ⚠ 骑手/调教师的 id 命名空间有重叠（同数字可能分属两人），两个映射必须分文件、按页面类型取。
 - **台账只留海外场**：netkeiba 成绩页聚合中央+地方+海外，台账仅补海外漏；海外场不参与収得。
   馬名匹配做「去国家后缀」归一（`Grand Warrior(JPN)` ↔ `Grand Warrior`）。
+- **更新停止环**（2026-10 用户定稿）：已确认退役去向 `抹消_去向種別 ∈ {乗馬, 繁殖, 種馬, 死亡}`
+  的马不再出赛 → `fetch_detail.py` / `fetch_races.py` 默认跳过（`common.is_done_racing(h)`，
+  地方競馬/海外除外——仍会出赛）；`--id` 定向可强制抓取（调试用）。
 
 ### 3.5 按域名限速（common.py 的 DOMAIN_SLEEP）
 
@@ -330,7 +345,7 @@ python merge_races.py --keep       # 单独合并（保留缓存调试）
 | race.netkeiba.com | 2.0s | 中央 比赛结果页（SP 域，格/条件/厩舎/本賞金） |
 | nar.netkeiba.com | 2.0s | 地方 比赛结果页（SP 域） |
 
-每次请求写 `data/fetch_log.csv`（含 host 列），可统计各域名 403/失败率后调整间隔。
+每次请求写 `data/fetch_log.jsonl`（含 host 字段），可统计各域名 403/失败率后调整间隔。
 
 ### 3.6 边界 / 纪律
 
@@ -344,7 +359,67 @@ python merge_races.py --keep       # 单独合并（保留缓存调试）
 
 ---
 
-## 4. 校验与编排
+## 4. status 任务（登録状態 · JRA 抹消/去向追踪）
+
+2026-10 新增（用户定稿）：**独立于 basic/races 两管线的日频任务**（不进 `run_update` 编排），
+是 `basic.json` 抹消组四键 + `kb_id` 的授权自动写入层（唯一例外，见 §1.5）。
+
+### 4.1 目录结构与命令
+
+```
+scripts/status/
+├── common.py        # 共享：限速口径（keibabook / keiba.go.jp / studbook.jp）+ 本任务 URL + basic.json 读写
+└── run_status.py    # NAR（翻页）+ 抹消馬簿 → 比对 → 調教師/kinkyo 补齐 → studbook 繁殖登録确认 → 直写 basic.json + 报告
+```
+
+- `python scripts/status/run_status.py`（落库）；`--dry-run` 只出报告不写 basic.json。
+- 报告：`tests/status_task_report.md`（覆盖式，每次运行重写；证据明细只进报告，不进 basic.json）。
+- **本机 Tier2 补跑**：`python scripts/studbook_sync.py` 串 命名环→merge→状态环→merge
+  （studbook 对 CI 出口 IP 403，需本机直连跑，见 §7）。
+
+### 4.2 数据链与落库规则（用户定稿）
+
+1. **NAR 竞走馬一覧**（父名=种马，免登录，50 行/页 + 「次の50頭」锚翻页跟随 `k_pageNum`；
+   `k_activeCode=1` 实测 = NAR 在册 + JRA 抹消全集）：
+   - 所属場=地方 → 确认去向落库：`登録状態=抹消` + `種別=地方競馬` + `場所=所属場原文`
+     （兵庫/北海道/高知/金沢/大井/船橋/浦和/愛知/岩手…**不做映射，同 美浦/栗東 一个道理**）；
+   - 所属場=JRA → **一律跳过**（用户定稿：含「抹消」标的也不深挖，仅报告列出）。
+2. **NAR 馬详情页 RaceHorseInfo**（按需，仅地方马，1 请求/匹）→ 調教師：
+   原文「長　倉　　　　功（兵庫）」→ 压名字里的全角空格、**保留（所属）尾缀** →「長倉功（兵庫）」，
+   **直接覆盖 basic 的 調教師**（人工表钉了調教師则跳过）。
+3. **keibabook 抹消馬簿**（栗東=1 / 美浦=2 共 2 请求，约 2 周滚动窗口 → 必须日频跑才不漏）：
+   命中即落全套 `抹消日` + 事由（地方/乗馬/繁殖/斃死→死亡 → `種別`）+ 行き先（未定 → 場所留空）。
+4. NAR-地方 但库里无抹消日（如未出走移籍）→ 馬検索（**必带 `masyof%5B%5D=1`**，否则只回現役）
+   拿 `kb_id` → 近況履歴补日期；未出走马本无中央登録可抹，kinkyo 无条目属正常（报告列待办）。
+5. **keibabook 补查**（用户定稿触发）：`登録状態 ∈ {抹消, 空}` 且 无去向 且 人工无值 → 馬検索拿 kb_id →
+   马页(kanzen) + 近況履歴。产出：中央抹消标 = 确凿抹消证据（补 `登録状態`/`抹消日`）；
+   抹消标 + 厩舎栏非中央地名（栗東/美浦以外，如 西脇/園田）= 地方去向证据（`種別=地方競馬` + `場所=厩舎地名原文`）；
+   无抹消标（未登录/未出走）→ 仅观察留痕。乗馬/繁殖去向免费页无记录（马页厩舎栏仍显示旧 JRA 厩舎），靠抹消馬簿窗口。
+6. **落库守则**：只有「确认去向」才写 種別/場所——推定/猜测绝不入库，不确定就只留抹消日；
+   人工表钉了 種別/場所 → 任务不碰该马去向（防乒乓），钉了抹消日 → 日期不碰，钉了調教師 → 調教師不碰，
+   钉了 kb_id → 技术键不碰（且补查优先用人工值）。
+   报告分「变更 / JRA跳过 / 人工钉 / **观察**（未登录·未出走·海外等正常终态留痕）/ 待办（仅真正需人工）」五段。
+7. **studbook 繁殖登録确认**（2026-10 状态环定稿，scope = `登録状態 ∈ {空, 抹消}` 且未钉 去向）：
+   `SearchChichiShushiList?kubun=1/2&initial=种马名`（服务端解析现行 hid）→ 单结果档案页（`<title>`=马名）
+   或 多结果列表（馬名|生年|性|父名|母名）→ 匹配 馬名 或 `(母名,生年)` → 繁殖登録**本身即退役+入繁殖的权威证据**：
+   `kubun=1`（牡）→ `種別=種馬`、`kubun=2`（牝）→ `種別=繁殖`；空 登録状態 一并补 `登録状態=抹消`。
+   現役（或其它非抹消）却已繁殖登録 → 只进待办（库内状态疑似滞后，不擅自改）；
+   已有冲突去向 → 只进待办。**乗馬不在 studbook**（仍靠抹消馬簿事由=乗馬）。
+   ⚠ CI 出口 IP 被 studbook 拦（403，2026-09 起每天如此）→ 本轮降级只留观察行，不中断任务；
+   本机经 `scripts/studbook_sync.py` 补跑（同一脚本集，403 解除后 CI 原样可用）。
+
+### 4.3 合并语义（双写入者，配套改两处）
+
+- `core/manual.apply_overrides` 对抹消组改为**逐键合并**：人工表条目里出现的键人工值覆盖
+  （值为空 = 显式清空）；条目里没有的键 → basic.json 已有值原样保留（任务值跨合并存活；
+  旧语义「有条目即整组重置」会把任务补的 種別/場所 一并洗掉，弃用）。
+- `merge_races` 的 VOLATILE 回填对 `登録状態` 加守卫：netkeiba 对已移籍地方的马**不写状态词（空）**、
+  对移籍事实**长期残留「現役」**——两者都不覆盖已有非空值（抹消状态由本任务/人工表维护）。
+- 抹消组进编辑台人工键不受影响（登録状態=抹消 时展开，契约见 `docs/SCHEMA.md` §3）。
+
+---
+
+## 5. 校验与编排
 
 - **门禁**：`python scripts/check_data.py`（退出码 0）+ 四个断言脚本
   `node scripts/races/verify_result.cjs` / `verify_drill.cjs` / `node scripts/stats/verify_stats.cjs` /
@@ -357,7 +432,7 @@ python merge_races.py --keep       # 单独合并（保留缓存调试）
 
 ---
 
-## 5. 离线脚本零第三方依赖（红线，2026-10-01 定稿）
+## 6. 离线脚本零第三方依赖（红线，2026-10-01 定稿）
 
 requests/bs4 只在真正发请求处惰性导入（`core/net.py` 的 `fetch()`/`soup_of()` 函数内、
 两个 `common.py` 走 PEP 562 `__getattr__` 重导出——统一收口见 `core/runtime.py::install_lazy_http`）——
@@ -365,3 +440,26 @@ GitHub runner 不再预装 requests，顶层 import 曾把 Pages deploy 的 merg
 
 **新增共享工具时保持这条线：不要在 `core/*` 或 `common.py` 模块顶层 import 第三方包。**
 （`core/runtime.py` / `core/sire_config.py` / `core/grade.py` 等后续新增模块一律纯 stdlib。）
+
+---
+
+## 7. studbook 本机同步（403 墙 · Tier2 调度 · 2026-10 定稿）
+
+**现象**：studbook.jp 对 GitHub Actions 出口 IP 返回 403（2026-09 起每天如此，`data/fetch_log.jsonl`
+里 SearchBameiList 连续 403；同一请求本机 200 / CI 403 → **IP 维度拦截，非请求形状问题**）。
+凡需 studbook 的环节（命名环、状态环繁殖登録确认）在 CI 必须能**优雅降级**，真正闭环在本机跑。
+
+**降级口径**（CI 侧）：
+- `fetch_studbook.py`：遇 403 → 明确打印 + `exit(1)`，**不写半截缓存**（merge_basic 无缓存可空转，
+  不产生脏数据；status.yml 里该步失败可忽略，其余步正常）。
+- `run_status.py` §4.2-7：studbook 检查 403/异常 → `stb=None`，只留观察行，**不中断任务**。
+
+**Tier2 本机闭环**（同一脚本集，本地可用）：
+```
+python scripts/studbook_sync.py            # 命名环(fetch_studbook)→merge→状态环(run_status)→merge
+python scripts/studbook_sync.py --commit   # 数据有变化时自动 git add data/ + commit（仍不 push）
+```
+- 命名环产出 `data/studbook_report.md`（回填/冲突/库外産駒/仍未登録/库内未见/空值五段）。
+- **Git 约定**：脚本默认只改 `data/`，**不 commit/push**；`--commit` 也只 add+commit，
+  push 一律由用户本人执行（AGENTS.md §0）。
+- 403 若解除，同一套脚本进 CI 原样可用（`status.yml` 已按降级口径编排），无需改本机/CI 两版。

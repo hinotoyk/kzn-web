@@ -35,16 +35,16 @@
          → ③ 竞赛 run_all(详情+判变 → 成绩增量(SP页含格/条件/調教師/本賞金) → 台账 → 合并) → 汇总
 ```
 **成功判据**（对照 full 日志「汇总」段）：
-- 建档：277 匹（2023=131 + 2024=146），新增数 = 预期
-- 血统 `pedigree_file`：277/277
-- `nk_id`：276/277（1 匹未命名仔无 nk_id，预期）
-- `races_file` / `収得賞金`：276/277
+- 建档：1,221 匹（2017~2025，逐年 107~182），新增数 = 预期
+- 血统 `pedigree_file`：1221/1221
+- `nk_id`：1213/1221（8 匹无 nk_id：未登録/未命名仔，预期）
+- `races_file` / `収得賞金`：1213/1221
 - 収得缺本賞金 0 场 · 抓取失败 0 匹
-- 风控：`fetch_log.csv` 各 host 非 200 = 0
+- 风控：`fetch_log.jsonl` 各 host 非 200 = 0
 
 ### 1.2 `--check` 数据校验
 校验：引用完整性 / 通算战数 vs 文件出赛 / 跨来源重复 / 字段填充统计；末尾跑四段断言（`node scripts/…`，见 §2）：**日期图**（`scripts/datechart/verify_datechart.cjs`，84 断言）/ **统计总览**（`scripts/stats/verify_stats.cjs`，168 断言）/ **比赛记录下钻冒烟**（`scripts/races/verify_drill.cjs`，31 断言）/ **比赛记录结果对账**（`scripts/races/verify_result.cjs`，全库三态闭合）。
-**成功判据**：`data/check_report.md` 中「问题合计: 0」，且可修复项均为 0（`nk_id` 可修复 1 是已知未命名仔，非缺陷）；日期图断言输出 `ALL PASS`。
+**成功判据**：`data/check_report.md` 中「问题合计: 0」，且可修复项均为 0（`nk_id` 可修复 8 是已知未登録/未命名仔，非缺陷）；日期图断言输出 `ALL PASS`。
 **`--fix` 模式**：对可修复项自动补跑对应脚本（pedigree / nk_id / races）。
 
 ### 1.3 `--horse <id>` 定向更新
@@ -144,7 +144,7 @@ python run_update.py --init
 |---|---|
 | `run_update.py` 每次运行 | `test-logs/update-<时间戳>.log`（每步一行状态 + 详细输出） |
 | `--init` / `run_full_test.py` 内部 | `test-logs/full-<时间戳>.log`（含汇总段） |
-| 风控观测 | `data/fetch_log.csv`（列：`ts,script,host,path,status,dur_s,retries,note`） |
+| 风控观测 | `data/fetch_log.jsonl`（字段：`ts,script,host,path,status,dur_s,retries,note`，逐行 JSON） |
 | 校验报告 | `data/check_report.md` |
 | 比赛合并报告 | `data/races_report.md` |
 | 意味匹配报告 | `data/studbook_report.md` |
@@ -152,8 +152,8 @@ python run_update.py --init
 > 日志都落在 `test-logs/`，按时间戳排序；排查时取**最新的对应策略日志**。
 
 ### 3.2 风控 / 限速问题
-- 若 `fetch_log.csv` 某 host **非 200 增多 / 出现 403**：调 `scripts/{basic,races}/common.py` 的 `DOMAIN_SLEEP` 字典（按域名间隔，已带 0.8~1.2 抖动）。
-- 用 fetch_log 统计各 host 失败率：`Import-Csv data/fetch_log.csv | Group-Object host | % { $bad=($_.Group|?{$_.status -ne '200'}).Count; "$($_.Name): $($_.Count) 条, 非200: $bad" }`。
+- 若 `fetch_log.jsonl` 某 host **非 200 增多 / 出现 403**：调 `scripts/{basic,races}/common.py` 的 `DOMAIN_SLEEP` 字典（按域名间隔，已带 0.8~1.2 抖动）。
+- 用 fetch_log 统计各 host 失败率：`Get-Content data/fetch_log.jsonl | ConvertFrom-Json | Group-Object host | % { $bad=($_.Group|?{$_.status -ne '200'}).Count; "$($_.Name): $($_.Count) 条, 非200: $bad" }`。
 
 ### 3.3 数据缺失 / 判变盲区
 - 判变 = 通算成績变化 ∪ 数据缺失（文件出赛 < 通算战数）∪ 无文件。

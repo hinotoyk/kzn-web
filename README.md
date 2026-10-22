@@ -84,6 +84,7 @@ python run_update.py <策略>
 | `--races` | 详情更新+判变 → 成绩增量 → 台账海外 → 合并（赛后日常） |
 | `--horse 1,2,3` | 只处理指定 id 的马 |
 | `--races-force` | 全部马重抓成绩页（覆盖式重建） |
+| `--day 20261020[,..]` | 按天快速更新（SP 结果页；可配 `--jra-only` 跳过地方） |
 | `--check [--fix]` | 数据一致性校验（+ 自动补跑修复） |
 | `--ledger` | 只拉台账海外并入 |
 | `--ci [--year …]` | 基本+比赛+校验+git 提交（GitHub Actions 每日） |
@@ -93,7 +94,7 @@ python run_update.py <策略>
 ## 部署
 
 - **GitHub Actions**：push main 时 `.github/workflows/deploy.yml` 自动 `npm run build`，把仓库根（含 `dist/` + `data/`）发布为 Pages 站点根，访问 `https://<user>.github.io/<repo>/dist/index.html`。
-- **数据自动更新**：`.github/workflows/update-data.yml` 每天 UTC 22:00 跑 `--ci`（数据仓库模式，跑完有变化自动 commit+push），也可手动触发选策略。
+- **数据自动更新**：`.github/workflows/update-data.yml` 每天 UTC 22:00 跑 `--ci`（数据仓库模式，跑完有变化自动 commit+push），也可手动触发选策略；`update-day.yml` 每天北京时间 21:00 按天快速补当天赛果；`status.yml` 在 update-data 成功后串联跑登録状態任务（抹消/去向）。
 - 前置：Settings → Pages → Source 选 **GitHub Actions**；Settings → Actions → Workflow permissions 勾选读写。
 
 ## 文档导航

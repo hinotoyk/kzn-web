@@ -11,6 +11,9 @@
   _tmp/nk_id.json     {id: nk_id}
   _tmp/馬名.json      {id: 馬名}（列表页；未命名=空，空值不覆盖已有名）
   _tmp/studbook.json  {id: 馬名意味}
+  _tmp/studbook_eu.json  {id: 欧字馬名}（studbook 兜底：仅当 netkeiba 缺失时写入，不覆盖已有值）
+  _tmp/studbook_name.json  {id: 馬名}（studbook 空名回填：只在「空→有」时写入，不覆盖已有真名；
+                             fetch 侧已过滤「馬名未登録」占位）
   _tmp/detail.json    {id: {登録状態, 性別, ..., 欧字馬名, ...}}
 
 用法:
@@ -24,6 +27,7 @@ import sys
 
 sys.path.insert(0, __file__.rsplit("\\", 1)[0])
 import common
+from core import text  # noqa: E402（調教師 格式守卫：防 状态环 NAR ↔ netkeiba 乒乓）
 
 # 缓存名 → 写入 basic.json 的字段映射
 PEDIGREE_FIELD = "pedigree_file"
@@ -33,9 +37,10 @@ _UNNAMED_RE = re.compile(r"^.+の\d{4}$")
 
 
 def is_unnamed(name):
-    """未命名占位判定：全角下划线 ＿＿＿ 或 netkeiba「母名のYYYY」。空值/占位→True。"""
+    """未命名占位判定：全角下划线 ＿＿＿ / netkeiba「母名のYYYY」/ studbook「馬名未登録」。
+    空值/占位→True。"""
     s = (name or "").replace("＿", "").replace("_", "").strip()
-    if s == "":
+    if s == "" or s == "馬名未登録":
         return True
     return bool(_UNNAMED_RE.match(s))
 
@@ -70,6 +75,8 @@ def main():
     nk = common.read_cache("nk_id")         # {id: nk_id}
     names = common.read_cache("馬名")       # {id: 馬名}（列表页，未命名=空）
     stud = common.read_cache("studbook")    # {id: 馬名意味}
+    stud_eu = common.read_cache("studbook_eu")  # {id: 欧字馬名}（studbook 兜底）
+    stud_name = common.read_cache("studbook_name")  # {id: 馬名}（studbook 空名回填）
     total = common.read_cache("总赏金")     # {id: 総賞金(万円)}（列表页）
     det = common.read_cache("detail")       # {id: {详情字段}}
 
@@ -81,8 +88,16 @@ def main():
                 continue
             if is_dict:
                 for k, v in (val or {}).items():
-                    if v:
-                        h[k] = v
+                    if not v:
+                        continue
+                    if k == "調教師":
+                        # 防格式乒乓（2026-10 用户定稿）：同训马师（仅 全半角括号/所属/空格 差异）不写，
+                        # 保留现值；现值空或真换人 → 规范化写入。三写者统一走 text.trainer_guard。
+                        g = text.trainer_guard(h.get(k, ""), v)
+                        if g is None:
+                            continue        # 同一人 → 不写（保留现值）
+                        v = g
+                    h[k] = v
             else:
                 if val:
                     h[field] = val
@@ -104,6 +119,25 @@ def main():
         h["馬名"] = val
         n_name += 1
     n_stud = apply(stud, "馬名意味")
+    # 欧字馬名（studbook 兜底）：只补 netkeiba 缺失的（已有值保留，防覆盖），空值不写入
+    n_stud_eu = 0
+    for id_s, val in (stud_eu or {}).items():
+        h = by_id.get(id_s)
+        if not h or not val:
+            continue
+        if not h.get("欧字馬名", ""):
+            h["欧字馬名"] = val
+            n_stud_eu += 1
+    # 馬名（studbook 空名回填）：只补空，绝不覆盖已有真名（含占位）；studbook 占位已在 fetch 侧过滤，这里再兜底一次
+    n_stb_name = 0
+    for id_s, val in (stud_name or {}).items():
+        h = by_id.get(id_s)
+        if not h or not val or is_unnamed(val):
+            continue
+        if not is_unnamed(h.get("馬名", "")):
+            continue                     # 已有真名/占位 → 不覆盖
+        h["馬名"] = val
+        n_stb_name += 1
     # 総賞金：0 也需写入（不能走 apply 的真值过滤），单独处理
     n_total = 0
     for id_s, val in (total or {}).items():
@@ -141,6 +175,8 @@ def main():
     print(f"   - nk_id:         {n_nk}")
     print(f"   - 馬名:          {n_name}")
     print(f"   - 馬名意味:      {n_stud}")
+    print(f"   - 欧字馬名兜底:  {n_stud_eu}")
+    print(f"   - 馬名(studbook回填): {n_stb_name}")
     print(f"   - 総賞金:        {n_total}")
     print(f"   - 详情字段:      {n_det}")
     print(f"   - 母父(血统图):  {n_mps}")

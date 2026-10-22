@@ -45,7 +45,7 @@ RACE_SP_URL_NAR = constants.RACE_SP_URL_NAR                    # 地方 比赛�
 
 # ---- 本管线的网络口径（以形参注进中立层：net 不含管线概念） ----
 # netkeiba 对高频抓取敏感；SP 域（race/nar result 页）相对宽松。
-# 运行后可在 data/fetch_log.csv 里按 host 观察 403/失败率，按需调整。
+# 运行后可在 data/fetch_log.jsonl 里按 host 观察 403/失败率，按需调整。
 DOMAIN_SLEEP = {
     "db.netkeiba.com": 6.0,      # 详情 / 成绩页（风控严，保守）
     "race.netkeiba.com": 2.0,    # 中央/海外 比赛结果页（SP 域）
@@ -75,6 +75,16 @@ clean_cache_all = functools.partial(basic_io.clean_cache_all, tmp_dir=TMP_DIR)
 # ---------------- 人工维护表 data/manual_overrides.json（契约见 docs/SCHEMA.md） ----------------
 load_overrides = manual.load_overrides
 apply_overrides = manual.apply_overrides
+
+
+# ---------------- 更新停止环（2026-10 用户定稿） ----------------
+DONE_RACING = {"乗馬", "繁殖", "種馬", "死亡"}   # 已确认退役去向且不再出赛 → 跳过比赛数据更新
+
+
+def is_done_racing(h):
+    """已确认退役去向（乗馬/繁殖/種馬/死亡）→ 不再出赛，跳过 races/detail 抓取。
+    地方競馬 除外（仍会出赛）；去向为空/未确认 → 不跳过（避免漏抓）。"""
+    return h.get("抹消_去向種別", "") in DONE_RACING
 
 
 # ---------------- 比赛记录 ----------------
