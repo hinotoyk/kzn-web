@@ -74,15 +74,15 @@ def log(msg="", echo=True):
         print(line, flush=True)
 
 
-def run_step(name, script, *args, exe=None):
+def run_step(name, script, *args, exe=None, timeout=10800):
     """跑一步子进程（默认 python，exe="node" 跑断言脚本），失败不中断后续步骤（返回码交给调用方决策）。"""
     log(f"\n───── [{name}] {Path(script).name} {' '.join(args)} ─────", echo=False)
     t0 = time.time()
     try:
         r = subprocess.run([exe or PY, str(script), *args], capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=10800)
+                           encoding="utf-8", errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired:
-        log(f"✗ [{name}] 超时(10800s)")
+        log(f"✗ [{name}] 超时({timeout}s)")
         results.append((name, -1, time.time() - t0))
         return -1, time.time() - t0
     except OSError as e:
@@ -201,7 +201,8 @@ def main():
         run_step("日期图·数据预计算", DATECHART)
         run_step("统计·数据预计算", STATS)
     elif args.races_force:
-        run_step("比赛·全量刷新", RACES / "run_all.py", "--force")
+        # kzn 规模（~1200 匹）全量 = 详情+成绩+SP ≈ 4.5h，yunji 默认 3h 超时会掐断在 merge 前（缓存作废）
+        run_step("比赛·全量刷新", RACES / "run_all.py", "--force", timeout=28800)
         run_step("时间线·事件预计算", TIMELINE)
         run_step("日期图·数据预计算", DATECHART)
         run_step("统计·数据预计算", STATS)
