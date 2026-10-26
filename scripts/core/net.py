@@ -12,7 +12,7 @@ import random
 import re
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # requests / bs4 不在模块顶层导入（2026-10-01）：core 会被 merge_basic / build_timeline 等
@@ -26,6 +26,10 @@ DEFAULT_SLEEP = constants.DEFAULT_SLEEP   # 未匹配到域名的兜底间隔
 
 # log_fetch 记 path 时剥掉的站点根前缀：同样由管线注入（两管线消费的域不同）。
 STRIP_BASES = ()
+
+# fetch_log.jsonl 滚动保留窗口（天）：日志入库可追踪（.gitattributes merge=union 抗并发 rebase 冲突），
+# 但只留最近两个月（2026-10-26 用户定稿）——过期行由 trim_fetch_log 在每次 log_fetch 后自动剔除。
+LOG_RETENTION_DAYS = 60
 
 
 def domain_of(url):
@@ -73,8 +77,9 @@ def fetch(url, retries=3, encoding="utf-8", session=None, sleep_on_403=20,
 def log_fetch(url, status, dur, retries, note="", strip_bases=None):
     """风控观测：记录 域名 + 最小必要请求信息，失败不影响抓取。
 
-    逐行 append JSONL（`data/fetch_log.jsonl`）：每行自包含、免 header、无 CSV 引号/逗号转义坑；
-    path 字段常含逗号，JSON 字符串转义更规范。进 dist 前由 vite copy-data 跳过 *.jsonl，不进仓库。"""
+    逐行 append JSONL（`data/fetch_log.jsonl`）：每行自包含、免 header、无 CSV 引号/逗号转义坑。
+    入库可追踪（.gitattributes merge=union 抗并发 rebase 冲突）+ 滚动只留最近两个月（trim_fetch_log）；
+    进 dist 前仍由 vite copy-data 跳过 *.jsonl。"""
     try:
         log = constants.DATA_DIR / "fetch_log.jsonl"
         constants.DATA_DIR.mkdir(parents=True, exist_ok=True)   # 首次运行目录可能还不存在
@@ -94,6 +99,39 @@ def log_fetch(url, status, dur, retries, note="", strip_bases=None):
         }
         with open(log, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        trim_fetch_log()
+    except Exception:
+        pass
+
+
+def trim_fetch_log():
+    """滚动保留：data/fetch_log.jsonl 只留最近 LOG_RETENTION_DAYS 天（按行 ts 判定，2026-10-26 定稿）。
+
+    追加时间序 → 首行仍在窗口内即无需重写（常规调用 = 1 次 json.loads，零开销）；
+    过期才全量过滤重写窗口内尾部；解析不了 ts 的行视为过期丢弃。失败不影响抓取。"""
+    try:
+        log = constants.DATA_DIR / "fetch_log.jsonl"
+        if not log.exists():
+            return
+        cutoff = (datetime.now() - timedelta(days=LOG_RETENTION_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
+        with open(log, encoding="utf-8") as f:
+            lines = f.readlines()
+        if not lines:
+            return
+        try:
+            if json.loads(lines[0]).get("ts", "") >= cutoff:
+                return                       # 首行仍在窗口内 → 无过期行
+        except Exception:
+            pass                             # 首行损坏 → 继续走全量过滤
+        kept = []
+        for ln in lines:
+            try:
+                if json.loads(ln).get("ts", "") >= cutoff:
+                    kept.append(ln)
+            except Exception:
+                pass
+        with open(log, "w", encoding="utf-8") as f:
+            f.writelines(kept)
     except Exception:
         pass
 
