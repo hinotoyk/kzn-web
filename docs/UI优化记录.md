@@ -727,5 +727,15 @@
 - **复评追补（2026-10-26 二次审阅，用户授权直接改；对齐 yunji 同轮复评）**：① 惰性求值收口（bus/editor/profile，见上）；② 旧桶清理 `cleanLegacyBucket()`；③ PAT 旧键提示 `legacyTokenNote()`；④ `site.id` 补进配置契约（`docs/REFACTOR.md` §3.3 + README 新项目步骤）与 `AGENTS.md` 硬规（存储键前缀 + 加载期禁求值）；⑤ `gen-site-config.mjs` 对缺省 `id` 构建期告警（新克隆仓最容易漏）；⑥ `data/fetch_log.jsonl` 裁剪改为**计数门控 + 全量按 ts 过滤**（原「只看首行是否过期」在 merge=union 把旧行夹到中间时会永久跳过裁剪，且逐请求全量读 1.6MB）；⑦ 常驻用例 `scripts/races/verify_races_edits.py`（13 断言）+ `scripts/verify_fetch_log.py`（trim/幂等/门控）；⑧ drill 体重断言 kzn 侧 2ef51c4 已是「17 档全集 + 升序」版，本轮核对 60/60 无需改（yunji 同轮去掉了「540-550 / >550 必须为空」的数据绑定）；⑨ 两仓全量对齐核查（front/scripts + core/两管线/CI/文档逐文件 MD5：53 文件逐字节相同，其余差异均为站点字符串/数据规模/行尾（git 索引同为 lf）/各自数据适配的断言），顺手收口 4 处——REFACTOR 新项目手册补 `id`、verify_fetch_log.py 还原与 yunji 逐字节一致、verify_stats 重赏明细降序断言换行内日期序列版（防「首尾同马 indexOf 恒假」，kzn 57 行实测过）、request-path.html 的 fetch_log.csv→jsonl 残留。yj-visit 差异 = yunji §97 双线统计，kzn 仍 §87 单线（domains 空 = 均关闭；如需对齐要 kzn 自己的 GoatCounter code）。
 - **关键结论**：跨站共存的工具链，站点级存储键必须自带命名空间；「origin 判定与路径无关」是本质——本地多项目共用一个端口时，任何未前缀的键都会跨项目互串。bus.js §62「sessionStorage 优于 localStorage」防的是**跨标签页**串扰，本次前缀补上的是**同标签跨站导航残留**这另一半。
 
+### §106 · 编辑台同步 yunji §106/§107/§108 三轮修复：草稿箱打不开崩溃 + 提交链 TypeError + 草稿即时持久化 + 缓存失效通道（2026-10-26 双仓同改）
+
+- **动因（用户实测 kzn）**：批量表格改了几个值、没贴 PAT，点「草稿箱」想先贴 PAT——按钮没反应，控制台报 `Cannot read properties of undefined (reading '868')`（draftEntriesHTML 里 `d.ph[id]`），草稿箱弹不出来。
+- **根因 1（§108 补形）**：`draftRead()` 原样返回箱里 JSON——批量表格页只写 `ov`（从未有图片草稿）时箱里**没有 `ph`/`racePh` 键**，渲染/提交侧多处 `d.ph[id]` 直接下标访问 → `undefined["868"]` TypeError。修法 = `draftRead()` 读出即补默认空对象（`blank()`），读侧全部安全，下次 `draftWrite` 顺手把旧箱补成完整形态。
+- **根因 2（yunji §106 同款，kzn 未同步）**：`rmCommit()`/`reCommit()` 无比赛配图/编辑表草稿时早退 `return null`，而提交链 `rmCommit().then(reCommit)` / `.then(rmCommit).then(reCommit)` 无条件 `.then` → **纯字段/图片提交必炸** `Cannot read properties of null (reading 'then')`。修法 = 早退分支恒回 `Promise.resolve()`。
+- **同步内容（= yunji §107 全量）**：① 图片草稿一变即落箱 `persistPhotosOf`（上传/删图/置无图不再等 render；切马/关页/换页不丢图），`setHorse` 切走前先落箱，上传队列中途切马按 owner 记回原马；② 字段草稿叠加落箱（打底=箱里现值），备注-only 合法，`ovPut` 保留条件放宽；③ 选马入 bus（`kzn.currentHorse`），重开编辑台回到上次那匹；④ 提交成功挂 `watchCI`（Deploy run 完成后自动 bust + refresh）；⑤ `yj-cache` 新增 `bust()`（失效戳 `kzn.data-bust-ts` + 清桶，15 分钟内回源 `no-store`），`selector.js` 路 D 跟随失效戳。
+- **站点差分保持**：同步以 yunji 修复后文件为基底，仅还原 kzn 专属差分——头注释「絆」、`GH_REPO = "hinotoyk/kzn-web"`、PAT 面板文案（kzn-web 仓库）、edit_server 探测注释、PAT 非继承方向（yunji 的 PAT 不装进 kzn）。
+- **验证**：`node --check` 三模块过；`tests/editor-sim.mjs`（yunji 仓的模拟台，`SIM_PUB`/`SIM_REPO` 指向 kzn）对 kzn 的 `front/public` 六模块直跑 **30 断言全绿**——含 T9「批量页写出的 ov-only 箱 → 草稿箱照常打开、未知马 `#868` 兜底、读侧补形回写补全键」；yj-cache 冒烟 16/16；`npm run build` 过（round-trip 对账通过）；dist 断言 `persistPhotosOf`/`watchCI`/`统一补形`/`bustTs` 全在位；字体子集随注释语料重算（正常连带）。
+- **关键结论**：双仓同源的模块，一处修 bug 必须同步另一处——「箱里缺键」这种形状假设缺陷，修在读入口（draftRead 补形）一处即可覆盖全部下游下标访问；比在每个调用点加 `d.ph || {}` 更稳。
+
 
 
