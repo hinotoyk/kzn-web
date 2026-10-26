@@ -14,7 +14,7 @@ window.YJ = window.YJ || {};
 YJ.bus = (function () {
   "use strict";
 
-  const KEY = "yj:currentHorse";
+  const KEY = YJ.util.storeKey("currentHorse");   /* §105 站点前缀：sessionStorage 同标签跨站导航会残留，键必须分站 */
   let last = null;
 
   function store() {

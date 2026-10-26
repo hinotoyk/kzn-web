@@ -21,11 +21,11 @@ YJ.editor = (function () {
   var PROBE_MS = 1800;
   /* 线上一次性提交（GitHub writer）：单仓库单分支，PAT 由编辑台「连接 GitHub」面板写入 localStorage */
   var GH_REPO = "hinotoyk/kzn-web", GH_BRANCH = "main";
-  var GH_TOKEN_KEY = "yj.gh.token";
+  var GH_TOKEN_KEY = YJ.util.storeKey("gh.token");   /* §105 站点前缀：同源本地双站（kzn/yunji）不串 */
   var GH_API = "https://api.github.com";
   /* 草稿箱：字段/备注/图片清单/时间线表快照 → localStorage；图片二进制 → IndexedDB（localStorage 存不了 Blob） */
   var DRAFT_KEY = YJ.util.DRAFT_KEY;   /* 草稿键单一出处 = YJ.util.DRAFT_KEY（2026-xx 收口，与 profile 页共用） */
-  var BLOB_DB = "yj-edit-blobs", BLOB_STORE = "blobs";
+  var BLOB_DB = YJ.util.storeKey("edit-blobs"), BLOB_STORE = "blobs";   /* IndexedDB 库名同样加站点前缀（§105） */
 
   /* D8 压缩口径：最大边缩进 1280px（profile 头像大图位 / 时间线图位都够清晰），目标 ≤100KB。
    * 质量先用两档扫描（0.93 高清档 / 0.72 常见分界）命中，未命中再在区间内二分，最多 7 次编码；
@@ -729,11 +729,11 @@ YJ.editor = (function () {
     return run(1);
   }
 
-  /* 端口可配：?port= > localStorage['yj.edit.port'] > 8090 */
+  /* 端口可配：?port= > localStorage[storeKey('edit.port')] > 8090 */
   function resolvePort() {
     var q = new URLSearchParams(location.search).get("port");
     var ls = null;
-    try { ls = localStorage.getItem("yj.edit.port"); } catch (e) { /* 禁 storage 时忽略 */ }
+    try { ls = localStorage.getItem(YJ.util.storeKey("edit.port")); } catch (e) { /* 禁 storage 时忽略 */ }
     var p = q || ls;
     return (p && /^\d{2,5}$/.test(p)) ? p : DEFAULT_PORT;
   }

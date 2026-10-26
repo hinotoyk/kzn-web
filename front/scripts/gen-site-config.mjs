@@ -28,8 +28,9 @@ function readJson(file) {
   }
 }
 
-/* site 五字段归一：字符串字段缺省 → ""；logo 缺省回退 site.name 首字符；
- * domains 缺省/非数组/空数组 → []（D10：yj-visit.js 的 HOSTS.indexOf 不对 undefined 抛 TypeError）。 */
+/* site 六字段归一：字符串字段缺省 → ""；logo 缺省回退 site.name 首字符；
+ * domains 缺省/非数组/空数组 → []（D10：yj-visit.js 的 HOSTS.indexOf 不对 undefined 抛 TypeError）；
+ * id（§105 站点命名空间）：站点存储键前缀单源（yj-util.storeKey），缺省 → ""（前端 storeKey 回退 "yj"）。 */
 export function siteVars() {
   const sire = readJson(SIRE_JSON);
   const site = (sire && typeof sire.site === "object" && sire.site) || {};
@@ -37,7 +38,7 @@ export function siteVars() {
   const name = str(site.name);
   const logo = str(site.logo) || name.charAt(0);
   const domains = Array.isArray(site.domains) && site.domains.length ? site.domains : [];
-  return { name, subtitle: str(site.subtitle), tagline: str(site.tagline), logo, domains };
+  return { id: str(site.id), name, subtitle: str(site.subtitle), tagline: str(site.tagline), logo, domains };
 }
 
 export function gradeTable() {
@@ -69,7 +70,7 @@ export function siteConfigJs() {
   const s = siteVars();
   return (
     "/* 构建产物 · 由 front/scripts/gen-site-config.mjs 生成（勿手改）；源 = config/sire.json + config/grade-table.json */\n" +
-    "window.YJ_SITE = " + JSON.stringify({ name: s.name, subtitle: s.subtitle, tagline: s.tagline, logo: s.logo, domains: s.domains }) + ";\n" +
+    "window.YJ_SITE = " + JSON.stringify({ id: s.id, name: s.name, subtitle: s.subtitle, tagline: s.tagline, logo: s.logo, domains: s.domains }) + ";\n" +
     "window.YJ_GRADE = " + JSON.stringify(gradeTable()) + ";\n"
   );
 }

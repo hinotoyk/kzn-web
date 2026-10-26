@@ -437,7 +437,7 @@
 - **未知键**（当前仅 `130.json` 的 `Rt`，值可为 `null`）：记入 `xk`，行尾以 `[xk下标, 值, …]` 对追加，decode 按键还原。
 - **确定性**：马 id 数值序、dict 按首见序、无时间戳 → **同输入字节级稳定 → ETag 稳定 → SWR 304 生效**。
 - **版本联动（审计 2.4）**：格式/字段升级时**三处同步**——① 数据 `v` 字段（+ 实际数据重打，人工核对）；
-  ② `race-bundle.js` 的解码逻辑、③ `yj-cache.js` 缓存桶名 `yj-data-vN`（桶名升级令全部旧缓存条目整体作废）
+  ② `race-bundle.js` 的解码逻辑、③ `yj-cache.js` 缓存桶名 `<site>.data-vN`（§105 站点前缀；桶升级令全部旧缓存条目整体作废）
   都编进 JS 内容 → 构建期内容哈希戳（`vite.config.js` 的 auto-version 插件）会随内容变化自动换 URL，
   **②③ 已自动化、无需手工 bump**。仍须人工核对的是 ①，漏 ① 会出现「新 JS 读旧 bundle 或旧缓存」的错读。
 - 打包器 `front/scripts/build-races-bundle.mjs` 自带 **round-trip 断言**
@@ -448,7 +448,7 @@
 - **比赛记录页（races.html）**：内嵌单马 `renderHorse` → `YJ.cache.fetch("bundle")` →
   `decode(b)[马id]`；独立模式 `initLibrary` → basic 马表 × `by[races_file 主干]` 组装 `LIB`。
   两处均保留逐马 `fetch('races/{id}.json')` 回退（源树模式/旧 dist 兜底）。
-- **12h 缓存**：统一走 `front/public/yj-cache.js`（`YJ.cache`，桶 `yj-data-v3`；新鲜期 10min
+- **12h 缓存**：统一走 `front/public/yj-cache.js`（`YJ.cache`，桶 `kzn.data-v3`——§105 站点前缀；新鲜期 10min
   0 请求，软过期秒开 + SWR 后台 `If-None-Match/If-Modified-Since` 校验，304 续期 / 200 更新+onUpdate，
   硬过期同步取、失败回退旧缓存；`caches` 不可用降级直连）。同控制器还管理 basic/stats/datechart/timeline/pedigree。
 
