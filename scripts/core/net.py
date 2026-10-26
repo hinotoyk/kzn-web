@@ -28,8 +28,12 @@ DEFAULT_SLEEP = constants.DEFAULT_SLEEP   # 未匹配到域名的兜底间隔
 STRIP_BASES = ()
 
 # fetch_log.jsonl 滚动保留窗口（天）：日志入库可追踪（.gitattributes merge=union 抗并发 rebase 冲突），
-# 但只留最近两个月（2026-10-26 用户定稿）——过期行由 trim_fetch_log 在每次 log_fetch 后自动剔除。
+# 滚动只留最近两个月（2026-10-26 定稿，merge 并发时可能多留几行，下次裁剪清掉）。
+# 频率门控：裁剪是全量读 + 全量过滤（O(文件)），逐请求做等于每轮抓取重复读几百遍 4MB（实测 22.6k 行 /
+# 4MB）；追加本是时间序 + 窗口 60 天，每 TRIM_CHECK_EVERY 次 log_fetch 检查一次足够。
 LOG_RETENTION_DAYS = 60
+TRIM_CHECK_EVERY = 200
+_trim_counter = 0
 
 
 def domain_of(url):
@@ -99,7 +103,10 @@ def log_fetch(url, status, dur, retries, note="", strip_bases=None):
         }
         with open(log, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
-        trim_fetch_log()
+        global _trim_counter
+        _trim_counter += 1
+        if _trim_counter % TRIM_CHECK_EVERY == 1:
+            trim_fetch_log()
     except Exception:
         pass
 
@@ -107,8 +114,9 @@ def log_fetch(url, status, dur, retries, note="", strip_bases=None):
 def trim_fetch_log():
     """滚动保留：data/fetch_log.jsonl 只留最近 LOG_RETENTION_DAYS 天（按行 ts 判定，2026-10-26 定稿）。
 
-    追加时间序 → 首行仍在窗口内即无需重写（常规调用 = 1 次 json.loads，零开销）；
-    过期才全量过滤重写窗口内尾部；解析不了 ts 的行视为过期丢弃。失败不影响抓取。"""
+    全量按 ts 过滤、只在真有过期行时重写。**不依赖「首行即最旧」**：.gitattributes 的 merge=union
+    合并可能把旧行夹到中间，只看首行会永久跳过裁剪；解析不了 ts 的行视为过期丢弃。
+    频率由 log_fetch 的计数门控（每 TRIM_CHECK_EVERY 次一次），失败不影响抓取。"""
     try:
         log = constants.DATA_DIR / "fetch_log.jsonl"
         if not log.exists():
@@ -116,13 +124,6 @@ def trim_fetch_log():
         cutoff = (datetime.now() - timedelta(days=LOG_RETENTION_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
         with open(log, encoding="utf-8") as f:
             lines = f.readlines()
-        if not lines:
-            return
-        try:
-            if json.loads(lines[0]).get("ts", "") >= cutoff:
-                return                       # 首行仍在窗口内 → 无过期行
-        except Exception:
-            pass                             # 首行损坏 → 继续走全量过滤
         kept = []
         for ln in lines:
             try:
@@ -130,8 +131,9 @@ def trim_fetch_log():
                     kept.append(ln)
             except Exception:
                 pass
-        with open(log, "w", encoding="utf-8") as f:
-            f.writelines(kept)
+        if len(kept) != len(lines):
+            with open(log, "w", encoding="utf-8") as f:
+                f.writelines(kept)
     except Exception:
         pass
 

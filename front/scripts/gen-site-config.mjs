@@ -30,15 +30,24 @@ function readJson(file) {
 
 /* site 六字段归一：字符串字段缺省 → ""；logo 缺省回退 site.name 首字符；
  * domains 缺省/非数组/空数组 → []（D10：yj-visit.js 的 HOSTS.indexOf 不对 undefined 抛 TypeError）；
- * id（§105 站点命名空间）：站点存储键前缀单源（yj-util.storeKey），缺省 → ""（前端 storeKey 回退 "yj"）。 */
+ * id（§105 站点命名空间）：站点存储键前缀单源（yj-util.storeKey），缺省 → ""（前端 storeKey 回退 "yj"）。
+ * ⚠ id 是站点级存储（PAT/草稿/缓存/IndexedDB）的隔离键：缺省时回退到旧的共享前缀 "yj"，
+ * 同源本地双站会重新互串 → 构建期显式告警（不 fail-soft：新克隆仓最容易漏这一项）。 */
+let warnedNoSiteId = false;
 export function siteVars() {
   const sire = readJson(SIRE_JSON);
   const site = (sire && typeof sire.site === "object" && sire.site) || {};
   const str = (v) => (v == null ? "" : String(v));
+  const id = str(site.id);
   const name = str(site.name);
   const logo = str(site.logo) || name.charAt(0);
   const domains = Array.isArray(site.domains) && site.domains.length ? site.domains : [];
-  return { id: str(site.id), name, subtitle: str(site.subtitle), tagline: str(site.tagline), logo, domains };
+  if (!id && !warnedNoSiteId) {
+    warnedNoSiteId = true;
+    console.warn("[gen-site-config] config/sire.json 缺 site.id（§105）：存储键前缀将回退共享的 \"yj\"，" +
+      "同一端口/同源部署多个站点时 PAT/草稿/缓存会互相串。新克隆仓库请改成自己的站点标识（如 \"kzn\"）。");
+  }
+  return { id, name, subtitle: str(site.subtitle), tagline: str(site.tagline), logo, domains };
 }
 
 export function gradeTable() {
