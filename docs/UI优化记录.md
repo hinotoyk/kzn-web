@@ -739,3 +739,10 @@
 
 
 
+
+### §107 · 批量表格页带草稿重开报「数据加载失败」：hydrateBasic 未声明标识符（2026-10-26，双仓同改）
+
+- **动因（同类排查）**：§106 修完草稿箱后按同一链路继续查「批量表格 → 草稿箱 → PAT → 提交」——`editor-table.js::hydrateBasic` 写的是 `saved == null`（应为局部变量 `sv`），`saved` 在本函数/闭包内未声明，严格模式读取即 ReferenceError。空箱时循环不执行，只在「改过值、箱里已有 ov 条目」状态下重开本页触发；异常被 init 的 .catch 吞成「数据加载失败：ReferenceError: saved is not defined」，整页表格不渲染。
+- **修法**：`saved` → `sv`（同分支 366/368 行用的就是 `sv`，此处笔误）。yunji 与 kzn 双仓同改。
+- **验证**：模拟台新增 T11（预置 ov 草稿 → 加载批量表格页 → hydrateBasic 水合）：修复前精确复现该 ReferenceError 且 pendOv 为空；修复后两仓各 32 断言全绿；node --check 过；双仓 npm run build 过，dist/editor-table.js 含修正。
+- **关键结论**：ReferenceError 类缺陷只在分支真被执行时暴露，回归测试必须带着状态跑（预置草稿再打开页面）。
