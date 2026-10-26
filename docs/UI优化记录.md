@@ -703,5 +703,19 @@
 - **最终状态**：✅ 已完成。
 - **关键结论**：筛选选项 = 官方全量清单，不跟随「库内有数据的场」；选中暂无记录的场 = 空结果属正常。场地名仅作筛选值透传（= 場名原值），无 i18n 改动。
 
+### §104 · 编辑台 · 批量表格「键盘电子表格流」（基本信息 + 比赛记录 批量增删改，2026-10-26 对齐 yunji §104）
+- **动因**：用户要求「基本信息和比赛都能通过类似 Excel 的表格形式批量新增、修改、删除」。yunji 侧 2026-10-24 立项：出 A（键盘电子表格流）/B（批量选择流）/C（变更台账流）三候选对比，用户拍板 **A 案**（整页密表 + 单元格就地编辑 + Enter↓/Tab→/方向键 + Ctrl+Z·Y 撤销重做 + 行首勾选批量删除）；候选探索与废案归档在 yunji 仓完成，本仓为**全量对齐移植**（11 文件补丁 context 级干净套用 + 2 新文件 byte 级同源）。
+- **定稿结构**：新页 `front/pages/edit-table.html`（编辑导航「批量表格」，电脑端专用）+ 新共享模块 `front/public/editor-table.js`（表格引擎）；编辑链路全部复用 `editor.js`——草稿箱、GitHub 连接、一次性原子提交、报告语言零改动。
+- **编辑范围（口径）**：
+  - **基本信息页签**：可改字段 = 编辑台字段白名单（`editor.js::FIELDS` 单一出处，14 字段）+ photo；馬名/派生列/技术键只读。**增删行不开放**——建档/移除走抓取管线（JBIS 白名单注册表），人工表管不了（与 §94 口径一致）。
+  - **比赛记录页签**：增/删/改全开放。日付/场名/赛事名等为场次级字段（同组多驹联动改），出走馬名/人気/タイム等为马级字段；删除行 = 删该驹该场记录；新增行 馬名 从档案马名 datalist 解析出 id，匹配不到则该行不进草稿（防脏数据）。
+- **落库契约（白名单 4）**：`data/races_edits.json`（`{del:[{id,race_id,日付,馬名}], mod:[{…,set:{字段:值|null}}], add:[{…全字段记录, 來源:"人工"}]}`，id=马 id）——**merge_races 每轮 fetch 合并后、派生前重新套用**（`apply_race_edits` 纯函数；del/mod 不烙死在 races 文件里，重抓回来会被再删/再改），套用在派生前 → 収得/通算成績_逐场/主勝鞍/性別_当前 自动跟随。契约 = `docs/SCHEMA.md` §9。匹配键 = `record_keys` 对称双键（race_id 优先，马级键走记录字段 `出走馬名`+日付；台账行（race_id 空）靠 `entry_match_keys` 马名归一命中，2026-10-26 双仓同改见追記）。
+- **草稿模型**：基本信息批量编辑直写草稿箱 `d.ov`（与编辑台同契约：值=钉住、null=恢复官方值、空值且无钉=不产生条目）；比赛编辑进新草稿段 `d.rc`（同上三段），提交时叠加远端 `races_edits.json`（`editor.js::mergeRaceEdits`：同组键草稿覆盖远端、del 连带清 mod、重建行自动撤 del、add 双键去重）。撤销/重做 = 内存日志逐条回滚并同步草稿箱；「放弃修改」按会话快照只回滚本页产生的改动（不碰其它页面的草稿）。
+- **关键结论**：批量表格不另起提交链路——**它就是编辑台的第 4 个入口**，草稿箱/提交/PAT/报告全共享；后端只加一个「编辑表套用」纯函数步骤。Excel 交互（键盘流 + 粘贴导入 TSV + 列显隐）负责输入效率，数据一致性交还给既有 merge/派生管线。
+- **导航收拢（随 yunji 2026-10-25 用户定稿并入）**：编辑台 4 页的页内页签全部撤下（edit.html / edit-table.html / edit-timeline.html / edit-drafts.html 的 `.yj-ed-tabs` 块，组件类一并删除勿复活），导航**统一收进外壳侧栏「编辑」组 5 条目**：✎ 基本信息编辑 / ⊞ 基本信息批量编辑 / ▤ 比赛记录批量编辑（两条批量共用 `pages/edit-table.html`，`data-navid` 区分，后者 `data-url` 带 `?sheet=races`）/ ⧗ 航迹线 / 🗒 草稿箱。高亮三路齐发：外壳 load 按 `?sheet=` 精确点亮 navid、页内切页签 `postMessage {type:"yj:page"}` 同步（仅认内容 iframe 自发消息 `e.source === frameEl.contentWindow`）、页内跳转走 pathname 后缀匹配。
+- **打磨定稿（随 yunji 同步并入）**：① 编辑控件 `absolute left-0 top-0 h-full w-full` 盖满本格（absolute 不参与表格布局 → 窄格零撑开）+ `invisible whitespace-pre` 占位保列宽 + sticky 格不动 position；② 开编辑器前 `setCursor(null)` 清光标环防双高亮；③ 「⬇ 导出 TSV」撤下（编辑流只进不出，`exportTsv` 全链路移除）；④ 比赛页签「格（级别）」改下拉框（枚举 = GI/JpnI/GII/JpnII/GIII/JpnIII + 障害 JGI/JGII/JGIII + 班赛 3勝/2勝/1勝クラス + 新馬/未勝利，现值不在枚举时自动追加保真）；⑤ 「⛶ 全屏」= **CSS 伪全屏**（表格卡 `#fsTarget` 切 `fixed inset-0 z-[70]` 盖满视口，不用 Fullscreen API——iframe 权限链会被拦；表区限高 `calc(100vh - 200px)`，ESC/按钮退出复原）。
+- **验证（2026-10-26 本仓）**：`git apply --check` 一次通过（editor.js / index.html / 三个编辑页 / theme.css / vite.config.js / scripts 两文件 / SCHEMA / pipeline，与 yunji 补丁 context 全对上）；2 新文件 git blob hash 与 yunji 逐字节一致；`npm run build` 通过（edit-table.html 7.17kB 入包；races-bundle **1213 马 · 16257 条** round-trip + dist 回读对账通过）；`dist/assets/theme-*.css` 新类 10/10 编译核对（`z-[70]`/`inset-0`/`left-[34px]`/`bg-chart3/10`/`ring-primary/60`/`ring-inset`/`bg-accent/25`/`bg-destructive/5`/`max-h-[420px]`/sticky），`.yj-ed-tabs` 编译产物零残留；dist edit-table 页 script 全量带版本戳、`{{YJ_SITE_NAME}}` 占位替换完成；后端 `apply_race_edits` 隔离单测 **6/6**（mod 双键命中 / del 马级键命中同组全部 / add 去重+人工缺省+id 剥离 / null 删键 / 空表 no-op / add 本表内双键去重）。浏览器端交互与 yunji 仓 byte 级同源，以其最终 E2E 回归（20/20）为准，本仓不重复跑。
+- **追記（2026-10-26 双仓同改）**：修复台账行（race_id 空）del/mod 静默无效——前端 del/mod 条目只带 `馬名`（人读标识）而 `record_keys` 读记录字段 `出走馬名`，race_id 空时键集为空被跳过（SCHEMA §9「race_id 缺失走 馬名+日付」名不副实；本仓当前 130.json 22 条全带 race_id，实际零影响，属契约层隐患）。定稿在**后端键构建处归一**：`merge_races.entry_match_keys` 复制条目把 馬名 映射为 出走馬名（条目自带 出走馬名 优先、不污染原条目），del/mod 两处匹配改走它；SCHEMA §9 措辞同步。隔离单测 6→**10** 例全过（新增 台账 del / 台账 mod / 出走馬名 优先 / 条目不被污染）。展示层遗留（双仓同形态）：批量表格刷新后台账行的待保存划线/改值高亮不回显（`editor-table.js::recKeysJs` 同口径读 出走馬名）——仅展示层，草稿/远端条目与后端套用不受影响。
+
 
 
