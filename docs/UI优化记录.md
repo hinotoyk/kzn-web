@@ -746,3 +746,26 @@
 - **修法**：`saved` → `sv`（同分支 366/368 行用的就是 `sv`，此处笔误）。yunji 与 kzn 双仓同改。
 - **验证**：模拟台新增 T11（预置 ov 草稿 → 加载批量表格页 → hydrateBasic 水合）：修复前精确复现该 ReferenceError 且 pendOv 为空；修复后两仓各 32 断言全绿；node --check 过；双仓 npm run build 过，dist/editor-table.js 含修正。
 - **关键结论**：ReferenceError 类缺陷只在分支真被执行时暴露，回归测试必须带着状态跑（预置草稿再打开页面）。
+
+### §108 · 统计总览新增「种马榜走势 · SIRE RANK」：跨站引用 jbis-sire-rank-history（2026-10-27，同步 yunji §110）
+
+- **动因（yunji 侧同日先落地コントレイル版，kzn 按同一方案同步）**：把キズナ的赏金变化图引到站内，未来还会引用 racing-calendar。定稿方案 = **组件化跨站引用**（与 friend-links「一个组件文件 + 各站一行挂载」同模式）：jbis-sire-rank-history 仓出纯渲染图表组件 `embed/sire-rank-chart.js`，本页只喂数据与挂载；**不复制数据进本仓 data/**（兄弟站即数据唯一出处，避免双站同步负担）。图表风格（组件 v1.3.1 用户选型定稿）= **combo 单面板**：赏金累计平滑线+渐变面积 + **单日增量柱（与赏金共用 y 轴、同面板**）；**名次副图去除** → 名次由主图跳增标注「+金额（N位）」与 tooltip 承担，KPI 保留「排名」。y 轴 = 目标 ~9 格自动取整；默认 23年世代・中央。
+- **本仓改动（= yunji §110 全量）**：
+  - `front/public/data-config.js`：新增 `YJ_DATA.remote.jbisRank`（GitHub Pages 站根，跨站 URL 单一出处）；
+  - `front/public/yj-cache.js`：注册表新增 `sireRank` 条目（arg = `"<board>/<jbisId>"` 如 `t4-gen-central@2023/0001120570`，TTL 12h 同全站；GH Pages 带 CORS `*`，Cache API/304 续期/断网回退全链路照常）；
+  - `front/scripts/gen-site-config.mjs`：`YJ_SITE` 增发 `jbisId`（源 = config/sire.json 的 `sire.jbis_id` = 0001120570，kzn 原有键直接可用）；
+  - `front/pages/stats.html`：原 ⑤「说明 · NOTES」整体移除（口径文案按 yunji 用户定稿只留代码注释与本记录），原位换 **⑤ 种马榜走势**（维度 seg 年度/23年世代/24年世代 × 范围 seg 中央/総合；KPI 当前赏金/排名/较前快照/最新快照；`manYen` 复用 §48 单一出处；**口径 = JBIS 榜单，不受顶部工具条影响**）；过期渲染丢弃（srkSeq）、组件失败可重试等逻辑与 yunji 逐字一致。
+  - **kzn 适配 2 处**：`SRK` 默认板注释与 g23 tip 去掉「首产世代」——キズナ 初产驹为 2016 年世代，g23 只是当前追踪的世代板（yunji 该措辞是コントレイル专属事实，照抄会失实）。
+- **jbis 侧（彼仓，已就绪）**：`embed/sire-rank-chart.js`（零依赖 ~10KB，纯渲染不 fetch 不写存储；颜色缺省继承宿主 CSS 变量/回退值）已发布；published 数据 **7 板块全含 0001120570**（t1-2yo/t2-annual/t3-annual-overall@2026、t4-gen/t5-gen-overall@2023·2024）→ kzn 直连即用。上线顺序：**先 push jbis 仓（发布 embed 组件与数据）再 push 本仓**，否则组件 404 显示重试态（本次核对线上 `t4-gen-central@2023/0001120570.json` 已 HTTP 200，无此风险）。
+- **坑与教训（承 yunji §110）**：Tailwind 色键 `chart2`（无连字符）不产出 CSS 变量，SVG 属性/图例里 `var(--chart-2)` 拿不到值 → 页面内单一定义 `SRK_COLORS`，图例与组件入参同源；缓存 arg 契约必须含 `<jbisId>` 段（漏了即 404）；stats 页独立打开会被 `rehome.js` 回壳重定向，无头验证须带 `?embed=1`。
+- **验证**：`npm run build` 过（races-bundle round-trip 1213 马 · 16269 条对账通过）；dist 断言——theme css 含 `.yj-tm` 系新类与 `underline`、stats.html 含 `renderSireRank`/`srkChart`/`JBIS_RANK_EMBED`/`srkKpis` 且 `renderAbout`/`aboutNote` 零残留、`data-config.js`/`yj-cache.js`/`site-config.js`（`"jbisId":"0001120570"`）全在位；字体子集随新文案重算（2763 字符 / 3445 字形 / 807KB，与当日 status update 新数据同树重算）；线上实测 GH Pages `t4-gen-central@2023/0001120570.json` HTTP 200（当前 第1位 · 157,159.7万円 · 17 快照）。`profile.html`/`data-config.js`/`yj-cache.js` 与 yunji 最终版 **git blob 逐字节一致**，stats.html 仅差上述 2 处 kzn 适配。
+- **关键结论**：跨站引用 = 数据与渲染组件都留在数据唯一出处仓，宿主页只挂载；缓存/失败回退/存储全走既有 `yj-cache` 通道，不引第二套机制。「site 专属事实」（初产世代等）写注释前先核对自家数据，双仓同步时照抄注释最容易埋失实。
+
+### §109 · 概览新增「状态 · BY STATUS」方形面积图 + 概览/性别统一块样式（2026-10-27，同步 yunji §111）
+
+- **动因（yunji 侧定稿，kzn 全量同步）**：未选马概览的「性别 BY SEX」下补一组**状态**统计；原始键组合太散（`登録状態` 現役/抹消/空 × `抹消_去向種別` 六枚举）没法直接摆。用户选型：**不要数字卡，用方形面积图（treemap）**，且**每类单独统计**、类名+数字直标块内。
+- **分类口径**（前端现场聚合，**不动数据**，与 `yj-util.js statusChain` 同源）：`現役` → 中央现役；确认去向 → 地方现役/繁殖/乘马/种马/死亡/海外（空状态马有确认去向同样归入，如未出道即死亡归「死亡」）；`抹消` 且去向未确认 → **JRA抹消**（JRA 注册状态原值当类名）；其余（空状态无去向，多为未出道马）→ 未登录。中央现役与地方现役同属「现役」语义 → 面积图分两块、色系同族可对照。**kzn 当前分布（basic.json 1221 匹现场聚合）**：中央现役 252 + 地方现役 334 + 繁殖 40 + JRA抹消 344 + 未登录 250 + 种马 1 + 死亡 0 + 海外 0 = 1221（yunji 侧对照：164+24+14+9+15+0+1+50=277——两站分布结构差异大，右栏小类构成天然不同：kzn = 种马 1 + 死亡 0，yunji = 死亡 1 + 种马 0，右栏排序逻辑两者都成立）。性别（セ/セン 归一）：牡 555 / 牝 590 / セン 68，8 匹无性别值不入列。
+- **改动**：`front/pages/profile.html`（renderOverview 内新增 CATS 分类聚合 + `tmSquarify`/`tmPaint`/`ovPaint` + 块渲染收口 `tmHTML` 单一出处（状态/概览两图共用）+ `group('状态','BY STATUS')`，resize 防抖重排）；`front/pages/theme.css`（`.yj-tm` 块形态 + `.yj-tm--*` 纯色类，@layer components；类名字面量都在 profile.html → content 扫得到，@layer 安全）。仅此一处使用 → 不抽离（§48）。
+- **算法与展示细节（承 yunji v2~v5.1 同日五轮定稿）**：squarified treemap（Bruls 贪心压短边）+ 末行借厚保底 28px（内联标签最低预算，容器精确铺满、无叠无漏）；面积 ∝ 匹数；<2 匹的小类入**右侧定宽格子栏**（纯面积图里 0 匹不可见、1 匹细成丝，硬等效放大会虚增面积比 → 右栏「块小即类小」诚实且全可读，大类主区面积零失真）；死亡固定浅灰（终点/退场=无彩色）并钉在右栏末位（末格=整图右下角）；标签按面积阈值退化（≥50×44 竖排类名+数 → ≥64×26 横排一行 → 数字-only）；概览改**年份占比图**（块内 标签+匹数+占比行，总数=全部面积之和抬到组标题右侧 chip，不占面积）；性别改**三等分列**（骟马匹数少，面积图会缩成细条太易忽视，等宽平权）；配色 = Tailwind 200 级低饱和浅底 + 同 hue 800/900 级深字（新年份 y1..y5 轮换自动续色）。
+- **验证**：`npm run build` 过；dist 的 theme css 含 `.yj-tm--live`/`.yj-tm--dead`/`.yj-tile`/`.yj-tm-p` 等新类，dist/pages/profile.html 含 `tmSquarify`/`BY STATUS`/`ovPaint`/`tmPaint` 新代码；profile.html 与 yunji b2155e7 最终版 **git blob 逐字节一致**；theme.css 新增块与 yunji 相同、kzn 特有段落不动。
+- **关键结论**：小类右栏「块小即类小」比硬等效放大诚实——0 匹块被撑到与 40 匹块同样大就是误导；treemap 面积差肉眼难辨的部分用占比行/标签阈值补偿，「图好看」与「读得准」分开保障。
