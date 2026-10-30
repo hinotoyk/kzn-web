@@ -804,3 +804,19 @@
 - **动因（yunji 侧用户实测）**：航迹线页上传比赛配图落箱后，「提交到 GitHub」按钮仍灰着（草稿箱抽屉却显示 1 处未提交）；F5 后才亮。根因 = 保存条按钮/草稿箱计数只在全量 `render()` 重算，而时间线页 5 处草稿变更路径只调了局部 `renderTL()`：① 上传比赛配图落箱；② 配图面板 rmdel（撤销草稿图 1→0 / 标记移除已配置 0→1）；③ 节点「应用」tlApplyEdit（整表快照落箱）；④ 节点「删除」tlDelete；⑤ 「放弃修改」tlreset（清箱 1→0 按钮不变灰，反向同病）。
 - **全编辑台状态刷新审计（同批完成，其余无需改）**：马匹页字段/备注/图片上传队列/外链/删图/拖拽排序/恢复官方值、批量表格页单元格提交/加行/删行/粘贴导入/撤销重做/放弃会话、查询页放弃、提交成功/失败/冲突重试——全部已收口全量 render；剩余 `renderTL()` 直调均为草稿数不变场景。
 - **同步方式**：5 处补丁与注释和 yunji 逐字节一致（对账：两仓 editor.js 差异仅剩站名 5 行——絆/云迹、GH_REPO、PAT 注释、线上域名注释、仓库名提示）；`npm run build` 过，dist/editor.js §133 注释 5 处落地。
+
+### §115 · 档案页：概览年份色扩 12 色全 hue（一年一色）+ 性别三块同步基本信息徽章色（2026-10-30，同步 yunji §136/§137）
+
+- **动因（用户，kzn 侧实测）**：概览 9 个年份块只有蓝紫两族观感——年份色 v1 仅 y1..y5 且全在蓝青族（sky/indigo/cyan/blue/teal），9 厩年取模轮换每色两现；用户定调「有几个年份就有几个颜色」。
+- **年份色扩容（theme.css + profile.html，双仓同改）**：y1..y12 共 12 色全 hue 铺开、冷暖交替（蓝/紫/青绿/玫红/橙黄/靛/黄绿/洋红/青/橙/翠绿/蓝），仍 200 浅底 + 同 hue 900 深字；`YEARC` 同步扩容——按年份降序位次取色，厩年 ≤12 一年一色零重复（kzn 现 9 厩年全异色），>12 才取模循环；新增年份仍插队拿 y1 顺移续色。
+- **性别三块同步（yunji §136 补同步）**：`.yj-tm--male/female/gelding` 改基本信息 sexBadge 同款指定色（牡 `#C9EFFE/#0B5A8C` · 牝 `#FFDBD5/#B03A30` · 骟 `#EFEFEF/#5A5A5A`），profile.html BY SEX 注释同步；顺带删总注「与性别组骟马同 neutral-200」过期表述。
+- **验证**：`npm run build` 过；dist/assets/theme-*.css 实测 12 条 y 规则 bg/text 各 12 hue 全异（y1 #BAE6FD/#0C4A6E … y12 #BFDBFE/#1E3A8A），性别三块 = 徽章逐位一致（male #C9EFFE/#0B5A8C · female #FFDBD5/#B03A30 · gelding #EFEFEF/#5A5A5A）。
+
+### §116 · 同步 yunji §134/§135——「统计总览」更名「倾向统计」+ stats v2（删重赏之路/模块重排/月龄×世代子行）（2026-10-30）
+
+- **动因**：双仓对账发现 yunji §134/§135（2026-10-29）漏同步 kzn——kzn 侧 stats 页仍停在「统计总览 + 重赏之路」旧版。
+- **更名（§134）**：stats.html `<title>`/页头大标题/JS 分节横幅注释、index.html 侧栏 📊 项、races.html 下钻注释 ×3、leaderboard.html 性别口径 tooltip、README 功能页表、HANDOFF 页名 ×2、TESTING.md 段名——「统计总览」→「倾向统计」。
+- **stats v2（§135）**：删「重赏之路」整块（section + `G_STEPS`/`renderGraded` + `.st-gline/.st-gstep/.st-garrow` 样式 + renderAll 调用；trophyMerged/🏆 KPI 数据保留）；模块重排 ①数据概览 → ②产驹倾向 → ③种马榜走势 → ④年龄成绩曲线；月龄明细表改「月龄 × 世代子行」（行=月龄升序 · 组首标月龄 · `.grp` 组间分隔线；世代自数据驱动，kzn 9 世代全量入表）；SRK 种马榜两处キズナ首产 2016 世代适配注释保留（g23 非「首产世代」措辞不改）。
+- **冒烟同步（verify_stats.cjs）**：删 4 条 aboutNote 存量失效断言（kzn 页面同样早已无说明区元素）；curveTable 断言改「行=月龄 · 世代子行」结构断言；[C6] 12 条重赏之路断言收口为 1 条「页面 HTML/CSS/JS 零残留」负断言；折线数断言保留 kzn 数据驱动版（不移植 yunji 写死「2023+2024 两条」的版本——kzn 9 世代会假失败）；firstRow（kzn tbody 版，较 yunji data-href 版新）不动。
+- **验证**：`npm run build` 过；front/ 检索 统计总览/重赏之路/gradedProg/renderGraded/st-gline/G_STEPS 全零残留，dist「倾向统计」就位；`node scripts/stats/verify_stats.cjs` 全绿（通过 465 · 失败 0——断言数随 kzn 9 世代数据量大于 yunji 的 193，TESTING.md 已按实际数记 465）。
+- **追记（2026-10-30）**：firstRow 漂移审查定案——kzn tbody 版正确（kzn「其他」桶胜率 18.2% 当前登顶，data-href 版会静默跳过无下钻首行测错行），已回灌 yunji（yunji 侧记 §138），两仓该函数现已一致。
