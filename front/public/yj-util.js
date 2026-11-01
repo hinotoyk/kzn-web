@@ -141,11 +141,39 @@ YJ.util = (function () {
   function siteId() { return (window.YJ_SITE && YJ_SITE.id) || "yj"; }
   function storeKey(k) { return siteId() + "." + k; }
 
+  /* ---------------- 编辑模式开关（§160 · PAT 校验解锁） ----------------
+   * 语义 = 「本站仓库 PAT 已验证并存在本机」→ 编辑模式开启。单一判定出处：
+   * 外壳 index.html（注入编辑导航 / PAT 解锁对话框）与内容页（profile / timeline 的
+   * 编辑入口显隐）共用；2026-11-01 起 ?edit=1 URL 开关彻底废除。
+   * ⚠ 调用时求值（理由同 storeKey），且 iframe 与外壳同源共享 localStorage → 子页直开同样生效。 */
+  function editUnlocked() {
+    try { return !!((localStorage.getItem(storeKey("gh.token")) || "").trim()); } catch (e) { return false; }
+  }
+
+  /* ---------------- 净效果等值（§154 · 编辑台草稿判脏的统一口径） ----------------
+   * 背景：判脏散落 4 种写法（String 裸比 / photoKeys join / JSON.stringify 内联重复×2），
+   * 收口为 canon 序列化 + 字符串比较。语义 = 「净效果是否与基线等值」：
+   * - 原始值走 String()（表单口径：1 与 "1" 同值，与既有字段/表格判定一致）；
+   * - 对象键排序 —— 比 JSON.stringify 更稳（消除插入序敏感：磁盘 JSON 与内存重建的
+   *   同内容对象键序可能不同，stringify 会误判 dirty）；
+   * - 数组保序 —— 照片顺序、节点顺序是语义的一部分，换序 = 改动；
+   * - 字符串值不做 JSON 引号转义（保持表单松散等值）。边界：只用于**同 schema**
+   *   两份数据的等值判定（草稿 vs 基线），不承诺跨 schema 抗碰撞。
+   * 调用侧注意：字段/表格的标量比较先 String() 归一再传入（两侧同为 string 才可靠）。 */
+  function canon(v) {
+    if (v === undefined) return "\u0000undefined";
+    if (v === null || typeof v !== "object") return String(v);
+    if (Array.isArray(v)) return "[" + v.map(canon).join(",") + "]";
+    var ks = Object.keys(v).sort();
+    return "{" + ks.map(function (k) { return JSON.stringify(k) + ":" + canon(v[k]); }).join(",") + "}";
+  }
+  function effEqual(a, b) { return canon(a) === canon(b); }
+
   /* 编辑台草稿箱 localStorage 键（schema 版本号）：profile.html（只读叠加渲染）与 editor.js（读写）共用，
    * 2026-xx 收口单一出处 —— 升级草稿 schema 只改这一处，防双处字符串漂移。
    * defineProperty getter 惰性求值（理由见上），保持 YJ.util.DRAFT_KEY 属性形态 → 调用点零改动。 */
   var api = { esc: esc, qs: qs, absUrl: absUrl, manYen: manYen,
-    siteId: siteId, storeKey: storeKey,
+    siteId: siteId, storeKey: storeKey, editUnlocked: editUnlocked, canon: canon, effEqual: effEqual,
     splitName: splitName, nameKind: nameKind, fallbackName: fallbackName,
     mainName: mainName, sexOf: sexOf, statusChain: statusChain };
   Object.defineProperty(api, "DRAFT_KEY", { get: function () { return storeKey("edit.drafts.v1"); } });

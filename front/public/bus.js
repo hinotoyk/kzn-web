@@ -1,4 +1,4 @@
-/* 绊 · 跨 iframe 共享选中马（bus）
+/* 絆 · 跨 iframe 共享选中马（bus）
  * 目标：profile 页内嵌 races 页时，选中马自动联动，不重载 iframe。
  * 机制：
  *   - broadcast(id)   : 写入 sessionStorage + postMessage 广播给父/子
