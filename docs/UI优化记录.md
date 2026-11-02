@@ -890,3 +890,24 @@
 **验证**：五段冒烟 11 / 113 / 483 / 60 / 三态闭合全绿；`npm run build` ✓。
 
 **维护约定**：换种马或改 `sire.wins` 后必须跑 `sync_sire_wins.py` + `build_timeline.py`，否则 `verify_sire_wins` 报漂移。
+
+### §117.4 · 同步 yunji §173：侧栏选中态在 CF Pages 全灭（iframe pathname 被剥 .html，2026-11-02）
+
+**同步源**：yunji §173（同一 bug 在 yunji 由用户两站对比截图发现）。kzn 现跑 GitHub Pages 不剥扩展名，所以本地/线上都没暴露；
+但代码同源，一旦迁到 Cloudflare Pages（或任何剥 `.html` 的托管）就会同样全灭，故**本仓一并改掉**，不等到那天。
+
+**根因**：CF Pages 把 `/pages/x.html` **307** 成 `/pages/x`，iframe 内 `location.pathname` 因此是 `/pages/profile`，
+而 `front/index.html` 的 load 回调拿它与 `data-href="pages/profile.html"` 做**后缀全等**比对 → 全部落空 → `light(null)` 全灭
+（点侧栏能亮，页内一跳/刷新即灭）。§88 只在外壳入口（`?page=` 补 `.html`）与 `rehome.js` 两处补过扩展名，iframe load 高亮这条路漏了。
+
+**改动（`front/index.html` 一处，与 yunji 逐字同文）**：新增 `pageKey(p)` 剥尾部 `.html`——高亮比对、`edit-table` 特例分支、
+顶层 `?page=` 回写（正则改 `/(pages\/[\w.-]+)$/` 抓路径后 `pageKey()+'.html'` 补回）统一走它。零视觉改动。
+
+**验证**：
+- `tests/_tmp_cfstrip/serve_cf.py`（模拟 CF 307 剥扩展名）起本地服务 + 无头 Edge dump `data-on`：默认页与
+  `?page=` 六页（races/stats/leaderboard/datechart/timeline）**逐页命中对应条目**；GH 语义（直接静态服务、不剥扩展名）仍 1 命中，无回归。
+- `cd front && COPY_DATA=skip npm run build` ✓ 8.79s；`dist/assets/theme-Bo-gQ5IK.css` 未变（本次不涉样式）。
+- 冒烟未受影响（纯外壳路径逻辑，不碰数据/产物）。
+
+**教训（已写进 yunji `docs/子项目复制与同步指南.md` §5）**：托管平台会剥 `.html`，凡 `location.pathname` 与 `*.html` 比对
+必须经 `pageKey()`；本地静态服务器**不剥扩展名，永远测不出这个坑**，要用模拟服务器验证。
