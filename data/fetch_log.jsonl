@@ -18212,3 +18212,9 @@
 {"ts": "2026-11-02 03:17:18", "script": "fetch_races.py", "host": "nar.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.33, "retries": 1, "note": ""}
 {"ts": "2026-11-02 03:17:20", "script": "fetch_races.py", "host": "db.netkeiba.com", "path": "/trainer/result/recent/a073b/", "status": "200", "dur_s": 0.31, "retries": 1, "note": ""}
 {"ts": "2026-11-02 03:17:26", "script": "fetch_races.py", "host": "db.netkeiba.com", "path": "/jockey/result/recent/a02b0/", "status": "200", "dur_s": 0.3, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:00", "script": "sync_sire_wins.py", "host": "db.netkeiba.com", "path": "/horse/result/2010105827/", "status": "200", "dur_s": 0.3, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:00", "script": "sync_sire_wins.py", "host": "race.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.41, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:01", "script": "sync_sire_wins.py", "host": "race.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.46, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:06", "script": "sync_sire_wins.py", "host": "db.netkeiba.com", "path": "/horse/result/2010105827/", "status": "200", "dur_s": 0.29, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:07", "script": "sync_sire_wins.py", "host": "race.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.43, "retries": 1, "note": ""}
+{"ts": "2026-11-02 13:50:07", "script": "sync_sire_wins.py", "host": "race.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.34, "retries": 1, "note": ""}

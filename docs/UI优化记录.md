@@ -871,3 +871,22 @@
 **验证**：`npm run build` ✓；四段冒烟 datechart 113 ALL PASS / stats 483·0 / drill 60·0 / result 三态闭合。yunji 侧同机制抽查：`sire_wins=1`（ゴーイントゥスカイ 菊花賞）与配置 7 项胜鞍命中一致，无同类错误。
 
 **防再犯**：`sire.wins` 无自动校验源（netkeiba 成绩页不参与管线），新增/修改后必须按 JRA 或维基逐条核对日期+赛事名，并跑 `build_timeline.py` 看 `sire_wins` 是否与数据实际命中数一致。
+
+### §117.3 · 父子制覇改派生：sire.wins 从手工表 → 种马成绩页（2026-11-02，承接 §117.2 的误报）
+
+§117.2 只是把手工表改对了；根因是**手工表本身没有校验源**。按用户拍板「方案二 · 派生」彻底改掉：
+
+1. **新增 `scripts/timeline/sync_sire_wins.py`**（手动跑、产物入库；netkeiba 对 CI 出口 IP 不稳，不挂每日管线）：
+   `sire.netkeiba_id` → 抓 `db.netkeiba.com/horse/result/{id}/`（EUC-JP）→ 复用 `races/fetch_races.py::parse_races`
+   → `着順==1` → 格先按赛名解析、缺则抓该场 SP 页看 `Icon_GradeType` → 只留重赏（GI/GII/GIII/JpnI-III/JGI-JGIII）
+   → 写 `data/sire_wins.json`（`cn` 从旧手工表按规范化赛名继承，译文不丢）。
+2. **`build_timeline.py`**：`_load_sire_wins()` 优先读产物，缺失/损坏/空 → 回退 `config/sire.json`（手工表降级为兜底）。
+3. **新增 `scripts/timeline/verify_sire_wins.cjs`（11 断言，全离线）**：产物结构自洽 / 赛名唯一 / 格=重赏 / 日期合法且不晚于今天 /
+   产物↔config 无漂移 / `timeline.sire_wins` == 源数据重算命中数 / 每条 sire 标签 tip 反查产物。
+
+**实测**：キズナ 14 场出走 → **5 项重赏**（毎日杯 / 京都新聞杯 / 東京優駿 / ニエル賞 / 産経大阪杯），与 §117.2 手工修正逐项一致；
+`build_timeline` 输出内容无变化（3 次父子制覇仍是京都新聞杯×3）。
+
+**验证**：五段冒烟 11 / 113 / 483 / 60 / 三态闭合全绿；`npm run build` ✓。
+
+**维护约定**：换种马或改 `sire.wins` 后必须跑 `sync_sire_wins.py` + `build_timeline.py`，否则 `verify_sire_wins` 报漂移。

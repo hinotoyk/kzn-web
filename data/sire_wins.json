@@ -1,0 +1,50 @@
+{
+ "meta": {
+  "schema": "sire-wins/v1",
+  "generated_at": "2026-11-02T13:50:07",
+  "source": "netkeiba horse/result/2010105827/",
+  "sire": "キズナ",
+  "count": 5
+ },
+ "sire": {
+  "name_ja": "キズナ",
+  "netkeiba_id": "2010105827"
+ },
+ "wins": [
+  {
+   "date": "2013-03-23",
+   "name": "毎日杯",
+   "grade": "GIII",
+   "cn": "每日杯",
+   "race_id": "201309020111"
+  },
+  {
+   "date": "2013-05-04",
+   "name": "京都新聞杯",
+   "grade": "GII",
+   "cn": "京都新闻杯",
+   "race_id": "201308030511"
+  },
+  {
+   "date": "2013-05-26",
+   "name": "東京優駿",
+   "grade": "GI",
+   "cn": "东京优骏",
+   "race_id": "201305021210"
+  },
+  {
+   "date": "2013-09-15",
+   "name": "ニエル賞",
+   "grade": "GII",
+   "cn": "尼尔赏",
+   "race_id": "2013A8a00d03"
+  },
+  {
+   "date": "2014-04-06",
+   "name": "産経大阪杯",
+   "grade": "GII",
+   "cn": "大阪杯",
+   "race_id": "201409020411"
+  }
+ ]
+}
