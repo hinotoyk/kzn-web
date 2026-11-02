@@ -828,3 +828,21 @@
 - **冒烟适配（yunji 侧数据耦合断言全部改数据派生，kzn 数据下全绿）**：verify_stats 世代全集/系列数/图例从 `stats.json` curve 派生（kzn 2017–2024 八世代 vs yunji 硬编码两世代）；verify_datechart「Grand Warrior」改自动选带尾缀马 + 逐月导航（month 面板无年份直选）+ 明细分页翻找（st.dp 跨 render 持久化先归 1）+ vseg 开关语义（已激活不重复点击）；verify_drill 整拷 yunji 新版（§159 18 列等）后修三处——体重 n 从源重算（kzn 17 档全有出走）、tag 删除改读 renderFilters 整体重建后的筛选条、embed 15/16→17/18 列（§159）。（追记 2026-11-02：上述冒烟改进与 workflows dispatch/403 降级已全部回灌 yunji，yunji §170，四段冒烟 yunji 侧全绿——drill 60 / stats 211 / datechart 113 / result 三态闭合。）
 - **验证**：`npm install` + `npm run build` 过（字体子集 828KB 现算、races-bundle 1213 马 round-trip 对账过）；dist 核对（新页 CSS 五档就位、yj-trophy/spin/nav-item 类在、site-config 注入 kzn 品牌、lightbox/echarts.line 进 dist 根）；四段冒烟 = datechart **113 全过** / stats **483 全过** / drill **60 全过（含 [F] dist 字节级对账）** / result 三态闭合（16,303 = 16,091 + 41 + 171）；TESTING.md 断言计数同步。
 - **流程沉淀**：复制与同步的操作规程已单源化到 yunji 仓 `docs/子项目复制与同步指南.md`（复制新子项目 + 日常同步 + 品牌保留清单），后续同步按该指南执行。
+
+### §117.1 · 同步 yunji §171 / §171.1（2026-11-02，增量补丁）
+
+§117 已把 §139–§169 全量对齐；本次只补 §171（15 世代压测收口）与 §171.1（配色降饱和）的增量，**未重复整拷**。
+
+**改法**：从 yunji `333bf3e..a5c0c21` 取 `front/` 补丁，`git apply` 到 kzn（9 个文件，全部 clean）。品牌差异（stats.html SRK 注释 / g23 tip）不在补丁范围，原样保留。
+
+- `editor-table.js`：可视区 ±12 行渲染 + 占位行撑高 + 列宽探针锁 `<colgroup>` + `revealRow` + 搜索去抖 → kzn 16307 行下 DOM 仅 29 行。
+- `stats.html`：`dataZoom`（PC slider / MB inside）+ 图例 >8 项 scroll + 默认近 5 世代（kzn 8 世代 → 全显，不折叠）。
+- `races.html` / `races-page.css`：年份/出生年份独占整行换行（否决横滚藏内容）+ `.filter-grid` 轨道 `minmax(0,1fr)` + MB 年份紧凑（`.filter-chips--years`）。
+- `leaderboard-page.css` / `stats-page.css`：`#sliceSeg` / `#yseg` 单行横滚 + `.seg button` nowrap。
+- `profile.html`：概览年份面积图 → 等高网格（PC 5 列 / MB 3 列）。
+- `theme.css`：年份 y1..y12 与状态色 200→100 底、900→700/800 字。
+- `echarts.line.min.js`：定制包补 `DataZoomComponent`（519 → 538.6KB）。
+
+**冒烟适配（数据耦合，两仓同改 `verify_datechart.cjs`）**：kzn 最新数据末月 2026-11 只有 2 场地方出走 → JRA 口径下该月为空，原断言 `dayInCur = sMonth(LAST_MONTH)[0]` 取到 undefined 直接崩、`锚点月=数据末月` 也假失败。改为派生式：C5 改在「最近有胜场的月」内下钻；步进边界断言改「窗口 = 数据末月 ⇔ › 禁用」。
+
+**验证**：`npm run build` ✓（1213 马 · 16307 条）；四段冒烟 **datechart 113 ALL PASS / stats 483·0 / drill 60·0 / result 三态闭合**（16307 = 16095 + 41 + 171）。
