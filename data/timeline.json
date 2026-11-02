@@ -1,12 +1,12 @@
 {
  "meta": {
-  "generated_at": "2026-10-23T10:52:36",
+  "generated_at": "2026-11-02T12:54:08",
   "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
   "stats": {
    "events": 82,
    "horses": 49,
    "graded_wins": 72,
-   "sire_wins": 1
+   "sire_wins": 3
   }
  },
  "events": [
@@ -240,7 +240,7 @@
   {
    "date": "2020-05-09",
    "type": "race",
-   "node": "graded",
+   "node": "sire",
    "horse": {
     "id": 102,
     "name": "ディープボンド",
@@ -255,6 +255,11 @@
     {
      "cat": "graded",
      "label": "G2第2胜"
+    },
+    {
+     "cat": "sire",
+     "label": "父子制覇",
+     "tip": "高情厚意同胜：京都新闻杯"
     }
    ],
    "race": {
@@ -794,7 +799,7 @@
   {
    "date": "2022-05-07",
    "type": "race",
-   "node": "gen",
+   "node": "sire",
    "horse": {
     "id": 325,
     "name": "アスクワイルドモア",
@@ -814,6 +819,11 @@
      "cat": "gen",
      "label": "2019年世代重赏首胜",
      "crown": true
+    },
+    {
+     "cat": "sire",
+     "label": "父子制覇",
+     "tip": "高情厚意同胜：京都新闻杯"
     }
    ],
    "race": {
@@ -1383,7 +1393,7 @@
   {
    "date": "2024-05-04",
    "type": "race",
-   "node": "graded",
+   "node": "sire",
    "horse": {
     "id": 605,
     "name": "ジューンテイク",
@@ -1398,6 +1408,11 @@
     {
      "cat": "graded",
      "label": "G2第11胜"
+    },
+    {
+     "cat": "sire",
+     "label": "父子制覇",
+     "tip": "高情厚意同胜：京都新闻杯"
     }
    ],
    "race": {
@@ -1770,7 +1785,7 @@
   {
    "date": "2025-02-09",
    "type": "race",
-   "node": "sire",
+   "node": "graded",
    "horse": {
     "id": 747,
     "name": "サトノシャイニング",
@@ -1785,11 +1800,6 @@
     {
      "cat": "graded",
      "label": "G3第24胜"
-    },
-    {
-     "cat": "sire",
-     "label": "父子制覇",
-     "tip": "高情厚意同胜：如月赏"
     }
    ],
    "race": {

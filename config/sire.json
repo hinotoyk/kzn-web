@@ -1,24 +1,56 @@
 {
-  "sire": {
-    "name_ja": "キズナ",
-    "name_cn": "高情厚意",
-    "name_en": "Kizuna",
-    "jbis_id": "0001120570",
-    "netkeiba_id": "2010105827",
-    "studbook": { "name": "キズナ", "father": "ディープインパクト" },
-    "wins": [
-      { "date": "2013-02-03", "name": "きさらぎ賞", "grade": "G3", "cn": "如月赏" },
-      { "date": "2013-05-26", "name": "東京優駿", "grade": "G1", "cn": "东京优骏" },
-      { "date": "2014-04-06", "name": "産経大阪杯", "grade": "G2", "cn": "大阪杯" }
-    ]
+ "sire": {
+  "name_ja": "キズナ",
+  "name_cn": "高情厚意",
+  "name_en": "Kizuna",
+  "jbis_id": "0001120570",
+  "netkeiba_id": "2010105827",
+  "studbook": {
+   "name": "キズナ",
+   "father": "ディープインパクト"
   },
-  "site": {
-    "id": "kzn",
-    "name": "絆",
-    "subtitle": "高情厚意档案",
-    "tagline": "沿着キズナ的羁绊，记录每一匹绊崽。",
-    "logo": "絆",
-    "domains": []
-  },
-  "ledger": { "url": "" }
+  "wins": [
+   {
+    "date": "2013-03-23",
+    "name": "毎日杯",
+    "grade": "G3",
+    "cn": "每日杯"
+   },
+   {
+    "date": "2013-05-04",
+    "name": "京都新聞杯",
+    "grade": "G2",
+    "cn": "京都新闻杯"
+   },
+   {
+    "date": "2013-05-26",
+    "name": "東京優駿",
+    "grade": "G1",
+    "cn": "东京优骏"
+   },
+   {
+    "date": "2013-09-15",
+    "name": "ニエル賞",
+    "grade": "G2",
+    "cn": "尼尔赏"
+   },
+   {
+    "date": "2014-04-06",
+    "name": "産経大阪杯",
+    "grade": "G2",
+    "cn": "大阪杯"
+   }
+  ]
+ },
+ "site": {
+  "id": "kzn",
+  "name": "絆",
+  "subtitle": "高情厚意档案",
+  "tagline": "沿着キズナ的羁绊，记录每一匹绊崽。",
+  "logo": "絆",
+  "domains": []
+ },
+ "ledger": {
+  "url": ""
+ }
 }
