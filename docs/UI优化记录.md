@@ -911,3 +911,50 @@
 
 **教训（已写进 yunji `docs/子项目复制与同步指南.md` §5）**：托管平台会剥 `.html`，凡 `location.pathname` 与 `*.html` 比对
 必须经 `pageKey()`；本地静态服务器**不剥扩展名，永远测不出这个坑**，要用模拟服务器验证。
+
+### §118 · 同步 yunji §182：文案口径统一（「马场状态」/ 航迹线 KPI 中文化，2026-11-06）
+
+**用户反馈**：比赛记录页筛选行与结果表列头的「马场」应叫「马场状态」；航迹线卡片「タイム / 上り / 人気」应显示「时间 / 后3F / 人气」。
+
+**同步方式**：只套用 yunji §182 的文案 / i18n 修复，**不做整批同步**。按 §1 品牌保留清单，kzn 侧
+§175–§177 卡片布局、SRK 措辞、`front/public/*.js` 首行「絆」品牌头、旧版 `timeline-cards.css` 注释均保持原样；
+文件逐处等值搬移（工作区 CRLF 原样保留，提交由 autocrlf 转 LF），`git diff` 仅 5 文件 22 增 19 删。
+
+**改动**：
+- `front/pages/races.html`：筛选行 label / `DIM_LABEL.cond` / 相关注释 → 「马场状态」。
+- `front/public/race-rows.js`：删 lib 视图 baba 短标签覆盖三处（th / mbLabel / BASE_LINES 行内 label），
+  表头与 mb 卡片回落字典全称；「体重/赔率」短标签保留。
+- `front/pages/stats.html`：`TAB_DIMS.cond.l` → 「马场状态」。
+- `front/pages/timeline.html`：补引 `i18n.js`；`kpi()` 统一 `esc(YJ.i18n.t(label))`。
+- `front/public/editor.js`：编辑台实时预览三格改走 `YJ.i18n.t(...)`。
+- `front/public/i18n.js` 无需改动——kzn 版四个词条（`馬場 / タイム / 上り / 人気`）本就齐备。
+
+**验证**：`npm run build` ✓；dist 核对（races/stats 含「马场状态」、timeline 含 i18n.js 引用、editor.js 走字典）+ vm 运行时对账
+`cols("lib").baba.th === "马场状态"`、`时间 / 后3F / 人气`；本次不涉数据产物。
+
+**冒烟**：`verify_datechart` 3/112 失败，属同步前既有欠账、与本次无关（HEAD 版 `race-rows.js` 对账：embed 视图改动前后
+完全一致）；其余四段 483 / 60 / 三态闭合 / 11 全绿，数据产物 [A][B] 全绿。复核确认**不是断言值过期**
+（[C1] 期望值全从源数据独立重算），真因：
+- ① 页面 `datechart.html:753` 锚点取「全场地最新一着」，脚本 `C1:254` 只按 JRA 取 —— kzn 两口径同在 2026-11
+  故未暴露，yunji 最新一着在地方（11-05）、JRA 最新一着在 10-31 → 主仓 10 项错位（见 yunji §182）。
+- ② 脚本 `:318` 马名切换样本只在当前锚点月 JRA 明细里找带中文名的马，kzn 2026-11 月 8 条里 0 条有 → 3 项假失败。
+**影响**：`run_update.py --ci` 以该脚本为门禁，失败即「跳过数据提交」（每日定时）；`--check` 亦报红。
+该欠账已由 §119 解决（同步 yunji §183），本节只记录复核结论。
+
+### §119 · 同步 yunji §183：日期统计锚点 = 当前自然月 + 空月兼容（2026-11-06）
+
+**用户定稿**：「今天是几月份就几月份，兼容没有数据也别报错就行了」。
+
+**同步方式**：`front/pages/datechart.html` 与 `scripts/datechart/verify_datechart.cjs` 改前两仓逐字同文，
+按 §1 清单整拷（kzn 工作区 CRLF 原样保留）；品牌头、`config/sire.json`、data/ 等一律未动，非整批同步。
+
+**改动**：
+- 页面：`todayParts()`（Asia/Shanghai）取当前自然月作锚点，不再随「全场地最新一着 / 数据末日」跳月；
+  空月 KPI 归零、日历空格、明细空态不报错；`dpOpen()` 面板浏览态钳到数据范围内，窗口标签仍显示当前月。
+- 体检：`TODAY`/`FIRST_MONTH` 与页面同法；[C1] 锚点/总赏金/步进边界派生式；马名切换样本从当前页明细 DOM 反查
+  （有中文名验切换、无中文名验回退、空月验空态）——kzn 2026-11 月 0 匹有中文名，正是走「回退分支」通过；
+  空月时 [C1] 先验完再切数据末月跑 [C2][C3]。
+
+**验证**：`npm run build` ✓ 8.73s；dist 含 `todayParts`/`Asia/Shanghai`；`verify_datechart` 111/111 全绿、
+`run_update.py --check` 四段全 OK、`verify_sire_wins` 11/11 全绿。空月探针（模拟 2027-01-15，整月 0 条）
+整份冒烟仍 ALL PASS（112 断言），无异常；探针跑完已删。未跑 `--ci`，未 commit / 未 push。
