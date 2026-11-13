@@ -30876,3 +30876,11 @@
 {"ts": "2026-11-13 15:39:10", "script": "smoke_fetch.py", "host": "nar.netkeiba.com", "path": "https://nar.netkeiba.com/race/result.html", "status": "200", "dur_s": 0.71, "retries": 1, "note": ""}
 {"ts": "2026-11-13 15:39:12", "script": "smoke_fetch.py", "host": "www.jbis.or.jp", "path": "https://www.jbis.or.jp/horse/0001120570/pedigree/", "status": "200", "dur_s": 0.36, "retries": 1, "note": ""}
 {"ts": "2026-11-13 15:39:15", "script": "smoke_fetch.py", "host": "www.studbook.jp", "path": "/users/ja/SearchBameiList", "status": "200", "dur_s": 0.41, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:54", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.36, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:55", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.32, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:55", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.21, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:55", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.28, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:56", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.45, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:56", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.22, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:56", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.29, "retries": 1, "note": ""}
+{"ts": "2026-11-13 20:13:57", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.29, "retries": 1, "note": ""}
