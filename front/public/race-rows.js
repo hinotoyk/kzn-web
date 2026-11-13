@@ -1,5 +1,5 @@
 /* ============================================================
- * 絆 · 比赛记录「表格 / 行 / 徽章」渲染共享模块（单一出处）
+ * 比赛记录「表格 / 行 / 徽章」渲染共享模块（单一出处）
  * ------------------------------------------------------------
  * 为什么存在：比赛记录表格全站有 3 个落点——① 比赛记录页跨马主表（视图 lib）、
  *   ② 内嵌表（races.html?embed=1，profile 下段）、③ 日期统计页明细（视图 embed + 馬名列）。
@@ -43,7 +43,7 @@ YJ.raceRows = (function () {
 
   /* ---- 等级徽章（JBIS 配色：实心胶囊 + 白字；OP 浅青绿）
    * ★ 取值必须与 .yj-g* 类名完全同大小写（全小写），否则徽章无底色、白字不可见。
-   * 单一表 GRADE：格 → [显示文案, 徽章类]——单一出处 = config/grade-table.json（R6，docs/REFACTOR.md §12），
+   * 单一表 GRADE：格 → [显示文案, 徽章类]——单一出处 = config/grade-table.json，
    * 构建期经 site-config.js 注入 window.YJ_GRADE，后端 core/grade.py 读同一份（原「与 build_timeline.py 互指」
    * 的手同步约定消灭）。缺失即显式报错（fail-fast，防漏注入静默跑错），回退空表派生空 G/GLABEL 不崩。
    * G/GLABEL 为兼容导出而派生，新代码请用 GRADE。 */
@@ -360,6 +360,20 @@ YJ.raceRows = (function () {
       pc: function (r) { return esc(r.調教師 || ""); },
       mbItem: function (r, en, o, lb) { return r.調教師 ? mbi(lb, esc(r.調教師)) : ""; },
       min: function (ctx) { return ctx.page(function (en) { return en.r.調教師; }); }
+    },
+    /* 视频回放列（§185 / §186 / §187）：数据/按钮/播放浮层单一出处 = front/public/yj-video.js（YJ.video）。
+     * 本模块只出壳；页面须在 race-rows.js 之前引入 yj-video.js（races.html / datechart.html 已接）。
+     * §187：**编辑统一放编辑台「比赛记录批量编辑」**（草稿箱 + PAT 写 data/video_manual.json），
+     *   正式页只读 → 该场无视频 / 数据未就绪 / YJ.video 缺席一律返回 ""（空态干净、不崩 stub）。
+     * 数据契约 = docs/SCHEMA.md §10（键：race:<race_id> / slot:<日付>|<場名>|<R>；v2 每场 = 源数组）。 */
+    video: {
+      th: "動画", cls: TT, clsLib: TTL, mbLabel: "動画",
+      pc: function (r) { return (window.YJ && YJ.video) ? YJ.video.cellHTML(r) : ""; },
+      mbItem: function (r) {
+        var h = (window.YJ && YJ.video) ? YJ.video.cellHTML(r) : "";
+        return h ? mbi(null, h, { raw: true }) : "";
+      },
+      min: function (ctx) { return Math.max(ctx.fmt("回放") + 8, 34); }  /* §186.1 只图标：小电视 28px */
     }
   };
 
@@ -384,12 +398,12 @@ YJ.raceRows = (function () {
     ["time", "chakusa", "agari"],
     ["waku", "umaban", "tosu", "kinryo", "ninki"],
     [{ k: "bw", label: "体重" }, { k: "odds", label: "赔率" }, "prize"],
-    ["jockey", "trainer"]
+    ["jockey", "trainer", "video"]
   ];
-  /* 基准列序（22 列，§78 增 性齢 紧随馬名、§101 上り 紧随着順）：馬名 → 性齢 → 日付 → 場名 → レース名 → 距離 → 天候 → 馬場 →
-     枠番 → 馬番 → 頭数 → 斤量 → 人気 → 着順 → 上り → タイム → 着差 → 体重 → 賠率 → 賞金 → 騎手 → 調教師 */
+  /* 基准列序（23 列，§78 增 性齢 紧随馬名、§101 上り 紧随着順、§185 末位增 動画）：馬名 → 性齢 → 日付 → 場名 → レース名 → 距離 → 天候 → 馬場 →
+     枠番 → 馬番 → 頭数 → 斤量 → 人気 → 着順 → 上り → タイム → 着差 → 体重 → 賠率 → 賞金 → 騎手 → 調教師 → 動画 */
   var BASE_COLS = ["horse", "sexage", "date", "venue", "race", "distMerged", "tenki", "baba", "waku", "umaban", "tosu",
-                   "kinryo", "ninki", "place", "agari", "time", "chakusa", "bw", "odds", "prize", "jockey", "trainer"];
+                   "kinryo", "ninki", "place", "agari", "time", "chakusa", "bw", "odds", "prize", "jockey", "trainer", "video"];
 
   var VIEWS = {
     embed: {

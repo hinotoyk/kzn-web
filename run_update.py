@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""统一更新入口：9 种更新策略（供日常运行与 GitHub Actions 定时调用）。
+"""统一更新入口：10 种更新策略（供日常运行与 GitHub Actions 定时调用；--since 为 --races 的修饰参数）。
 
 策略（互斥，--since 可修饰 --races）：
   --init        初始化：删空 data/ 从 0 全量（复用 run_full_test.py 的完整测试流程）
   --basic       基本数据增量：新马对账建档(--year) + 补缺(血统/nk_id/意味/详情) + merge
   --races       比赛数据增量：详情更新+判变 → 成绩增量(SP页含格/条件/調教師/本賞金) → 台账海外 → 合并
   --horse id    定向更新：只处理指定 id 的马（详情更新 + 成绩增量 + 台账海外 + 合并；
-                台账环防「海外台账马 races 文件丢失后被成绩页 0 场误判为空」——见 docs/TESTING.md §4 边界）
+                台账环防「海外台账马 races 文件丢失后被成绩页 0 场误判为空」——见 README「维护与排障」）
   --races-force 比赛全量刷新：全部马重抓成绩页（覆盖式重建，历史数据修正用；已有记录缺失字段一并回填）
   --day YYYYMMDD[,..]  按指定日期快速更新：当天全部比赛(SP 结果页)→按 nk_id 匹配库内马→抓命中场并入库。
                        比 --races 快（不依赖 netkeiba 马匹成绩页滞后，当天出结果即抓）；支持多日期、--jra-only。
@@ -15,6 +15,7 @@
   --since N     轻量时段增量：只抓最近 N 天内出赛的马的成绩（不跑详情/判变，需配合 --races；
                 含台账环防海外台账马误伤）
   --ledger      仅台账：只拉台账海外场并入（不跑 netkeiba）
+  --video       视频回放：抓 B 站 UP 主视频清单 + 离线匹配 → data/video-map.json（本地跑；CI 不抓 B 站）
   --ci          CI 全自动：基本增量 + 比赛增量 + 校验 + 日期图断言(node) + git 提交（全部通过才提交）
 
 输出约定：详细输出进 test-logs/update-<时间戳>.log，stdout 每步一行状态（便于远程监督）。
@@ -28,14 +29,18 @@
     python run_update.py --races-force
     python run_update.py --check --fix
     python run_update.py --ledger
+    python run_update.py --video                # 视频回放（B 站抓取在本地跑）
     python run_update.py --ci [--year 2025,2026]
 """
 import argparse
 import datetime
 import json
+import os
+import queue
 import re
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -56,9 +61,21 @@ STATS = ROOT / "scripts" / "stats" / "build_stats.py"               # 统计总�
 VERIFY_STATS = ROOT / "scripts" / "stats" / "verify_stats.cjs"      # 统计总览断言校验（node：产物契约/源对账/页面冒烟）
 VERIFY_RACES_DRILL = ROOT / "scripts" / "races" / "verify_drill.cjs"      # 比赛记录页下钻冒烟（统计矩阵行 → races.html?f= 全链路）
 VERIFY_RACES_RESULT = ROOT / "scripts" / "races" / "verify_result.cjs"    # 比赛记录页着顺三态口径对账（读 data/races 全量）
+VIDEO = ROOT / "scripts" / "video"                                       # 视频回放（B 站抓取 + 离线匹配 → data/video-map.json）
 FULL_TEST = ROOT / "run_full_test.py"
 LOG_DIR = ROOT / "test-logs"
 PY = sys.executable
+
+"""步骤看门狗：连续 IDLE_TIMEOUT 秒**没有任何输出**判为卡死（2026-11-13 取代原单步总时长超时）。
+
+为什么砍掉总时长超时：抓取耗时是随机变量（fork 实测 JBIS 单页 0.5~330s，同站差 600 倍），
+任何固定值或按马数缩放都是在赌；赌输的代价不是「慢」，而是白跑数小时后被杀、再拿不完整的缓存
+去合并 —— 比不设超时更糟。而脚本每匹马都会 print 进度，天然有心跳：还在动就不该杀。
+总时长兜底交给 CI 的 job timeout-minutes（= GitHub 单 job 上限 6h），那是需求不是估计，不会错。
+
+20 分钟的依据：单请求超时 90s（net.TIMEOUT）× 最多 4 次重试 + 退避 ≈ 7 分钟，留 3 倍余量。"""
+IDLE_TIMEOUT = 1200
+TOTAL_TIMEOUT = 0        # 总时长兜底（秒），0 = 不设；仅调试/本地应急时可临时给值
 
 TS = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 LOG_FILE = LOG_DIR / f"update-{TS}.log"
@@ -74,30 +91,93 @@ def log(msg="", echo=True):
         print(line, flush=True)
 
 
-def run_step(name, script, *args, exe=None, timeout=10800):
-    """跑一步子进程（默认 python，exe="node" 跑断言脚本），失败不中断后续步骤（返回码交给调用方决策）。"""
+def startup_notice():
+    """启动自检：打印卡死判据 + 库内马数（马数只作现场参考，不再据此推算超时）。
+
+    为什么不再按马数算超时：耗时 ≈ 固定成本 + 每匹请求数 × 单请求成本，而单请求成本本身受
+    风控/网络抖动支配（同站可差数百倍），算出来的值给的是虚假安全感。判据改成「有没有在动」。"""
+    n = None
+    try:
+        with open(DATA / "basic.json", "r", encoding="utf-8") as f:
+            n = len((json.load(f) or {}).get("horses") or [])
+    except Exception:
+        pass                                   # 首次运行还没有 basic.json：正常，不必报错
+    log(f"卡死判据：连续 {IDLE_TIMEOUT // 60} 分钟无输出即中止（不设总时长上限，兜底 = CI job timeout）"
+        f" · 库内马数 {n if n is not None else '未知（尚无 data/basic.json）'}")
+
+
+def finish(code=0):
+    """收尾：打印本轮步骤汇总后退出。正常结束与「卡死中止」共用，保证中止路径也留下汇总。"""
+    log("\n══ 更新结束 ══")
+    total = sum(dt for _, _, dt in results)
+    log(f"总耗时 {total/60:.1f} 分钟 · 步骤: " + " · ".join(
+        f"{n}{'OK' if rc == 0 else f'FAIL({rc})'}" for n, rc, _ in results))
+    sys.exit(code)
+
+
+def run_step(name, script, *args, exe=None):
+    """跑一步子进程（默认 python，exe="node" 跑断言脚本）。
+
+    输出**流式**落日志（原 capture_output 要等子进程退出才拿得到输出，卡死时日志一个字都没有、
+    也无法判断「还在动没在动」）：边跑边写 + 记最后一次输出时间 → 连续 IDLE_TIMEOUT 秒无输出
+    即判卡死、杀进程、**整轮中止**（继续 merge 会拿不完整缓存合成一份看着正常的库）。
+    返回 (returncode, 耗时秒)；卡死时直接 finish(2) 退出，不返回。"""
     log(f"\n───── [{name}] {Path(script).name} {' '.join(args)} ─────", echo=False)
     t0 = time.time()
     try:
-        r = subprocess.run([exe or PY, str(script), *args], capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=timeout)
-    except subprocess.TimeoutExpired:
-        log(f"✗ [{name}] 超时({timeout}s)")
-        results.append((name, -1, time.time() - t0))
-        return -1, time.time() - t0
+        p = subprocess.Popen([exe or PY, str(script), *args],
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             text=True, encoding="utf-8", errors="replace", bufsize=1,
+                             env={**os.environ, "PYTHONUNBUFFERED": "1"})
     except OSError as e:
         log(f"✗ [{name}] 启动失败: {e}")
         results.append((name, -1, time.time() - t0))
         return -1, time.time() - t0
-    dt = time.time() - t0
+
+    q = queue.Queue()
+
+    def _pump():
+        try:
+            for line in p.stdout:
+                q.put(line)
+        finally:
+            q.put(None)                        # 哨兵：子进程退出（含被 kill）
+
+    threading.Thread(target=_pump, daemon=True).start()
+
+    last_out = time.time()
+    killed = ""
     with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write("\n".join("  | " + ln for ln in (r.stdout or "").splitlines()) + "\n")
-        if (r.stderr or "").strip():
-            f.write("  [stderr]\n" + "\n".join("  ! " + ln for ln in r.stderr.splitlines()) + "\n")
-    results.append((name, r.returncode, dt))
-    status = "完成" if r.returncode == 0 else f"失败(exit={r.returncode})"
+        while True:
+            try:
+                line = q.get(timeout=5)
+            except queue.Empty:
+                now = time.time()
+                if now - last_out > IDLE_TIMEOUT:
+                    killed = f"连续 {IDLE_TIMEOUT}s 无输出"
+                elif TOTAL_TIMEOUT and now - t0 > TOTAL_TIMEOUT:
+                    killed = f"总时长超过 {TOTAL_TIMEOUT}s"
+                if killed:
+                    p.kill()                   # 杀掉后直接跳出，不再等队列（_pump 在 daemon 线程里自行收尾）
+                    break
+                continue
+            if line is None:
+                break
+            last_out = time.time()
+            f.write(line if line.endswith("\n") else line + "\n")
+            f.flush()
+
+    rc = p.wait()
+    dt = time.time() - t0
+    if killed:
+        log(f"✗ [{name}] 判为卡死（{killed}）· 已耗时 {dt/60:.1f} 分钟")
+        log("→ 整轮中止：不再执行后续步骤，也不提交（避免用不完整缓存合并出少数据的库）")
+        results.append((name, -1, dt))
+        finish(2)
+    results.append((name, rc, dt))
+    status = "完成" if rc == 0 else f"失败(exit={rc})"
     log(f"✔ [{name}] {status} · 耗时 {dt/60:.1f} 分钟")
-    return r.returncode, dt
+    return rc, dt
 
 
 def git_commit_if_changed():
@@ -147,7 +227,7 @@ def run_ledger():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="统一更新入口（9 种策略）")
+    ap = argparse.ArgumentParser(description="统一更新入口（10 种策略）")
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--init", action="store_true", help="初始化：删空 data/ 从 0 全量")
     g.add_argument("--basic", action="store_true", help="基本数据增量")
@@ -157,6 +237,7 @@ def main():
     g.add_argument("--day", help="按指定日期快速更新：YYYYMMDD 或逗号分隔多个")
     g.add_argument("--check", action="store_true", help="数据校验")
     g.add_argument("--ledger", action="store_true", help="仅台账海外并入")
+    g.add_argument("--video", action="store_true", help="视频回放：抓 B 站 UP 主清单 + 匹配落盘（本地跑，CI 不抓 B 站）")
     g.add_argument("--ci", action="store_true", help="CI 全自动：基本+比赛+校验+日期图/统计/下钻断言+git 提交")
     ap.add_argument("--year", default="", help="建档年份（--basic/--ci 用，如 2025,2026；默认现有年份）")
     ap.add_argument("--since", type=int, default=0, help="时段增量天数（配 --races，轻量模式）")
@@ -165,7 +246,8 @@ def main():
     ap.add_argument("--jra-only", action="store_true", help="配 --day：跳过 NAR 地方")
     args = ap.parse_args()
 
-    log(f"══ 更新开始 {TS} · 策略: {next(k for k in ('init','basic','races','horse','races-force','day','check','ledger','ci') if getattr(args, k.replace('-', '_')))} ══ 日志: {LOG_FILE}")
+    log(f"══ 更新开始 {TS} · 策略: {next(k for k in ('init','basic','races','horse','races-force','day','check','ledger','video','ci') if getattr(args, k.replace('-', '_')))} ══ 日志: {LOG_FILE}")
+    startup_notice()
 
     def lim():
         return ["--limit", str(args.limit)] if args.limit else []
@@ -201,8 +283,7 @@ def main():
         run_step("日期图·数据预计算", DATECHART)
         run_step("统计·数据预计算", STATS)
     elif args.races_force:
-        # kzn 规模（~1200 匹）全量 = 详情+成绩+SP ≈ 4.5h，yunji 默认 3h 超时会掐断在 merge 前（缓存作废）
-        run_step("比赛·全量刷新", RACES / "run_all.py", "--force", timeout=28800)
+        run_step("比赛·全量刷新", RACES / "run_all.py", "--force")
         run_step("时间线·事件预计算", TIMELINE)
         run_step("日期图·数据预计算", DATECHART)
         run_step("统计·数据预计算", STATS)
@@ -228,6 +309,9 @@ def main():
         run_step("时间线·事件预计算", TIMELINE)
         run_step("日期图·数据预计算", DATECHART)
         run_step("统计·数据预计算", STATS)
+    elif args.video:
+        run_step("视频·抓取清单", VIDEO / "fetch_video.py")
+        run_step("视频·匹配落盘", VIDEO / "build_video_map.py")
     elif args.ci:
         y = ["--year", args.year] if args.year else []
         run_step("CI·建档新马对账", BASIC / "build_registry.py", *y)
@@ -246,10 +330,7 @@ def main():
         else:
             git_commit_if_changed()
 
-    log("\n══ 更新结束 ══")
-    total = sum(dt for _, _, dt in results)
-    log(f"总耗时 {total/60:.1f} 分钟 · 步骤: " + " · ".join(
-        f"{n}{'OK' if rc == 0 else f'FAIL({rc})'}" for n, rc, _ in results))
+    finish(0)
 
 
 if __name__ == "__main__":

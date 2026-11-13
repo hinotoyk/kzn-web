@@ -10,13 +10,11 @@
 </head>
 <body class="bg-muted/50 text-foreground antialiased">
 
-<!-- §93（docs/UI优化记录.md）：草稿箱查询页 —— 快速检索抽屉之外的全页通览：
+<!-- §93（docs/DESIGN.md）：草稿箱查询页 —— 快速检索抽屉之外的全页通览：
      未提交草稿 + 已保存人工维护值一页看全，检索共用同一状态；跳马 = 基本信息 · 跳场 = 航迹线。
      提交动作与编辑页同一链路（GitHub API 单原子 commit → CI 自动 merge + 重算）。
      §155：mb 端开放编辑（§82.13 作废）——列表/检索均为点击交互，mb 直接可用。 -->
 <div class="mx-auto w-full max-w-[880px] px-4 pt-6 pb-[108px] max-md:px-3 max-md:pt-3 max-md:pb-[132px]">
-
-  <!-- 页内页签已撤下（2026-10-25 用户定稿）：编辑台导航统一收进外壳侧栏「编辑」组（front/index.html #editNav） -->
 
   <section>
     <div id="drafts"><div class="hint-empty">草稿箱加载中…</div></div>
@@ -40,6 +38,8 @@
 <script src="../site-config.js"></script>
 <script src="../data-config.js"></script>
 <script src="../yj-util.js"></script>
+<!-- §190 编辑页 PAT 门禁：未解锁（本机无本站 PAT）时整页换成解锁卡片 -->
+<script src="../yj-edit-gate.js"></script>
 <script src="../i18n.js"></script>
 <script src="../device.js"></script>
 <script src="../yj-cache.js"></script>

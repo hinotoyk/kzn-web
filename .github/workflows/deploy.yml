@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  # contents: write —— 重算产物落库 commit（方案A：线上站点独立构建直读仓库 data/*.json）
+  # contents: write —— 重算产物落库 commit（方案A：www.yunji.xyz 独立构建直读仓库 data/*.json）
   contents: write
   pages: write
   id-token: write
@@ -70,7 +70,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # 方案A（2026-10-02 定稿）：重算产物落库。线上站点（Pages 独立构建）直读仓库 commit
+      # 方案A（2026-10-02 定稿）：重算产物落库。www.yunji.xyz（CF Pages 独立构建）直读仓库 commit
       # 的 data/*.json、不走本工作流的重算 → 编辑台提交人工表后把 merge_basic/build_timeline 产物
       # commit 回 main，CF 随之自动重建。无变化不 commit（幂等终止，无循环）；落库 push 会再触发
       # 本工作流一次（重算后无变化 → 空转部署，预期内）。放最后一步：先保证本 run 部署完成，

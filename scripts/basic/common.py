@@ -6,7 +6,7 @@
 薄再导出；本管线特有的风控口径（DOMAIN_SLEEP / STRIP_BASES）仍由这里持有并以形参注入
 中立层 net（net 不含管线概念）。业务隔离：basic 不 import races 的任何业务模块。
 
-设计原则与并发架构见 docs/pipeline.md，basic.json 字段契约见 docs/SCHEMA.md。
+设计原则与并发架构见 README「维护与排障」，basic.json 字段契约见 docs/SCHEMA.md。
 """
 import functools
 import sys
@@ -46,8 +46,14 @@ JBIS_SIRE_ID = sire_config.jbis_id()               # 种马 JBIS id（config/sir
 NK_SIRE_ID = sire_config.netkeiba_id()             # 种马 netkeiba id（config/sire.json 的 sire.netkeiba_id）
 
 # ---- 本管线的网络口径（以形参注进中立层：net 不含管线概念） ----
-# 值参考实际风控表现：netkeiba 对高频抓取敏感（间隔需大），JBIS/studbook 相对宽松。
-# 运行后可在 data/fetch_log.jsonl 里按 host 观察，按需调整这里。
+# ★ 觉得抓得太慢？**改下面这几个秒数就是唯一的提速开关**（数值越大越保守越慢）。
+#   实测口径（fork 729 匹冷启动，4866 请求）：全程 6h02m，其中 **5.1h 是这里的等待、只有 1.84h 是网络**
+#   —— 慢的原因是限速，不是带宽，所以调它立竿见影，调机器/换网速基本没用。
+#   怎么安全地调小：**不要一次砍半**。先挑一个域降一档（如 db 6.0 → 4.0），跑一轮后在
+#   data/fetch_log.jsonl 里看该 host 的 ERR 条数与重试比例，稳定几天再降下一档。
+#   反过来的代价：撞 403 不是「慢一次」，而是当天整批数据拿不到（还会连带 20s+ 长退避），
+#   所以默认值宁可保守 —— 想快请按上面方式逐步试，别照抄别人的数字。
+#   值参考实际风控表现：netkeiba 对高频抓取敏感（间隔需大），JBIS/studbook 相对宽松。
 DOMAIN_SLEEP = {
     "www.jbis.or.jp": 1.5,       # JBIS 建档/血统
     "db.netkeiba.com": 6.0,      # netkeiba 列表/详情（风控严，保守）

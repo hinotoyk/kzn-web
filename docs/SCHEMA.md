@@ -1,7 +1,7 @@
 # docs/SCHEMA.md · 数据产物字段契约（单一出处）
 
 `data/` 各产物的**字段契约与口径**统一写在这里（原来散在 `scripts/**/build_*.py` 文件头，阶段 6a 搬来）。
-改字段先改这里 + 对应生成脚本；「管线怎么跑」见 `docs/pipeline.md`，跨管线代码结构见同文件。
+改字段先改这里 + 对应生成脚本；「管线怎么跑」见 README「维护与排障」。
 前端只读产物，字段解释以外实现在 `front/`。
 
 ---
@@ -56,6 +56,7 @@
 | 34 | `photo` | `""` | ✓ | ✓ | 图源 URL/路径；人工钉成数组时 [] = 确无图片 |
 | 35 | `races_file` | `""` | ✓ | ✓ | 站点根相对路径 data/races/{id}.json |
 | 36 | `pedigree_file` | `""` | ✓ | ✓ | 站点根相对路径 data/pedigree/{id}.json |
+| 37 | `trainer_id` | `""` | ✓ | ✓ | netkeiba 调教师 id（详情页 `調教師` 单元格里 `/trainer/{id}/` 链接）。2026-11-13 起写入：**详情页给的 `調教師` 是显示名，长名字被截短**（大久保龍 / 中内田充 / 西田雄一），靠这个 id 才能取到全名（大久保龍志…）。只有抓过详情的马才可能有值，历史库为空的属正常 |
 
 **`主勝鞍` 派生口径（2026-10-21 用户定稿）**：只认 `結果=1` 且带 `日付` 的胜场，按「命中最高一级」取，层级数字越小越优先：
 
@@ -67,7 +68,7 @@
 
 「最多 4 条」的常数 = `scripts/races/merge_races.py::MAJOR_MAX`，层级表 = 同文件 `MAJOR_TIER`；改规则先改这里。
 
-抓取来源分工（详见 `docs/pipeline.md`）：JBIS 建档（id / jbis_id / 馬名 / 母名 / 生年）→ netkeiba 详情（
+抓取来源分工（详见 README「维护与排障」）：JBIS 建档（id / jbis_id / 馬名 / 母名 / 生年）→ netkeiba 详情（
 登録状態 / 性別 / 毛色 / 馬主 / 調教師 / 通算成績 / 獲得賞金 …）→ studbook（馬名意味）→ 血统图（pedigree_file / 母父）
 → 竞赛管线（races_file / 収得賞金 / 性別_当前 / 通算成績_逐场 / 主勝鞍）。
 
@@ -97,7 +98,7 @@
   只用于 `check_data.py` 同口径对账；展示一律用 `basic.json` 的 `通算成績_逐场`（含台账场）。
 - **去重键**（增量抓取判重用，两条同时生效）：`race:{race_id}` 与 `horse:{馬名归一}|{日付}`，
   见 `scripts/races/common.py::record_keys`；无 race_id 的台账记录靠 馬名+日付（一匹马一天只跑一场）。
-- **格** → 显示文案 / 徽章类 / 重赏判定的单一出处 = `config/grade-table.json`（REFACTOR.md §12 / R6；
+- **格** → 显示文案 / 徽章类 / 重赏判定的单一出处 = `config/grade-table.json`（口径说明见该文件 `about` 键；
   Python 端经 `scripts/core/grade.py` 消费，前端经构建注入 `window.YJ_GRADE`）。
 - 文件按 `日付` 倒序（新赛在前）。
 
@@ -345,7 +346,7 @@
 日期图数据预计算：读 data/basic.json + data/races/*.json → data/datechart.json
 
 页面 front/pages/datechart.html 只做渲染：fetch 本产物 → RUNS → 天/周/月/年 日历聚合
-（2026-09-14 布局样式定稿，按 docs/UI优化记录.md §32.6 接入真实数据）。
+（2026-09-14 布局样式定稿，按 docs/DESIGN.md §32.6 接入真实数据）。
 产物 runs[] 与页面字段完全同构（布局稿 RUNS 契约），本脚本只做
 「字段抽取 + 类型归一 + 排序」，不做任何聚合口径计算——进板数 6 段、🏆 计数、
 赏金合计等全部由前端在 runs[] 上聚合，保证单一事实源（data/races）与页面零换算。
@@ -420,7 +421,7 @@
 
 ## 8. races-bundle.json —— 全库比赛压缩包（构建期派生，源 data/ 不落盘）
 
-**2026-09-28 立项（路 B，D11 替换式；决策与处置记录 = docs/UI优化记录.md §72）**：`data/races/*.json` 276 个逐马文件
+**2026-09-28 立项（路 B，D11 替换式；决策与处置记录 = docs/DESIGN.md §72）**：`data/races/*.json` 276 个逐马文件
 （minified 353KB，站点上为 276 次请求）在 **vite 构建期** 打成单文件
 `dist/data/races-bundle.json`（149.6KB → gzip ≈44KB）。**D11 替换式**：打包成功则 dist
 不再拷贝 `data/races/*.json`；打包失败告警并退回拷贝（叠加形态兜底）。`data/` 仓库永远
@@ -485,3 +486,112 @@
   `來源:"人工"`、`本賞金:0`；落库时同样过 结果/格/芝ダ 归一 + `order_record` 重排 + 日期排序。
 - **前端草稿段**：编辑台草稿箱 `d.rc`（形状同本表三段），提交时叠加远端（同组键草稿覆盖远端、del 连带清 mod、
   重建行自动撤 del、add 双键去重），合并逻辑单源 = `front/public/editor.js::mergeRaceEdits`。
+
+## 10. video-map.json + video_manual.json + video-sources.json —— 视频回放（§185）
+
+比赛记录「回放」列的数据链。**契约三件套**：配置（人工维护）→ 自动产物（脚本生成）→ 人工覆写（脚本只读，人工值永远优先）。
+
+### 10.1 config/video-sources.json（配置，人工维护；换 UP 主只改这里）
+
+```json
+{
+  "mid": 3493136521235298,            "space_url": "https://space.bilibili.com/…",
+  "fetch": { "seasons_list_page_size": 10, "archives_page_size": 30, "domain_sleep": 1.5 },
+  "search": { "keyword": "" },        // 全量投稿通道：留空 = 自动取 UP 昵称（card 接口）
+  "match": {
+    "date_full":  "(?P<y>20\\d{2})[./\\-](?P<m>\\d{1,2})[./\\-](?P<d>\\d{1,2})",   // 2025-11-09 / 2025/9/28
+    "date_ymd_ja": "(?P<y>20\\d{2})年(?P<m>\\d{1,2})月(?P<d>\\d{1,2})日",           // 2026年04月17日
+    "date_md_ja":  "(?P<m>\\d{1,2})月(?P<d>\\d{1,2})日?",                          // 10月26日（年份=视频 pubdate）
+    "venue":      "(?P<v>東京|中山|…|东京|小仓|…)",                                 // 日文+简体双形
+    "venue_alias": { "东京": "東京", "小仓": "小倉", "福岛": "福島", "函馆": "函館", … },
+    "race_no":    "(?P<r>\\d{1,2})\\s*[Rr]"                                         // 5R / 3r
+  },
+  "subtitle_hint": { "yes": ["字幕","中字","熟肉","双语","CC"], "no": ["生肉","无字幕","字幕なし"] }
+}
+```
+
+- `mid` 为空 = 功能关闭态（脚本显式退出）。**子项目站（kzn 等）各自维护本文件**（品牌保留清单项，不随模板同步）。
+- 字幕**二态**（用户定稿 2026-11）：`subtitle_hint.yes` 命中标题 → `true`，否则 `false`；画面内嵌硬字幕 B 站 API 判不了（`x/player/v2` 只暴露 CC 软字幕）→ **以人工表为准**。
+
+### 10.2 data/video-map.json（自动产物；`run_update.py --video` → scripts/video/ 两步生成）
+
+```json
+{
+  "_meta": { "schema": "video-map/v2", "updated": "…", "mid": …, "auto": 111, "manual": 0,
+             "unmatched": 86, "multi_p": 4, "suspect": 0, "match_how": { "精确": 111 } },
+  "videos": {
+    "race:202501010405": [
+      { "source": "bilibili", "bvid": "BV…", "url": "https://www.bilibili.com/video/BV…/",
+        "title": "2025/8/3 札幌5R 2歳新馬 …", "video_title": "", "page": 1,
+        "subtitle": false, "match": "auto" }
+    ]
+  }
+}
+```
+
+- **v2（§186）= 每场一个源数组**（`videos[key]: [source, …]`），支持一场多个视频源。自动产物恒 1 源；人工表可给多源。前端 `normList()` 同时兼容 v1 的单对象（升级过渡/旧缓存）。
+
+- **键 = 比赛键**（与 `scripts/races/racelib.py::race_key` 同构，改键两处同步）：有 `race_id` → `race:<race_id>`；无（海外台账场）→ `slot:<日付>|<場名>|<R>`。同场多驹共享一键 → 全部产驹行同列显示同一视频。
+- **匹配在构建期做，前端只查表**（正则不进浏览器）：标题三信号（日期+场地+R）→ `(日付,場名,R)` 查比赛索引；不齐（追切/展示/直播回放）或同键冲突 → 不落库，进 `data/video_report.md` 待人工。
+- **无年份标题（「11月8日」）的年份口径**：按视频 `pubdate` 推断（含 ±1 年跨年校正），**推断年查不到就判未收录，绝不跨年硬配**。反例（2026-11 实测踩坑）：`11月8日 京都3R ゴールデンプロミス`（2026-11-08，当日中央赛未入库）曾被"同月日唯一"抢到 **2025-11-08 京都3R**；现在只在报告里点名「跨年候选」供人工确认。
+- **马名校验**：标题含片假名马名而该场出走马无此马 → 判疑似错配，不落库并写报告（`suspect` 计数）。宁可不落库，不可挂错场。
+- **多 P 视频按分 P 拆场**：整条标题匹配不到时，逐 P 用分 P 标题（`pages[].part`）匹配，命中记 `page=N`（例：`2025/8/24-8/25 比赛合集` 3 段 → 中京3R / 札幌5R / 新潟6R 各一场）。分 P 详情由 `fetch_video.py` 写进 `_tmp/video/videos.json` 的 `pages`，`build_video_map.py` 保持纯离线。
+- 抓取通道：**主通道 = 站内搜索按 UP 昵称**（`search_type=video&keyword=<昵称>&order=pubdate`，返回条目 `author` 恒为本 UP 主 → 等价全量投稿列表；2026-11 实测 192 条 / 10 页）；**兜底 = 合集/系列接口**（`seasons_series_list`/`seasons_archives_list`/`x/series/archives`，清单 page_size 上限 10，但只覆盖被收录的部分 —— 实测仅 29/192，**不能当全量用**）。`x/space/wbi/arc/search` 对服务器 IP 一律风控（-352 / 412）。兜底：`fetch_video.py --from-file 手工导出.json`。
+- **风控识别（关键）**：B 站对机房/海外 IP 常返回 **HTTP 200 + `code:0`，但 `data` 里只有 `v_voucher` 验证票、没有 `result`**。`common.guard_risk()` 专门识别这种「假成功」并抛 `RiskControl` —— 否则会被当成“该 UP 主没有投稿”，把映射洗成空。
+- **清单 `data/video_raw.json` 入库**（`data/_tmp/` 被 gitignore，Actions 读不到）：CI 抓不到时用这份基线照样能重算映射（新入库的比赛能挂上旧视频）。`copy-data` 显式跳过它 → 不进 dist。
+- **累积合并（默认）**：抓取结果与已有清单按 `bvid` 并集，**只增不减**；`--replace` 才覆盖。抓不全（如只有合集通道可用，29/192）绝不会把已有 111 场映射清空。
+- `page` = 多 P 视频分 P 号（默认 1）；`video_title` = 分 P 命中时保留整条视频标题（前端 tooltip 用 `title`，即该场的分 P 标题）。
+- 每次 `build_video_map.py` 另出人看清单 `data/_tmp/video/videos.md`（全量视频名 + URL + 匹配结果，`_tmp` 不进库不进 dist）。
+
+#### 10.2.1 日频方案（GitHub 定时 + 本机兜底，二者互补）
+
+| 方式 | 触发 | 能力 | 说明 |
+|---|---|---|---|
+| `.github/workflows/video-task.yml` | `update-data` 成功后自动串联（每天 1 次）；亦可手动 dispatch | **尽力而为** | `--via both --best-effort`：机房 IP 被风控时只打 `::warning::` 注解、沿用旧清单、无变化不提交 → 站点零噪音 |
+| `scripts/video/local_refresh.py` | Windows 任务计划程序 / 手动 | **全量可靠**（家宽 IP） | 抓取 → 重算 → `git commit/push` → CI 的 deploy 自动构建上线 |
+
+- 想提高 Actions 成功率：在仓库 Secrets 配 **`BILI_COOKIE`**（浏览器 Cookie 串，含 `SESSDATA`），脚本会自动带 Cookie 请求；不配则匿名请求（本机匿名可用，机房 IP 多半不行）。
+- 无论哪条链路，`data/video_manual.json` 的**人工值永远优先**，CI 不写它。
+
+### 10.3 data/video_manual.json（人工覆写表；写入者唯一 = 人，脚本永不写）
+
+```json
+{
+ "_readme": "…",
+ "race:202604030411": {
+  "sources": [
+   { "url": "https://www.bilibili.com/video/BV1xx411c7mD/", "title": "带字幕版", "page": 1, "subtitle": true },
+   { "url": "https://www.bilibili.com/video/BV1yy411c7mE/", "title": "另一机位", "page": 1, "subtitle": false }
+  ]
+ }
+}
+```
+
+- **多源三种写法**：`{"sources":[…]}`（推荐）/ 单个 `{"url":…}`（v1 兼容）/ 直接数组 `[…]`。每个源字段：`url`（必填，任意 http(s)；B 站链接自动解析 BV 号走站内 iframe，其他链接＝`other` 源；**可带 `?t=秒`/`?start=` 时间轴与 `?p=2` 分 P，前端解析后透传给播放器**）、`title`、`page`（默认 1）、`start`（起播秒数，缺省从 url 的 t 解析）、`subtitle`（true=「字」角标）。**链接写法随意**：站点链接 / 分享链接（`share_source`、`vd_source` 等参数忽略）/ `av` 号 / `?p=2` 分 P 都识别；只有 `b23.tv` 短链例外（离线展不开，按外链处理）。
+- 外层开关：`append:true` = 把人工源**追加**到自动源之后（默认 `replace`：人工列表就是该场最终源列表）；`{"sources":[],"clear":true}` = 清空该场自动视频。`_` 前缀键忽略。
+- 人工值**永远优先**（`build_video_map.py` 落盘时合并 + `yj-video.js::load` 前端再合并，双保险）；⚠ 本表随构建进 `dist/data/`（公网可读），别写私人内容。
+- 改完重算：`python scripts/video/build_video_map.py` + `npm run build`。**正式配置入口 = 编辑台「比赛记录批量编辑」**（见 10.4 末）。
+
+### 10.4 前端消费（只读）
+
+`front/public/yj-video.js`（`YJ.video`，注册进 `yj-cache.js` 的 `videoMap`/`videoManual`，12h 统一缓存）：
+
+- `load()` 两层合并 → `MAP[key] = [source,…]`，优先级 **data/video_manual.json > data/video-map.json**（人工默认 replace，`append:true` 追加，`clear:true` 清空）。
+  模块**只读不写**：§187 之前曾有 localStorage 本机表，因它会盖掉编辑台提交的全站值已移除。
+- `cellHTML(r)` → 回放列只出**图标**（用户定稿 §186.1）：小电视按钮（无文字）、多源右下角数字角标、字幕右上**小胶囊「字」**（§187.1 定稿：16×12 圆角矩形、9px/400 字重，不再是 14px 圆形大角标；角标字小，标题 tooltip 追加「· 带字幕」补足可读性）；无视频 / 数据未就绪 / 模块缺席一律返回 `""`（空态干净）。
+- 点击主按钮：单源 B 站 → 16:9 浮层（`player.bilibili.com/player.html`，点击才注入 src、关闭即清空）；单源 `other` → 新标签页直开；**多源 → 浮层顶部源切换条**（`other` 源在浮层内显示外链卡片）。浮层底部「配置视频源 ↗」直达编辑台。
+- **起播点（§189）**：源 `url` 里的 `?t=` / `?start=`（`2339`、`1h2m3s`、`1m39s` 均可）解析成 `start` 秒，拼到播放器 URL 的 `&t=`（player.html 支持 `t`，但站点链接的参数不会自动透传）；`?p=` / `?page=` 解析成分 P。**mb 端自动追加 `&muted=1`**（移动端只放行静音自动播放），页脚显示「从 mm:ss 开始」「静音起播·点喇叭开声」。链接为分享链接时只取 `BV`/`av` 号与 `t`/`p`，其余参数丢弃；`b23.tv` 短链改走外链卡片并给出说明。
+- **浮层挂 `window.top.document`（§186）**：内容页都在外壳 `index.html` 的 iframe 里，页内 `fixed` 只能盖到内容区（基本信息页弹窗会偏右下）；同源 iframe 直接操作顶层文档，外壳引了同一份 `theme.css` → 遮罩全屏、弹窗整页居中。直开子页自动退回本 document。遮罩**完全透明**（用户定稿），点空白 / Esc / × 关闭。
+- 样式 = `theme.css` `.yj-vid*` / `.yj-vm*` / `.yj-ve*`（B 站品牌粉 #FB7299 指定色块，单一出处；`.yj-ve*` 由编辑台视频源弹窗复用）。
+
+#### 10.4.1 编辑链路（§187：复用草稿箱 + PAT）
+
+| 环节 | 落点 |
+|---|---|
+| 编辑入口 | `edit-table.html?sheet=races` 的「视频源」列（`editor-table.js::RACE_LAYOUT` 新增 `type:"video"` 列，点击开多源弹窗） |
+| 草稿段 | `d.vid = { "<比赛键>": { sources:[…] } }`（`editor.js::vidGet/vidPut/vidN/vidDropAll`），计入 `draftCount()`，草稿箱显示「回放视频源」条目，`__vid` 可放弃 |
+| 提交 | `editor.js::submitDrafts` 白名单 5 `VM_PATH = data/video_manual.json`：远端 + `mergeVideoManual(remote, d.vid)` → 与其余 4 张人工表同一原子 commit（GitHub Git Data API + PAT） |
+| 生效 | `yj-video.js::load` 直读该表且人工值优先 → **不需要后端重算**；`YJ.cache.bust()` + `watchCI` 后刷新即见。提交成功清 `d.vid` 并派发 `yj-vid-dropped` |
+| 防污染 | 视频源列**不写 `races_edits.json`**：`type:"video"` 列在 `startEdit` 被拦截、不走 `applyCell`；行初始化 4 处跳过该列（`r._pend` 永不出现「视频源」） |
+
+`video-task.yml` 每天重算 `video-map.json` 时会再次把人工表合并进去（幂等），不影响上述即时生效路径。

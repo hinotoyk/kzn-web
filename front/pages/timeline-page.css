@@ -26,22 +26,39 @@
  * 这里只放「居中轴线 + 左右交替」的 grid 骨架 —— 编辑台预览是单侧一行布局，两者不通用。 */
 .tl{position:relative}
 .tl::before{content:"";position:absolute;left:50%;top:8px;bottom:8px;width:2px;transform:translateX(-50%);background:#ececec}
-.tl-item{position:relative;display:grid;grid-template-columns:1fr 56px 1fr;grid-template-rows:auto;align-items:center;padding-bottom:26px}
+.tl-item{position:relative;display:grid;grid-template-columns:1fr 56px 1fr;grid-template-rows:auto;align-items:start;padding-bottom:26px}
 .tl-item.right{grid-template-areas:"date node card"}
 .tl-item.left{grid-template-areas:"card node date"}
 .tl-date{grid-area:date}
 .tl-item.right .tl-date{text-align:right;padding-right:20px}
 .tl-item.left .tl-date{text-align:left;padding-left:20px}
 .tl-node{grid-area:node;justify-self:center}
-.tl-cardwrap{grid-area:card;min-width:0;width:min(480px,100%)}
+/* §179（2026-11-06 用户从 §178 对照页选型）：卡宽 480 → 420。
+ * 竖排通栏图下卡宽直接决定图高（420 宽 → 图 420×280，比 480 的 320 矮 40px，视觉仍「满」），
+ * 同批 3 场赛事整页高度 1779 → 1655px。结构一字未改，只收窄，故 mb（width:100%）不受影响。 */
+.tl-cardwrap{grid-area:card;min-width:0;width:min(420px,100%)}
 .tl-item.right .tl-cardwrap{justify-self:start}
 .tl-item.left .tl-cardwrap{justify-self:end}
-.tl-item.left .tl-photo{order:2}
-.tl-item.left .tl-body{order:1}
+/* §177：卡片两端都是「图在上、文在下」，左右交替只决定卡片落在轴的哪一侧，不再翻转图位顺序 */
+.tl-item.left .tl-photo,
+.tl-item.left .tl-body{order:0}
 /* 年份：骑在轴线上的居中胶囊；sticky 吸附在视口顶部（§147）——
  * sticky 以父盒子 .tl-group 为界，只在本年份区间内跟随，滚出即让位下一年；
  * yearrow 全宽透明层 pointer-events:none，避免悬停时挡住下方卡片的 hover（胶囊自身恢复）。 */
 .tl-yearrow{position:sticky;top:8px;z-index:2;display:flex;justify-content:center;padding:4px 0 20px;pointer-events:none}
+/* §188 sticky 年份胶囊缓退：滚动进行中常显（不挡操作），滚动停止 ~0.9s 后若仍吸附在视口顶
+ * （此时正好盖住下方卡片内容）→ 缓慢淡出；再次滚动立刻恢复。
+ * 动效（§188.1 优化）：淡出 = 透明度 + 轻微上浮缩小（-8px / .95）+ 阴影同步收拢，三轨同一条
+ *   平滑曲线（cubic-bezier(.4,0,.2,1)），不是干瘪的纯 opacity；恢复 = 快速落回（.3s ease-out）。
+ * 只淡出「吸附态」的胶囊：自然流位置的年份标签照常可见（静置阅读时年份上下文不丢）。
+ * 动画作用在胶囊 .tl-year 本体（yearrow 全宽透明层不动，吸附定位不受 transform 影响）；
+ * 吸附态判定在 JS（rect.top ≈ sticky 偏移）→ 挂 .stuck；.tl-idle 由 JS 滚动静默计时挂上。
+ * 过渡包在 no-preference 里尊重系统减动效（减动效下瞬时隐藏，内容不滞留）。 */
+.tl-idle .tl-yearrow.stuck .tl-year{opacity:0;visibility:hidden;transform:translateY(-8px) scale(.95);box-shadow:0 1px 4px rgba(16,24,40,0)}
+@media (prefers-reduced-motion: no-preference){
+  .tl-yearrow.stuck .tl-year{transition:opacity .3s ease-out,transform .3s ease-out,box-shadow .3s ease-out,visibility .3s}  /* 恢复（出现）：快 */
+  .tl-idle .tl-yearrow.stuck .tl-year{transition:opacity .7s cubic-bezier(.4,0,.2,1) .2s,transform .7s cubic-bezier(.4,0,.2,1) .2s,box-shadow .7s ease .2s,visibility .7s ease .2s}  /* 淡出：慢 + 略延迟 */
+}
 .tl-year{pointer-events:auto;background:#fff;border:1px solid #ececec;border-radius:100px;padding:3px 18px;font-size:13px;font-weight:700;color:#171717;box-shadow:0 1px 4px rgba(16,24,40,.06)}
 .tl-yc{margin-left:7px;padding-left:8px;border-left:1px solid #ececec;font-size:11px;font-weight:600;color:#9aa0a6}
 .tl-group{position:relative}

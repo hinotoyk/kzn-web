@@ -446,8 +446,6 @@ global.fetch = function (url) {
  * stub 按浏览器加载顺序先入 yj-util.js → race-rows.js → loading.js（window=global，挂到同一 YJ），再 eval 页面脚本。
  * ★ #18 撤销骨架屏/分批渲染后 loading.js 只剩 YJ.ui.img（B4 图片标记），stats 页已不调 YJ.ui →
  *   这里入它只为与本分支各页的浏览器加载顺序一致，删了也不影响下列断言。 */
-/* P3/R6（docs/REFACTOR.md §12.4）：race-rows.js 已改读 window.YJ_GRADE（fail-fast）→ stub 环境须先注入
- * 与浏览器一致的 YJ_SITE / YJ_GRADE（node 侧 fs 读 config 两个 JSON，与 dist/site-config.js 同源）。 */
 const _sireCfg = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "sire.json"), "utf8"));
 const _gradeCfg = JSON.parse(fs.readFileSync(path.join(ROOT, "config", "grade-table.json"), "utf8"));
 window.YJ_SITE = _sireCfg.site || {};
@@ -647,7 +645,7 @@ setTimeout(function () {
   ok(pageCss.includes("tr.base td{position:sticky;top:var(--st-th,26px);z-index:2;background-color:#f4f4f5") && !pageCss.includes("#f7fdfd"),
     "基准行（总体平均）= 中性灰底 + sticky（与率列 绿=高于/红=低于 的数据语义色分离；长列表滚动时参照常驻，§144）");
   ok(mt.includes("短距离"), "默认页签 = 距离（首屏渲染短/英/中/长距离行）");
-  click("matTabs", "surf");                      /* 跑道维度需切页签（默认已是距离，见 docs/UI优化记录.md §56） */
+  click("matTabs", "surf");                      /* 跑道维度需切页签（默认已是距离，见 docs/DESIGN.md §56） */
   const mtSurf = String(els["matTable"]._html);
   const daRow = byv["中央"].scopes.all.dims.surf.find(x => x.k === "ダ");
   ok(mtSurf.includes(">ダ<") && mtSurf.includes(String(startsOf(daRow))), "跑道页签：泥地行 出走 " + startsOf(daRow));
@@ -748,7 +746,7 @@ setTimeout(function () {
   const firstRow = () => {
     /* 首个数据行 = tbody 内基准行之后的第一行；不能用 data-href 定位（「其他」等无下钻档无该属性，
      * drillURL 对 grade 其他/未知 cond 返回 null → 行渲染无 data-href；data-href 版会静默跳过它测错行，
-     * kzn 数据「其他」桶胜率登顶实测踩坑，2026-10-30 审查定版回灌，见 UI优化记录 §138） */
+     * kzn 数据「其他」桶胜率登顶实测踩坑，2026-10-30 审查定版回灌，见 docs/DESIGN.md §11 索引的 §138） */
     const tb = String(els["matTable"]._html).split("<tbody")[1] || "";
     const rows = tb.split("<tr");
     return (rows[2] || "").slice(0, (rows[2] || "").indexOf("</tr>"));

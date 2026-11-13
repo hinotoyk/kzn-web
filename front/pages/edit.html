@@ -10,7 +10,7 @@
 </head>
 <body class="bg-muted/50 text-foreground antialiased">
 
-<!-- 2026-10 v3「工作台」改版（docs/UI优化记录.md §90）：页首「编辑」分段导航（✎ 基本信息 / ⌇ 航迹线，
+<!-- 2026-10 v3「工作台」改版（docs/DESIGN.md §90）：页首「编辑」分段导航（✎ 基本信息 / ⌇ 航迹线，
      参考成熟编辑菜单的分组条目：图标 + 文字 + 当前项浮起）→ 常开工作表卡（照片位 + 五字段常开直改 +
      备注行）→ 固定底部保存条。状态语言 v3 定稿：沉默 = 与官方一致（不亮牌），仅「已保存（青绿）/
      待保存（橙）」显示。编辑台恒为草稿箱模式：不依赖 edit_server，线上提交统一走 GitHub API → CI
@@ -19,7 +19,6 @@
 <div class="mx-auto w-full max-w-[880px] px-4 pt-6 pb-[108px] max-md:px-3 max-md:pt-3 max-md:pb-[132px]">
 
   <header class="rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
-    <!-- 页内页签已撤下（2026-10-25 用户定稿）：编辑台导航统一收进外壳侧栏「编辑」组（front/index.html #editNav） -->
     <div id="mast" class="flex flex-wrap items-center gap-x-3 gap-y-2"></div>
     <div id="selector" class="mt-2.5"></div>
   </header>
@@ -57,6 +56,8 @@
 <script src="../site-config.js"></script>
 <script src="../data-config.js"></script>
 <script src="../yj-util.js"></script>
+<!-- §190 编辑页 PAT 门禁：未解锁（本机无本站 PAT）时整页换成解锁卡片 -->
+<script src="../yj-edit-gate.js"></script>
 <script src="../i18n.js"></script>
 <script src="../device.js"></script>
 <script src="../yj-cache.js"></script>

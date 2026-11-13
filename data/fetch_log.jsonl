@@ -30871,3 +30871,8 @@
 {"ts": "2026-11-12 20:37:09", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.25, "retries": 1, "note": ""}
 {"ts": "2026-11-12 20:37:10", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.3, "retries": 1, "note": ""}
 {"ts": "2026-11-12 20:37:10", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.34, "retries": 1, "note": ""}
+{"ts": "2026-11-13 15:39:05", "script": "smoke_fetch.py", "host": "db.netkeiba.com", "path": "https://db.netkeiba.com/horse/2017106203/", "status": "200", "dur_s": 0.31, "retries": 1, "note": ""}
+{"ts": "2026-11-13 15:39:07", "script": "smoke_fetch.py", "host": "race.netkeiba.com", "path": "https://race.netkeiba.com/race/result.html", "status": "ERR", "dur_s": 0.24, "retries": 1, "note": "400 Client Error: Bad Request for url: https://race.netkeiba.com/race/result.htm"}
+{"ts": "2026-11-13 15:39:10", "script": "smoke_fetch.py", "host": "nar.netkeiba.com", "path": "https://nar.netkeiba.com/race/result.html", "status": "200", "dur_s": 0.71, "retries": 1, "note": ""}
+{"ts": "2026-11-13 15:39:12", "script": "smoke_fetch.py", "host": "www.jbis.or.jp", "path": "https://www.jbis.or.jp/horse/0001120570/pedigree/", "status": "200", "dur_s": 0.36, "retries": 1, "note": ""}
+{"ts": "2026-11-13 15:39:15", "script": "smoke_fetch.py", "host": "www.studbook.jp", "path": "/users/ja/SearchBameiList", "status": "200", "dur_s": 0.41, "retries": 1, "note": ""}

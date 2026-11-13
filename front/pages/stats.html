@@ -53,8 +53,9 @@
   </section>
 
   <!-- ③ 种马榜走势（跨站引用 jbis-sire-rank-history：数据 = 该站 derived/sire-history 派生产物，
-       图表 = 该站发布的纯渲染组件 embed/sire-rank-chart.js，本页只挂载；口径=JBIS 榜单，不受顶部工具条影响） -->
-  <section class="mb-8">
+       图表 = 该站发布的纯渲染组件 embed/sire-rank-chart.js，本页只挂载；口径=JBIS 榜单，不受顶部工具条影响）
+       id="srkSection"：跨站地址未配置（config/sire.json 的 site.cross_site.jbis_rank 空）时整节原地摘除。 -->
+  <section id="srkSection" class="mb-8">
     <div class="mb-2.5 flex items-center gap-2 text-[13px] font-bold uppercase tracking-[1px] text-secondary-foreground">
       <span class="h-3.5 w-1 flex-none rounded bg-primary"></span>种马榜走势 · SIRE RANK
     </div>
@@ -94,6 +95,7 @@
 
 <script src="../data-config.js"></script>
 <script src="../yj-util.js"></script>
+<script src="../yj-cap.js"></script>
 <script src="../loading.js"></script>
 <script src="../i18n.js"></script>
 <script src="../yj-cache.js"></script>
@@ -310,7 +312,7 @@ function renderYseg() {
 
 /* ---- ④ 年龄成绩曲线（ECharts 定制包 · §145）----
  * 语义沿用 §135：颜色 = 世代 · 线型 = 指标 · 分母 = 出走。
- * 相对原手写 SVG 的五处改动，每处对应一个实测问题（详见 docs/UI优化记录.md §145）：
+ * 相对原手写 SVG 的五处改动，每处对应一个实测问题（详见 docs/DESIGN.md §145）：
  *   ① y 轴上界自适应 + 超上界贴顶 —— 原固定 50%，14 颗可靠点全挤在底部 30% 高度里互相压线；
  *      撑满 50% 的其实只有一颗 9 场的 44.4%（噪声）→ 刻度只按可靠点定标，噪声点贴顶画 ▲
  *   ② axis tooltip —— 原只有 SVG <title>，必须精确悬停，触屏完全不可用
@@ -670,7 +672,7 @@ function matHtml(tab) {
       return ra - rb;                                  /* 稳定排序：同档保持 n 降序 */
     });
   }
-  /* 着别 1/2/3着/着外 = 纯数字无样式（v3 用户拍板：彩字/浅底胶囊方案均废止，见 docs/UI优化记录.md §44）；8 个数值列表头可点击排序 */
+  /* 着别 1/2/3着/着外 = 纯数字无样式（v3 用户拍板：彩字/浅底胶囊方案均废止，见 docs/DESIGN.md §44）；8 个数值列表头可点击排序 */
   var COLS = [
     { k: "starts", l: "出走" },
     { k: "w",      l: "1着" },
@@ -799,7 +801,7 @@ function syncEdges() {
  *        TTL 12h · 断网回退旧缓存，与全站产物同一控制器）；图表 = 该站发布的纯渲染组件
  *        embed/sire-rank-chart.js（window.JBIS_RANK_EMBED，只画图不 fetch 不写存储）。
  * 本节口径 = JBIS 榜单（賞金・全般・万円），与页面工具条（basic.json 口径）相互独立。 */
-var SRK = { dim: "g23", div: "central" };   /* 默认 = 23年世代・中央（2026-10-27 与用户定稿；キズナ 初产驹为 2016 年世代，g23 非首产） */
+var SRK = { dim: "g23", div: "central" };   /* 默认 = 23年世代・中央（首产世代，2026-10-27 与用户定稿） */
 /* 图表色 = tailwind.config chart1/chart2 对齐值：主题未发 CSS 变量（chart2 键无连字符），
  * SVG 属性与图例拿不到 var(--*)，页面内单一定义、图例与组件入参同源（组件默认回退值与此一致）。 */
 var SRK_COLORS = { prize: "#0aa7a0", rank: "#0f8fd6" };
@@ -810,7 +812,7 @@ function srkLegend() {   /* v1.3.0 定稿：名次副图去除，名次 = 跳增
 }
 var SRK_DIMS = [
   { k: "年度", l: "年度",     tip: "年度別サイアー（全部产驹，JBIS 当前年度集計）" },
-  { k: "g23",  l: "23年世代", tip: "世代別サイアー 2023年生" },
+  { k: "g23",  l: "23年世代", tip: "世代別サイアー 2023年生（首产世代）" },
   { k: "g24",  l: "24年世代", tip: "世代別サイアー 2024年生（当年 2歳世代）" }
 ];
 var SRK_DIVS = [ { k: "central", l: "中央" }, { k: "overall", l: "総合" } ];
@@ -838,19 +840,28 @@ function srkEmbed() {   /* 图表组件脚本只加载一次；加载失败可�
 }
 function srkKpis(data) {
   var his = data.history || [];
-  var last = his[his.length - 1] || {}, prev = his.length > 1 ? his[his.length - 2] : null;
-  /* 赏金格式复用 YJ.util.manYen（§48 单一出处；入参円，derived 口径万円 ×1e4） */
-  var dp = prev && last.prizeOverall != null && prev.prizeOverall != null ? last.prizeOverall - prev.prizeOverall : null;
-  var dpHtml = dp == null ? "—" : dp === 0 ? "±0" :
-    '<span class="' + (dp > 0 ? "yj-up" : "yj-down") + '">' + (dp > 0 ? "+" : "−") + manYen(Math.abs(dp) * 10000) + "</span>";
+  var last = his[his.length - 1] || {};
   var rank = last.rank;
   document.getElementById("srkKpis").innerHTML =
     kpiHTML("当前赏金", last.prizeOverall != null ? manYen(last.prizeOverall * 10000) : "—", "hi") +
-    kpiHTML("排名", rank == null ? "—" : "第" + rank + "位", rank != null && rank <= 3 ? "hi" : "") +
-    kpiHTML("较前快照", dpHtml) +
-    kpiHTML("最新快照", last.date ? last.date.slice(5).replace("-", "/") : "—", "dim");
+    kpiHTML("排名", rank == null ? "—" : "第" + rank + "位", rank != null && rank <= 3 ? "hi" : "");
 }
 var srkSeq = 0;
+/* 标注档位（见 renderSireRank 内说明）：PC 恒全量；MB 需组件 ≥1.4.0 才用 "rank"，
+ * 旧版退化为 false（宁可无标注，也不让 +金额 与相邻点压成一团）。 */
+function srkVerAtLeast(min) {
+  var v = String((window.JBIS_RANK_EMBED && window.JBIS_RANK_EMBED.version) || "0").split(".");
+  var m = String(min).split(".");
+  for (var i = 0; i < 3; i++) {
+    var a = parseInt(v[i] || "0", 10) || 0, b = parseInt(m[i] || "0", 10) || 0;
+    if (a !== b) return a > b;
+  }
+  return true;
+}
+function srkAnnotate() {
+  if (!isMb()) return true;
+  return srkVerAtLeast("1.4.0") ? "rank" : false;
+}
 /* §169 浮层 loading（常驻引用；node 门禁 stub 无 createElement → 跳过，chart 内容断言不依赖它）：
  * 盖在 srkWrap 上而不是 srkChart 里 —— JBIS render 整体重写 #srkChart，浮层作兄弟节点才安全。 */
 var srkOv = null, srkLoaded = false;
@@ -872,6 +883,9 @@ function srkLoading(on) {
   }
 }
 function renderSireRank() {
+  /* 跨站引用关闭（config/sire.json 的 site.cross_site.jbis_rank 空 = 本站没接 jbis 榜站）→ 整节不渲染。
+   * 三道防线：节元素已在 init 里移除 + 这里早退（切维度/切板/重试都会再进来） + 不发请求。 */
+  if (!(window.YJ_DATA && YJ_DATA.remote && YJ_DATA.remote.jbisRank)) return;
   var el = document.getElementById("srkChart");
   var kpis = document.getElementById("srkKpis");
   var board = srkBoard(), seq = ++srkSeq;   /* 过期渲染丢弃：切板后迟到的旧数据不回写 */
@@ -894,8 +908,14 @@ function renderSireRank() {
   Promise.all([YJ.cache.fetch("sireRank", { arg: board }), srkEmbed()]).then(function (r) {
     if (seq !== srkSeq) return;
     window.JBIS_RANK_EMBED.render(el, r[0], {
-      style: "combo",      /* 2026-10-27 用户定稿：单面板（平滑累计+渐变面积）+ 增量柱共用 y 轴；名次副图 v1.3.0 去除 */
-      annotate: true,      /* 跳增日标注「+金额（名次）」 */
+      style: "combo",
+      /* 标注（组件 v1.4.1 · 2026-11-05 用户反馈「赏金增量与排名文案压叠」）：
+       *   PC = true（跳增日「+金额（N位）」，幅面宽放得下）
+       *   MB = "rank"（只报名次变化「N位」）—— 390px 下 +金额 文案宽约 90px，与相邻点必然互压；
+       *        名次变化才是走势的结构变化，金额由增量柱承担。
+       * 兼容：组件由兄弟站发布，线上还是旧版（<1.4.0 不认识 "rank"、会按 truthy 走全量档继续压叠）
+       *   → MB 在旧版上直接不标（干净图 > 压字），新版到位后自动切 "rank"。 */
+      annotate: srkAnnotate(),
       colors: SRK_COLORS,
       labels: { prize: "赏金", rank: "名次", delta: "单日增量", empty: "暂无快照数据" }
     });
@@ -1003,10 +1023,17 @@ document.getElementById("matTable").addEventListener("click", function (e) {
   var tr = e.target.closest ? e.target.closest("tr[data-href]") : null;
   if (tr) window.open(tr.getAttribute("data-href"), "_blank", "noopener");   /* §80：跳转新标签页，不离开当前统计视图 */
 });
-var resizeTimer = null;
+var resizeTimer = null, srkMbLast = isMb();   /* 初始断点：首帧就记下，首个 resize 才可判翻转 */
 window.addEventListener("resize", function () {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(function () { renderCurve(); applyMatScroll(); syncEdges(); }, 150);
+  resizeTimer = setTimeout(function () {
+    renderCurve(); applyMatScroll(); syncEdges();
+    /* 跨 768px：种马榜标注形态不同（PC 全量 / MB 只报名次）→ 整体重绘；
+     * 同断点内的宽度变化由组件自身 ResizeObserver 处理，这里不碰（免得每次拖窗都重取缓存）。 */
+    var mb = isMb();
+    if (srkMbLast !== null && mb !== srkMbLast) renderSireRank();
+    srkMbLast = mb;
+  }, 150);
 });
 
 /* ---- 初始化 ---- */
@@ -1019,7 +1046,14 @@ window.addEventListener("resize", function () {
     var n = document.getElementById(id);
     if (n && window.YJ && YJ.ui && YJ.ui.spin) n.innerHTML = YJ.ui.spin({ label: "加载统计数据…", sm: true });
   });
-  renderSireRank();                                    /* 种马榜走势数据独立（JBIS 跨站引用），与 stats.json 并行加载 */
+  /* 跨站引用关闭时整节不进 DOM（P1-0）：先摘掉再决定要不要渲染 —— 否则标题/选择器留着、
+   * 图表永远转圈，看起来像"坏了"而不是"没接"。 */
+  if (!(window.YJ_DATA && YJ_DATA.remote && YJ_DATA.remote.jbisRank)) {
+    var srkSec = document.getElementById("srkSection");
+    if (srkSec && srkSec.parentNode) srkSec.parentNode.removeChild(srkSec);
+  } else {
+    renderSireRank();                                  /* 种马榜走势数据独立（JBIS 跨站引用），与 stats.json 并行加载 */
+  }
   YJ.cache.fetch("stats").then(function (data) {
     STATS = data;
     renderAll();

@@ -1,0 +1,9 @@
+{
+  "_meta": {
+    "schema": "video-map/v2",
+    "updated": "2026-11-13 15:50:00",
+    "count": 0,
+    "note": "本站未配置视频源（config/video-sources.json 的 mid 为空）→ 空表。启用：填 mid/space_url/search.keyword → python run_update.py --video → npm run build。"
+  },
+  "videos": {}
+}

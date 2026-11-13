@@ -53,7 +53,7 @@ def trainer_guard(cur, new):
     return norm_trainer(new)
 
 
-# ── 全角 → 半角：双作用域（docs/REFACTOR.md §5.1 R7，v2.4 定案 R7-α/β/γ） ──
+# ── 全角 → 半角：双作用域（v2.4 定案 R7-α/β/γ） ──
 # 必须走 str.maketrans（translate 只认 ordinal 键，直接给字符键会静默不生效）。
 # 全量版表：0x3000（全角空格）→ 空格；FF01-FF5E → ASCII 0x21-0x7E（94 字母数字标点）。
 _FW_TABLE = str.maketrans({0x3000: 0x20, **{0xFF01 + i: 0x21 + i for i in range(94)}})
@@ -77,3 +77,25 @@ def fw2hw_narrow(s):
     ⚠ 作用域（R7）：本函数是 racelib._fold_fullwidth 系（名字/键折叠）唯一正确版本，
     勿拿全量版 fw2hw 替换它。"""
     return (s or "").translate(_FW_NARROW_TABLE)
+
+
+# ── netkeiba 人物页标题解析（调教师 / 骑手） ──
+# 2026-11-13 实测：调教师页标题已从「〇〇の調教師成績｜競馬データベース」改成
+# 「〇〇のプロフィール | 調教師データ」，而骑手 result 页仍是旧写法。
+# 只认死一种 → 解析静默返回 ""，调用方退回马级/原页文本，全程不报错（本次就是这么发现的）。
+_PERSON_TITLE_RE = {
+    "調教師": re.compile(r"<title>\s*([^<]+?)\s*の(?:調教師成績|プロフィール\s*[|｜]\s*調教師データ)"),
+    "騎手": re.compile(r"<title>\s*([^<]+?)\s*の(?:騎手成績|プロフィール\s*[|｜]\s*騎手データ)"),
+}
+
+
+def person_from_title(html, kind):
+    """netkeiba 人物页 <title> → 人名（kind 取 "調教師" / "騎手"）。两种版式都认，认不出返回 ""。
+
+    为什么放在 core 而不是各脚本里：`fetch_races`（赛事记录归一）和 `basic/fetch_detail`
+    （马级調教師）都要解析同一种标题，各写一份就会像这次一样「一边改了另一边没改」。"""
+    rx = _PERSON_TITLE_RE.get(kind)
+    if rx is None:
+        raise ValueError(f"person_from_title: 不支持的 kind={kind!r}")
+    m = rx.search(html or "")
+    return m.group(1).strip() if m else ""

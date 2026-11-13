@@ -48,10 +48,21 @@ on:
         type: boolean
         default: false
 
+# 显式声明权限（原来靠仓库默认 "Read and write permissions" 隐式拿到 actions:write）：
+#   contents: write —— commit/push data/ 与 upload-artifact 之外的数据提交
+#   actions: write  —— upload-artifact@v4 上传日志 + 末步 dispatch deploy.yml
+# 显式写死可避免仓库默认权限被改动后本流程静默 403。
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 180          # 初始化全量最长约 1.5~2 小时
+    timeout-minutes: 360          # = GitHub 单 job 硬上限（6h）。这是「最多能占多久」的保险丝，
+                                  # 不是耗时预算：真正的卡死止损在 run_update.py 的无输出看门狗（20 分钟）。
+                                  # 实测 729 匹冷启动全量 6h02m（4866 请求，其中 5.1h 是限速等待），
+                                  # 原来写 180 会在真正需要时先被砍掉。
     steps:
       - uses: actions/checkout@v4
 

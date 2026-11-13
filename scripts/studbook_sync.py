@@ -20,7 +20,7 @@ Git 约定（AGENTS.md）：脚本默认只更新 data/，**不 commit/push**。
   - 传 --commit 可在数据有变化时自动 `git add data/ + commit`（仍**不 push**）。
 
 Windows 任务计划（周频示例；实际路径以你机器为准）：
-  powershell -Command "cd Z:\\IdeaProjects\\kzn-web; python scripts\\studbook_sync.py --commit"
+  powershell -Command "cd Z:\\IdeaProjects\\yunji-web; python scripts\\studbook_sync.py --commit"
 
 用法:
     python scripts/studbook_sync.py            # 只更新 data/

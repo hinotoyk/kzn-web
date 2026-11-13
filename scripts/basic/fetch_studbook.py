@@ -3,7 +3,7 @@
 """并发3（命名环）：studbook.jp → 馬名意味 / 欧字馬名 / 空名回填 → basic.json。
 
 链路（复用探针验证过的完整链路）：
-  Step2: SearchBameiList 搜キズナ → 选出 父=ディープインパクト 的那匹 → 现行 hid
+  Step2: SearchBameiList 搜コントレイル → 选出 父=ディープインパクト 的那匹 → 现行 hid
          （服务端解析当前 hid；studbook 做过 hid 重编号，血统页内嵌旧 hid 会 404，勿硬编码）
   Step1a: SearchChichiKettouList2?hid=..&birthYear=.. 各年产駒列表（翻页）→ 每匹 sid + 馬名/生年/性/母名
           （列位：馬名|生年|性|父名|母名，5 列）—— 覆盖「非繁殖登録」的仔（赛马/未命名）
@@ -28,7 +28,7 @@
   不再抛裸 traceback；本机直连正常时可本地补抓：python scripts/studbook_sync.py。
 
 用法:
-    python fetch_studbook.py [--year 2017,...,2025] [--sleep 0.5] [--force] [--limit N]
+    python fetch_studbook.py [--year 2023,2024] [--sleep 0.5] [--force] [--limit N]
 """
 import argparse
 import re
@@ -95,11 +95,44 @@ def mare_key(mare):
     return text.norm_mare(text.fw2hw(mare or ""))
 
 
+def _hid_from_profile(soup, want, father):
+    """302 直跳的 Honba 档案页 → 本马现行 hid（名字唯一命中时服务端不做列表，直接 302 到档案页）。
+
+    requests 默认跟随跳转，所以此时拿到的**不是搜索结果表**而是档案页，原「找结果行」逻辑必然扑空。
+    取 hid 的顺序（实测 シルバーステート 档案页）：`SearchChichiShushiList2?hid=`（「本馬を父とする
+    繁殖登録馬を検索」）优先，其次 `Godai1?...hid=`（五代血统表，带本马 hid）—— 页面里其余 hid=
+    是父/母的血统表链接（本页另有 父 ディープインパクト、母 シルヴァースカヤ 两个），不能乱取。
+    双重校验：h1.bamei 的馬名 + table_family「父」栏都要对上，对不上返回 None（宁可报未找到，绝不猜）。"""
+    h1 = soup.select_one("h1.bamei")
+    if h1 is None:                                  # 不是档案页（可能仍是列表页）→ 交给调用方
+        return None
+    if want and strip_anno(h1.get_text(" ", strip=True)) != want:
+        return None
+    if father:
+        got = ""
+        tbl = soup.select_one("table#table_family")
+        if tbl is not None:
+            for tr in tbl.find_all("tr"):
+                th, td = tr.find("th"), tr.find("td")
+                if th and td and th.get_text(strip=True) == "父":
+                    got = td.get_text(" ", strip=True)
+                    break
+        if strip_anno(got) != strip_anno(father):
+            return None
+    for pat in (r"SearchChichiShushiList2\?hid=(\d+)", r"Godai1\?[^\"']*hid=(\d+)"):
+        m = re.search(pat, str(soup))
+        if m:
+            return m.group(1)
+    return None
+
+
 def get_hid(name=None, father=None):
     """搜馬名 → 现行 hid。name/father 缺省读 config/sire.json 的 sire.studbook（S3 配置化）；
     显式传值（含空串）时按原行为透传（father 为空 = 不按父馬过滤）。
 
-    ⚠ 只认「馬名=种马名」的结果行（防单结果页内嵌血统表里的旧/其它 hid 被误抓）。"""
+    ⚠ 只认「馬名=种马名」的结果行（防单结果页内嵌血统表里的旧/其它 hid 被误抓）。
+    ⚠ 名字唯一命中时 studbook 直接 302 到档案页（2026-11-13 补兜底）：列表逻辑扑空后改由
+      `_hid_from_profile` 从档案页取，仍带馬名+父馬双重校验。"""
     if name is None:
         name = sire_config.studbook_name()
     if father is None:
@@ -124,7 +157,10 @@ def get_hid(name=None, father=None):
             m = re.search(r"hid=(\d+)", a["href"])
             if m:
                 return m.group(1)
-    return None
+    hid = _hid_from_profile(soup, want, father)     # 唯一命中 → 302 档案页兜底
+    if hid:
+        print(f"  · studbook 搜索唯一命中 → 302 直达档案页，已从档案页校验取 hid={hid}")
+    return hid
 
 
 def get_progeny_paged(hid, birth_year, sleep=0.4):
@@ -224,7 +260,7 @@ def get_honba_fields(path):
 
 def main():
     ap = argparse.ArgumentParser(description="studbook 命名环：意味・由来 / 欧字馬名 / 空名回填")
-    ap.add_argument("--year", default="2017,2018,2019,2020,2021,2022,2023,2024,2025", help="生年数组")
+    ap.add_argument("--year", default="2023,2024", help="生年数组")
     ap.add_argument("--sleep", type=float, default=0.5)
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--limit", type=int, default=0)

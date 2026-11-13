@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""中立层运行时收口：UTF-8 stdout 包装 + PEP 562 惰性导入工厂（docs/REFACTOR.md §5.1 R1）。
+"""中立层运行时收口：UTF-8 stdout 包装 + PEP 562 惰性导入工厂。
 
-收口依据 = 逐字重复防漂移（§9 D7）：9 处调用点（两个 common.py + 7 个入口脚本）原先各持一份
+收口依据 = 逐字重复防漂移：9 处调用点（两个 common.py + 7 个入口脚本）原先各持一份
 相同的 UTF-8 包装块 / 惰性 __getattr__，统一收进本模块后改为 1 行调用，行为逐字等价。
 纯 stdlib（io + sys），遵守离线脚本零第三方依赖红线。
 """
@@ -11,12 +11,17 @@ import sys
 
 
 def install_utf8_stdout():
-    """非 UTF-8 控制台（如 Windows GBK）下把 sys.stdout 重包为 UTF-8（errors=replace）。
+    """非 UTF-8 控制台（如 Windows GBK）下把 sys.stdout 重包为 UTF-8（errors=replace，行缓冲）。
 
-    已是 UTF-8 或包装失败（无 buffer 等）时静默原样不动——与各脚本原先内联的逐字块等价。"""
+    已是 UTF-8 或包装失败（无 buffer 等）时静默原样不动——与各脚本原先内联的逐字块等价。
+
+    line_buffering=True（2026-11-13 补）：编排层（run_update / run_full_test）现在按「有没有进度
+    输出」判断子进程卡死，而 TextIOWrapper 默认块缓冲 —— 输出接管道时会攒满 8KB 才吐一次，
+    每匹马一行的进度等于看不见，看门狗会误判成卡死。行缓冲让每条 print 立刻可见。"""
     if not (getattr(sys.stdout, "encoding", "") or "").lower().startswith("utf-8"):
         try:
-            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace",
+                                          line_buffering=True)
         except Exception:
             pass
 

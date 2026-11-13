@@ -1,0 +1,8 @@
+{
+  "_readme": "回放视频源人工表（契约 = docs/SCHEMA.md §10.3）。键 = 比赛键：有 race_id → 'race:<race_id>'，无 → 'slot:<日付>|<場名>|<R>'。值 = {\"sources\":[{url,title,page,start,subtitle}]} / 单个 {url:…} / 直接数组；append:true = 追加到自动源之后（默认 replace），{\"sources\":[],\"clear\":true} = 清空该场自动视频。本站未启用视频回放（config/video-sources.json mid 空），本表留空。正式入口 = 编辑台「比赛记录批量编辑」。",
+  "_examples": {
+    "race:202604030411": {
+      "sources": [{ "url": "https://www.bilibili.com/video/BV1xx411c7mD/", "title": "带字幕版", "page": 1, "subtitle": true }]
+    }
+  }
+}

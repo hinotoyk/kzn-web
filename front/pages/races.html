@@ -13,8 +13,6 @@
 <body class="bg-background text-foreground antialiased">
 <div class="mx-auto w-full px-6 pt-[26px] pb-[60px] max-md:px-3.5 max-md:pt-2 max-md:pb-12 md:w-[90%]" id="page">
   <div class="page-title mb-7 max-md:mt-2.5">比赛记录 · RACES</div>
-  <!-- 独立模式标识条已于 2026-10-30 按用户要求移除：筛选条自带「筛选 · FILTER」标题，
-       模式本身不难辨认，多一行说明只是增加噪音。 -->
   <div id="selector" class="embed-hide"></div>
   <!-- 独立模式：全库跨马多维组合查询（维度条 + 结果区）；内嵌模式不使用 -->
   <div id="filters" class="mb-4"></div>
@@ -24,10 +22,12 @@
 <script src="../data-config.js"></script>
 <script src="../yj-cache.js"></script>
 <script src="../yj-util.js"></script>
+<script src="../yj-cap.js"></script>
 <script src="../loading.js"></script>
 <script src="../race-bundle.js"></script>
 <script src="../i18n.js"></script>
 <script src="../site-config.js"></script>
+<script src="../yj-video.js"></script>
 <script src="../race-rows.js"></script>
 <script src="../selector.js"></script>
 <script src="../bus.js"></script>
@@ -37,6 +37,8 @@ var esc = YJ.util.esc;  /* HTML 转义：单一出处 public/yj-util.js */
 var sexOf = YJ.util.sexOf;  /* 当前性别（性別_当前 优先，回退官方 性別）：单一出处同上 */
 
 var EMBED = /[?&]embed=1/.test(location.search);
+/* §185 回放列：视频映射预取（YJ.video 未加载/加载失败 → 空表，回放列整列空态，不阻塞任何渲染链） */
+function videoLoad(){ return (window.YJ && YJ.video) ? YJ.video.load() : Promise.resolve(); }
 /* 从基本信息「在比赛记录中查看详情」跳转带来的 ?horse=id：独立模式预置出走马筛选 */
 var URL_HORSE = YJ.util.qs("horse");
 var PAGE = document.getElementById("page");
@@ -67,13 +69,13 @@ function resultCode(n){
 }
 
 /* 单马 KPI 统计（computeStats）与「独立单马 22 列表 / 过滤条」一起，随表格渲染收口删除
- * （其唯一调用点 renderRaces 非内嵌分支本就不可达，见 docs/UI优化记录.md §53） */
+ * （其唯一调用点 renderRaces 非内嵌分支本就不可达，见 docs/DESIGN.md §53） */
 
 /* ---- 排序比较器：日期降序（新→旧）；同日按発走降序（大→小），无発走视为最大（同日排最前）----
  * 発走 是零填充 "HH:MM" 字符串，可直接字符串比较；缺失/空串视为最大。
  * 内嵌单马表（renderHorse 加载后）与独立跨马表（renderResults）共用；
  * PC 表与 mb 卡片渲染同一份有序列表，一份排序四处（内嵌/独立 × pc/mb）同时生效。
- * ★ 末位比较键（docs/UI优化记录.md §69）：同一场比赛有多匹产驹 = 完全同键，旧实现返回 0 →
+ * ★ 末位比较键（docs/DESIGN.md §69）：同一场比赛有多匹产驹 = 完全同键，旧实现返回 0 →
  *   稳定排序只能保持「并入顺序」，而全库 276 个文件是 16 并发逐个 push 进 entries 的（顺序 = 到达时序）
  *   → 最终行序不唯一（实测同键组 135 个 / 298 行）。故同键后一律按数据字段定序：
  *   着顺升序（未完走殿后，与日期统计明细同口径）→ race_id（不同场次不交错）→ 馬番升序 → 馬名。
@@ -102,9 +104,6 @@ function raceTieCmp(a, b){
   return na===nb?0:(na<nb?-1:1);
 }
 
-/* ===== 单马 22 列独立表 / 22 列 mb 卡片：已随「全库跨马查询」上线而失效（renderRaces 只在
- * 内嵌模式被调用，内嵌走 embed 列集），2026-09-18 随表格渲染收口删除（见 docs/UI优化记录.md §53）。
- * 需要旧形态可从 git 历史取回 ===== */
 function isMb(){ return YJ.device.isMb(); }
 
 /* 内嵌模式（profile 下段）的表头/行/mb 卡片渲染见共享模块 front/public/race-rows.js
@@ -132,14 +131,18 @@ function renderHorse(id){
   var url = YJ_DATA.url('races/'+id+'.json');
   var renderR = function(hh){
     /* 比赛数据主路径：全库压缩包（races-bundle，构建期 276 个逐马文件 → 1 请求），
-     * 12h 统一缓存（YJ.cache）内零请求；dist 替换式下无逐马文件 → 失败回退直连（源树模式兜底） */
-    YJ.cache.fetch("bundle").then(function(b){
+     * 12h 统一缓存（YJ.cache）内零请求；dist 替换式下无逐马文件 → 失败回退直连（源树模式兜底）。
+     * §185 回放列：视频映射与 bundle 并行拉取（YJ.video.load 失败静默空表，不阻塞本链） */
+    Promise.all([YJ.cache.fetch("bundle"), videoLoad()]).then(function(all){
+      var b = all[0];
       var hs = YJ.raceBundle.decode(b)[String(id)] || [];
       hs.sort(raceCmp);   /* 日期降序 + 同日発走降序（无発走视为最大排最前），内嵌 PC/mb 共用 */
       lastR = { hh: hh || {id:id}, races: hs };
       renderRaces(lastR.hh, lastR.races);
     }).catch(function(){
-      fetch(url).then(function(r){
+      videoLoad().then(function(){
+        return fetch(url);
+      }).then(function(r){
         if(!r.ok) throw new Error("HTTP "+r.status);
         return r.json();
       }).then(function(races){
@@ -1088,8 +1091,10 @@ function initLibrary(){
   YJ.selector.loadHorses(YJ_DATA.url('basic.json')).then(function(horses){
     /* 主路径：全库压缩包（races-bundle，构建期把 276 个逐马文件打成 1 请求 ~44KB gzip）；
      * 12h 统一缓存（YJ.cache）内零请求，SWR 后台校验由控制器自理。
-     * bundle 键 = races_file 末段文件名主干（兼容 data/ 前缀，split("/").pop()）；未出道马的空文件 → 空数组，自然跳过 */
-    YJ.cache.fetch("bundle").then(function(b){
+     * bundle 键 = races_file 末段文件名主干（兼容 data/ 前缀，split("/").pop()）；未出道马的空文件 → 空数组，自然跳过。
+     * §185 回放列：视频映射并行拉取（load 失败静默空表；legacy 兜底路径不再等待视频——回放列可能晚一拍，可接受） */
+    Promise.all([YJ.cache.fetch("bundle"), videoLoad()]).then(function(all){
+      var b = all[0];
       var by=YJ.raceBundle.decode(b), entries=[];
       horses.forEach(function(h){
         if(!h.races_file) return;
