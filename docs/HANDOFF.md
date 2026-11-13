@@ -5,7 +5,7 @@
 
 ## 0. 一句话
 
-**絆 · 高情厚意档案**：キズナ（高情厚意 / Kizuna，netkeiba `2010105827`）产驹的个人查阅/检索静态站，GitHub Pages 部署，入口 `/dist/index.html`，`dist/` 自包含 `data/` 副本。
+**絆 · 绊崽档案**：キズナ（高情厚意 / Kizuna，netkeiba `2010105827`）产驹的个人查阅/检索静态站，GitHub Pages 部署，入口 `/dist/index.html`，`dist/` 自包含 `data/` 副本。
 
 ## 1. 当前状态（2026-11-13 对齐后）
 
