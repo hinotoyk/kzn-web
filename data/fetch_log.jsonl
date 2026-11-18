@@ -37021,3 +37021,8 @@
 {"ts": "2026-11-18 05:20:47", "script": "fetch_detail.py", "host": "db.netkeiba.com", "path": "/horse/2025103955/", "status": "200", "dur_s": 0.23, "retries": 1, "note": ""}
 {"ts": "2026-11-18 05:20:54", "script": "fetch_detail.py", "host": "db.netkeiba.com", "path": "/horse/2025107415/", "status": "200", "dur_s": 0.49, "retries": 1, "note": ""}
 {"ts": "2026-11-18 05:21:01", "script": "fetch_detail.py", "host": "db.netkeiba.com", "path": "/horse/2025101968/", "status": "200", "dur_s": 0.28, "retries": 1, "note": ""}
+{"ts": "2026-11-18 21:02:28", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "ERR", "dur_s": 0.22, "retries": 1, "note": "400 Client Error: Bad Request for url: https://race.netkeiba.com/top/payback_lis"}
+{"ts": "2026-11-18 21:02:28", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.23, "retries": 1, "note": ""}
+{"ts": "2026-11-18 21:02:29", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.3, "retries": 1, "note": ""}
+{"ts": "2026-11-18 21:02:29", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.3, "retries": 1, "note": ""}
+{"ts": "2026-11-18 21:02:29", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.27, "retries": 1, "note": ""}
