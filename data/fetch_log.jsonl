@@ -41040,3 +41040,11 @@
 {"ts": "2026-11-21 05:23:58", "script": "run_status.py", "host": "p.keibabook.co.jp", "path": "/db/uma/0873299/kanzen", "status": "200", "dur_s": 0.96, "retries": 1, "note": ""}
 {"ts": "2026-11-21 05:24:00", "script": "run_status.py", "host": "p.keibabook.co.jp", "path": "/db/uma/0873299/kinkyo", "status": "ERR", "dur_s": 0.63, "retries": 1, "note": "502 Server Error: Bad Gateway for url: https://p.keibabook.co.jp/db/uma/0873299/"}
 {"ts": "2026-11-21 05:24:00", "script": "run_status.py", "host": "www.studbook.jp", "path": "/users/ja/SearchChichiShushiList", "status": "ERR", "dur_s": 0.75, "retries": 1, "note": "403 Client Error: Forbidden for url: https://www.studbook.jp/users/ja/SearchChic"}
+{"ts": "2026-11-21 19:53:41", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.25, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:41", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.24, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:41", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.2, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:42", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.25, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:42", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.28, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:42", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.2, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:42", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.28, "retries": 1, "note": ""}
+{"ts": "2026-11-21 19:53:43", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.28, "retries": 1, "note": ""}
