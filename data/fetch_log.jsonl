@@ -42229,3 +42229,11 @@
 {"ts": "2026-11-22 04:04:04", "script": "fetch_races.py", "host": "nar.netkeiba.com", "path": "/race/result.html", "status": "200", "dur_s": 0.31, "retries": 1, "note": ""}
 {"ts": "2026-11-22 04:04:08", "script": "fetch_races.py", "host": "db.netkeiba.com", "path": "/trainer/result/recent/05785/", "status": "200", "dur_s": 0.35, "retries": 1, "note": ""}
 {"ts": "2026-11-22 04:04:14", "script": "fetch_races.py", "host": "db.netkeiba.com", "path": "/jockey/result/recent/05536/", "status": "200", "dur_s": 0.33, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:42", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.27, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:43", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.47, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:43", "script": "fetch_day.py", "host": "race.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.18, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:44", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.47, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:44", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.21, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:44", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.24, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:45", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.29, "retries": 1, "note": ""}
+{"ts": "2026-11-22 20:05:45", "script": "fetch_day.py", "host": "nar.netkeiba.com", "path": "/top/payback_list.html", "status": "200", "dur_s": 0.34, "retries": 1, "note": ""}
