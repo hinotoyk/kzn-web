@@ -125,6 +125,7 @@
 - **编辑台**（2026-09-29/30 → 2026-11-01）：草稿箱 + 线上单原子 commit；`?edit=1` 废除，改 PAT 校验解锁（§168）；编辑页整页门禁（§190，2026-11-11）。
 - **代码结构**（2026-xx）：取消「两管线互不 import」硬限制 → 「业务隔离、代码抽离复用」；`core/paths.py` 扩展为 `core/constants.py`；新增 `net.bind()` 与 `runtime.install_lazy_http()`。
 - **开源化**（2026-11-12）：代码 MIT + 数据独立声明（LICENSE / NOTICE）；站点身份全部进 `config/`（`repo` / `analytics` / `cross_site` / `progeny_years` / 友链），空值 = 关闭；构建期「本站身份」自检；页面能力表（`features.json` + `yj-cap.js`，关闭的能力仍构建以显示空态）；构建入口改目录派生。
+- **部署版本指纹探测**（2026-11-23）：解决「线上更新后老访客拿旧数据」（yj-cache 12h SWR 的 304 续期，更新后最长 12h 不可见）。构建期 `deployVersionPlugin`（vite.config.js）写 `dist/version.json = {v: git 短 SHA, ts}`，并向每个入口注入 `<script src="yj-version.js" defer>`；浏览器侧页面加载/切回标签页/每 5 分钟 no-store 探测，v 变化 → `YJ.cache.bust()` → reload（先写回新 v 防循环）；编辑页（edit*.html）不自动刷新，改弹顶部提示条。模块 = `front/public/yj-version.js`（与母版仓 yunji-web 同款，四兄弟站 2026-11-23 统一上线）。
 
 ## 11. UI 规格索引（正文归档在 git）
 
