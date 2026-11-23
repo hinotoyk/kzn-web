@@ -1,7 +1,7 @@
 {
  "_meta": {
   "schema": "basic/v1",
-  "updated": "2026-11-23 04:13:05",
+  "updated": "2026-11-23 08:35:44",
   "count": 1221
  },
  "horses": [
@@ -51086,7 +51086,9 @@
     "Jpn": 0
    },
    "セリ取引価格": "6,600万円 (2024年 セレクトセール)",
-   "photo": "",
+   "photo": [
+    "data/photos/977-1.webp"
+   ],
    "races_file": "data/races/977.json",
    "pedigree_file": "data/pedigree/977.json"
   },
