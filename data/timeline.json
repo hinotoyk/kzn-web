@@ -1,11 +1,11 @@
 {
  "meta": {
-  "generated_at": "2026-11-24T03:45:31",
+  "generated_at": "2026-11-24T08:00:36",
   "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
   "stats": {
-   "events": 82,
-   "horses": 49,
-   "graded_wins": 72,
+   "events": 83,
+   "horses": 50,
+   "graded_wins": 73,
    "sire_wins": 3
   }
  },
@@ -2677,6 +2677,43 @@
     "agari": "34.5",
     "pop": "1番",
     "team": "騎手 戸崎圭太 · 55kg ｜ 調教師 上村洋行"
+   }
+  },
+  {
+   "date": "2026-11-23",
+   "type": "race",
+   "node": "gen",
+   "horse": {
+    "id": 977,
+    "name": "オンユアマークス",
+    "cn": "各就各位"
+   },
+   "photo": "../data/photos/977-1.webp",
+   "tags": [
+    {
+     "cat": "graded",
+     "label": "重赏第73胜"
+    },
+    {
+     "cat": "graded",
+     "label": "G2第23胜"
+    },
+    {
+     "cat": "gen",
+     "label": "2024年世代重赏首胜",
+     "crown": true
+    }
+   ],
+   "race": {
+    "name": "東京スポーツ杯2歳S",
+    "grade": "GII",
+    "glabel": "G2",
+    "gbadge": "g2",
+    "meta": "東京11R · 芝1800m · 良",
+    "time": "1:47.1",
+    "agari": "32.5",
+    "pop": "6番",
+    "team": "騎手 武豊 · 56kg ｜ 調教師 松永幹夫"
    }
   }
  ]
