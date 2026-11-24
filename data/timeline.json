@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-11-02T12:54:08",
+  "generated_at": "2026-11-24T03:45:31",
   "source": "basic.json + races/*.json + races_manual.json(比赛人工配图)",
   "stats": {
    "events": 82,
@@ -281,7 +281,7 @@
    "horse": {
     "id": 249,
     "name": "ダディーズビビッド",
-    "cn": ""
+    "cn": "严父劲跑"
    },
    "photo": "",
    "tags": [
@@ -2204,7 +2204,7 @@
    "horse": {
     "id": 634,
     "name": "ダブルハートボンド",
-    "cn": ""
+    "cn": "双心绊"
    },
    "photo": "",
    "tags": [
@@ -2273,7 +2273,7 @@
    "horse": {
     "id": 634,
     "name": "ダブルハートボンド",
-    "cn": ""
+    "cn": "双心绊"
    },
    "photo": "",
    "tags": [
