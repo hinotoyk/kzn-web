@@ -127,6 +127,7 @@ python run_update.py <策略>
 | `--horse 1,2,3` | 只处理指定 id 的马 |
 | `--races-force` | 全部马重抓成绩页（覆盖式重建） |
 | `--day 20261020[,..]` | 按天快速更新（SP 结果页；可配 `--jra-only` 跳过地方） |
+| `--day auto` | 漏赛日检测 + 快更：库内最新日付+1 逐日探测 netkeiba 到今天，赛日全扫（每日任务用这条，cron 延迟跨日不漏抓） |
 | `--check [--fix]` | 数据一致性校验（+ 自动补跑修复）；含「数据体检」（乱码/覆盖率骤降/字段整批为空） |
 | `--ledger` | 只拉台账海外并入（本站 `ledger.url` 空 = 未启用） |
 | `--video` | 视频回放：抓 B 站 UP 主清单 → `data/video-map.json`（本站 `mid` 空 = 关闭；只在本地跑） |
@@ -138,7 +139,7 @@ python run_update.py <策略>
 
 ## 维护与排障
 
-**日常三条线**（本仓启用 4 条 workflow，串联不抢文件）：`update-data` 每日 UTC 22:00 跑 `--ci`（有变化才 commit，末步 dispatch 部署）→ 串联 `status`（登録/抹消马簿）；`update-day` 每日北京 21:00 用 `--day` 快更当天赛果（幂等，与全量互不覆盖）。视频回放未启用，**没有** `video-task`。
+**日常三条线**（本仓启用 4 条 workflow，串联不抢文件）：`update-data` 每日 UTC 22:00 跑 `--ci`（有变化才 commit，末步 dispatch 部署）→ 串联 `status`（登録/抹消马簿）；`update-day` 每日北京 21:00 用 `--day auto` 漏赛日检测+快更（从库内最新日付+1 逐日探测到今天，赛日全扫；幂等，与全量互不覆盖）。视频回放未启用，**没有** `video-task`。
 
 **管线三条硬规矩**（动脚本前先看）：
 
@@ -157,6 +158,7 @@ python run_update.py <策略>
 | 编辑台打不开 / 403 | `site.repo` 与 PAT 所属仓库不一致（双站防串是故意的） |
 | 访客数不涨 | 本仓 `site.domains` 为空 = 统计整体关闭（预期），要开就先填域名并在 GoatCounter 注册 |
 | 某匹马数据一直缺 | `python run_update.py --horse <id>` 定向跑；再看 `data/fetch_log.jsonl` 里该 host 的状态码 |
+| 最新比赛日期停在几天前 | `python run_update.py --day auto` 补扫漏掉的赛日；根因多为 GitHub cron 延迟跨日（2026-11-25 事故，auto 已兜住） |
 | 全量跑到一半被掐断 | 日志出现 `✗ [步骤] 判为卡死（连续 1200s 无输出）` → 站点假死/请求挂住（看 `fetch_log.jsonl` 该 host 的状态码与 dur）；整轮退出是**有意的**：不完整缓存不许合并提交 |
 | 抓完发现马名乱码/整批空 | 先跑 `python scripts/smoke_fetch.py`（4~5 个请求，30 秒）判断是解码/跳转/结构哪一处变了；再看 `--check` 报告「数据体检」段 |
 | 删了旧图后老访客 404 | 缓存桶要 +1（`front/public/yj-cache.js` 的 `data-vN`） |
@@ -166,7 +168,7 @@ python run_update.py <策略>
 ## 部署
 
 - **GitHub Actions**：push main 时 `.github/workflows/deploy.yml` 自动 `npm run build`，把仓库根（含 `dist/` + `data/`）发布为 Pages 站点根，访问 `https://<user>.github.io/<repo>/dist/index.html`。
-- **数据自动更新**：`.github/workflows/update-data.yml` 每天 UTC 22:00 跑 `--ci`（数据仓库模式，跑完有变化自动 commit+push），也可手动触发选策略；`update-day.yml` 每天北京时间 21:00 按天快速补当天赛果；`status.yml` 在 update-data 成功后串联跑登録状態任务（抹消/去向）。
+- **数据自动更新**：`.github/workflows/update-data.yml` 每天 UTC 22:00 跑 `--ci`（数据仓库模式，跑完有变化自动 commit+push），也可手动触发选策略；`update-day.yml` 每天北京时间 21:00 跑 `--day auto`（漏赛日检测：库内最新日付+1 逐日探测到今天，赛日全扫——GitHub cron 延迟跨日也不会漏抓）；`status.yml` 在 update-data 成功后串联跑登録状態任务（抹消/去向）。
 - 前置：Settings → Pages → Source 选 **GitHub Actions**；Settings → Actions → Workflow permissions 勾选读写。
 
 ## 文档导航
