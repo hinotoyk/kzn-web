@@ -495,6 +495,12 @@
 
   /* 保存条模式点 / 状态点 */
   .yj-ed-chipdot { @apply inline-block h-[7px] w-[7px] flex-none rounded-full; }
+
+  /* 首页快捷标签（左栏顶部战绩筛选，2026-11-27）：pill + 右侧计数（小一号、淡一档）。
+   * 三个档位是嵌套关系（G1 马 ⊂ 重赏马 ⊂ 有胜），计数由 races-bundle 派生后回填。
+   * 选中态/零值态在 @layer 外（.yj-ftag.is-on / .yj-ftag--zero —— is-on 是 JS 拼接的动态类） */
+  .yj-ftag { @apply inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-[3px] text-[11.5px] font-semibold leading-[1.6] text-secondary-foreground transition-[background-color,border-color,color] duration-150 hover:border-primary/45 hover:bg-primary/5 hover:text-primary active:scale-[.98]; }
+  .yj-ftag b { @apply text-[10.5px] font-bold tabular-nums text-muted-foreground; }
 }
 
 /* ---------- 等级徽章配色（.yj-g*）：必须置于 @layer 之外 ----------
@@ -553,6 +559,16 @@
   .yj-view-in,.yj-cp-ok,.yj-ov-bar i{animation:none}
 }
 
+/* ---------- 首页筛选选中态（profile 概览色块 / 快捷标签 · @layer 外防候选裁剪） ----------
+ * 2026-11-27：概览三组卡与左栏快捷标签都变成筛选入口，is-on 由 syncFilterUI 动态 toggle；
+ * 面积图/年份图 resize 重排会重建 innerHTML，所以 tmHTML/ovPaint 生成时也按 FIL 带上 is-on。
+ * 描边用 inset box-shadow（不外扩、不吃相邻块的间距），色值 = tailwind primary #0aa7a0 同源。 */
+.yj-ftag.is-on{border-color:#0aa7a0;background-color:rgba(10,167,160,.1);color:#0a7a75;box-shadow:inset 0 0 0 1px rgba(10,167,160,.55)}
+.yj-ftag.is-on b{color:#0a7a75}
+.yj-ftag--zero{opacity:.45}
+#ovStats .yj-tile[data-f],#ovStats .yj-tm[data-f]{cursor:pointer}
+.yj-tile.is-on,.yj-tm.is-on{box-shadow:inset 0 0 0 2px rgba(10,167,160,.92)}
+
 /* ---------- §160 奖杯「金光闪闪」（stats / datechart 重赏 KPI、日历胜格、月卡共用 · @layer 外防候选裁剪） ----------
  * 图案本体 = 页面 JS 注入的内联 SVG（class yj-trophy，内嵌 linearGradient #yj-tg：
  * 亮金 #fde68a → #fbbf24 → 基线金 #e8a013 → 深金 #d97706），此处只管「闪闪」：
@@ -565,3 +581,20 @@
 @media (prefers-reduced-motion:reduce){
   .yj-trophy{animation:none}
 }
+
+/* ---------- §189 全站统一滚动条（2026-11-13 · @layer 外防候选裁剪） ----------
+ * 目标：站内所有横/竖滚动条统一成「基本信息」页竖条的定稿样式 —— 8px 胶囊 thumb（#e5e5e5 +
+ * 2px 白描边 → 视觉约 4px 细条）、透明轨道、hover 加深；与 .yj-drop-scroll / .yj-pane 同款。
+ * 生效面：页面 body 主滚动 + 各 overflow 容器（表格滚动区 / 侧栏 / 下拉 / 编辑抽屉 …）。
+ * 不受影响的既有规则（特异性高于本通配，按原样保留）：
+ *   - #sliceSeg / #yseg 隐藏滚动条（leaderboard/stats 分段条，故意无条横滑）；
+ *   - .yj-drop-scroll / .yj-pane 本就同款，纯冗余保留作锚点。
+ * Firefox：scrollbar-width/scrollbar-color 声明在 html 上、靠继承全站生效；
+ * Chromium：::-webkit-* 伪元素按元素生效，须用 * 通配（html 声明对伪元素无继承）。
+ * 站点仅亮色（tailwind darkMode 预留未启用），hex 与既有两处写死一致。 */
+html{scrollbar-width:thin;scrollbar-color:#e5e5e5 transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:#e5e5e5;border-radius:99px;border:2px solid #fff}
+*::-webkit-scrollbar-thumb:hover{background:rgba(115,115,115,.5)}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-corner{background:transparent}
