@@ -12,7 +12,7 @@
 
 ## 0.1 与母版仓同步（本站 = 分支站，务必先读）
 
-代码随母版、身份不随母版。母版仓 = `yunji-web`（云迹，同机 `Z:/IdeaProjects/yunji-web`）。
+代码随母版、身份不随母版。母版仓 = `yunji-web`（云迹，同机 `Z:/project/yunji-web`）。
 
 - **不要手改**：`front/**`、`scripts/**`、`run_update.py`、`run_full_test.py`、`serve.py`、`.github/workflows/*` —— 这些归母版，下一次同步会整文件覆盖；发现 bug 先考虑是否为上游问题（`python scripts/smoke_fetch.py` 判定），要改就同步反哺母版。
 - **只在本地改**：`config/sire.json`（种马 + `site` 段）、`config/features.json`、`config/friend-links.json`、`config/video-sources.json`、`data/**`、`README.md`/`AGENTS.md` 品牌段、本仓过程文档。
