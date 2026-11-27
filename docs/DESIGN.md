@@ -103,7 +103,7 @@
 
 ## 8. Git 协作约定
 
-- **commit**：仅在用户明确要求时执行；**push**：永远不执行（推送只能由维护者本人操作）。
+- **commit**：仅在用户明确要求时执行；**push**：2026-11-27 用户特批，允许 AI 执行（原「永远不执行 / 只能由维护者本人操作」作废），仍只在明确要求时推送。
 - **git 身份**：仓库级固定 GitHub noreply 邮箱；仓库内不得出现公司邮箱 / 私有 npm 源 / 任何 token；装包走项目级 `front/.npmrc` 的官方 registry。
 - `dist/`、`tests/`、`test-logs/`、`data/_tmp/` 在 `.gitignore`；`data/` 是数据仓库模式（直接提交进 git）。
 
