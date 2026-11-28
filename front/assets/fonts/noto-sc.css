@@ -4,11 +4,11 @@
  * 语料 = 项目根 data 目录下的全部 .json（渲染数据，排除 _tmp 缓存）
  *        + config 目录下的全部 .json（站点品牌文案源，P3 起）
  *        + front 静态文案（index.html、pages 下 .html、public 下 .js，含 i18n 字典）
- * 源字体 = NotoSansSC-VF.ttf（可变），wght 轴限 300–700；2869 字符 / 3549 字形 / 1 片，替换旧 101 片（4.5MB）
+ * 源字体 = NotoSansSC-VF.ttf（可变），wght 轴限 300–700；2878 字符 / 3559 字形 / 1 片，替换旧 101 片（4.5MB）
  * 漏字 = 新数据带来的汉字未进子集时，按 body 字体栈尾（Noto Sans CJK SC / PingFang SC / Microsoft YaHei）降级，不出豆腐块
  * 重算 = npm run build 自动（字符集变了才真跑子集化）；强制重算 FONT_GEN=force npm run build
  * ============================================================ */
-/* yj-font: v=3 hash=ea76ef1c2e0c3992 chars=2869 in_src=2835 glyphs=3549 flavor=woff2 bytes=850924 wght=300-700 src=NotoSansSC-VF.ttf tool=fontTools4.69.1 at=2026-11-27T06:06:45Z */
+/* yj-font: v=3 hash=760c6f7b2f073660 chars=2878 in_src=2844 glyphs=3559 flavor=woff2 bytes=853236 wght=300-700 src=NotoSansSC-VF.ttf tool=fontTools4.69.1 at=2026-11-28T05:54:52Z */
 @font-face {
   font-family: 'Noto Sans SC';
   font-style: normal;
